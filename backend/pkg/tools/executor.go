@@ -506,6 +506,12 @@ func (ce *customExecutor) getMessage(args json.RawMessage) string {
 		return ""
 	}
 
+	// Hard-truncate message field to prevent narration bloat
+	const maxMessageLength = 200
+	if len(msg.Message) > maxMessageLength {
+		msg.Message = msg.Message[:maxMessageLength] + "..."
+	}
+
 	return msg.Message
 }
 

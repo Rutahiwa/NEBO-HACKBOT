@@ -12,7 +12,7 @@ const docTemplate = `{
         "title": "{{.Title}}",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
-            "name": "PentAGI Development Team",
+            "name": "NEBO-HACKBOT Development Team",
             "url": "https://pentagi.com",
             "email": "team@pentagi.com"
         },
@@ -10654,8 +10654,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "/api/v1",
 	Schemes:          []string{},
-	Title:            "PentAGI Swagger API",
-	Description:      "Swagger API for Penetration Testing Advanced General Intelligence PentAGI.",
+	Title:            "NEBO-HACKBOT Swagger API",
+	Description:      "Swagger API for Penetration Testing Advanced General Intelligence NEBO-HACKBOT.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 }

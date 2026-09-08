@@ -60,13 +60,13 @@ var frontendRoutes = []string{
 	"/dashboard",
 }
 
-// @title PentAGI Swagger API
+// @title NEBO-HACKBOT Swagger API
 // @version 1.0
-// @description Swagger API for Penetration Testing Advanced General Intelligence PentAGI.
+// @description Swagger API for Penetration Testing Advanced General Intelligence NEBO-HACKBOT.
 // @termsOfService http://swagger.io/terms/
 
 // @contact.url https://pentagi.com
-// @contact.name PentAGI Development Team
+// @contact.name NEBO-HACKBOT Development Team
 // @contact.email team@pentagi.com
 
 // @license.name MIT
@@ -237,7 +237,7 @@ func NewRouter(
 	}
 
 	router.Use(gin.Recovery())
-	router.Use(logger.WithGinLogger("pentagi-api"))
+	router.Use(logger.WithGinLogger("nebo-hackbot-api"))
 
 	// AuthSalt mixes TENANT_ID into the key derivation so a session minted by one
 	// instance is cryptographically invalid on another even when COOKIE_SIGNING_SALT

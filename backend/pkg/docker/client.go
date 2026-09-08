@@ -151,7 +151,7 @@ func NewDockerClient(ctx context.Context, db database.Querier, cfg *config.Confi
 			logrus.Warn("DOCKER_INSIDE=true with neither DOCKER_SOCKET nor DOCKER_INSIDE_HOST set: " +
 				"the host Docker socket will be autodetected and bind-mounted into every worker " +
 				"container, so any process inside it gets control of the same daemon that runs " +
-				"PentAGI. Set DOCKER_SOCKET or DOCKER_INSIDE_HOST explicitly, or front the socket " +
+				"NEBO-HACKBOT. Set DOCKER_SOCKET or DOCKER_INSIDE_HOST explicitly, or front the socket " +
 				"with a least-privilege proxy (e.g. Tecnativa/docker-socket-proxy), if that is not intended.")
 		}
 	}

@@ -186,4 +186,4 @@ func (c *Config) TenantLabels() map[string]string {
 
 // TenantLabelKey is the docker label carrying the owning tenant id. Sweeps over
 // the daemon should filter on this rather than matching name prefixes.
-const TenantLabelKey = "pentagi.tenant"
+const TenantLabelKey = "nebo-hackbot.tenant"

@@ -2054,14 +2054,14 @@ definitions:
 info:
   contact:
     email: team@pentagi.com
-    name: PentAGI Development Team
+    name: NEBO-HACKBOT Development Team
     url: https://pentagi.com
-  description: Swagger API for Penetration Testing Advanced General Intelligence PentAGI.
+  description: Swagger API for Penetration Testing Advanced General Intelligence NEBO-HACKBOT.
   license:
     name: MIT
     url: https://opensource.org/license/mit
   termsOfService: http://swagger.io/terms/
-  title: PentAGI Swagger API
+  title: NEBO-HACKBOT Swagger API
   version: "1.0"
 paths:
   /agentlogs/:

@@ -62,7 +62,7 @@ func wrapToolCallIDTemplateError(err error) error {
 	if strings.Contains(err.Error(), "does not support tools") {
 		return fmt.Errorf(
 			"failed to determine tool call ID template: the selected model "+
-				"does not support tool/function calling, which PentAGI requires "+
+				"does not support tool/function calling, which NEBO-HACKBOT requires "+
 				"for tool execution in flows and assistant sessions; select an "+
 				"Ollama model whose metadata advertises tool/function calling "+
 				"support and update the provider configuration: %w",

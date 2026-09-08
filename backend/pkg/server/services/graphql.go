@@ -64,7 +64,7 @@ func NewGraphqlService(
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
 		DB:              db,
 		Config:          cfg,
-		Logger:          logrus.StandardLogger().WithField("component", "pentagi-gql-bl"),
+		Logger:          logrus.StandardLogger().WithField("component", "nebo-hackbot-gql-bl"),
 		TokenCache:      tokenCache,
 		DefaultPrompter: templates.NewDefaultPrompter(),
 		ProvidersCtrl:   providers,
@@ -74,7 +74,7 @@ func NewGraphqlService(
 		Replacer:        replacer,
 	}}))
 
-	component := "pentagi-gql"
+	component := "nebo-hackbot-gql"
 	srv.AroundResponses(logger.WithGqlLogger(component))
 	logger := logrus.WithField("component", component)
 

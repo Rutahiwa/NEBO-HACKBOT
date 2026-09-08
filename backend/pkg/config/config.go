@@ -269,7 +269,7 @@ type Config struct {
 	AgentPlanningStepEnabled bool `env:"AGENT_PLANNING_STEP_ENABLED" envDefault:"false"`
 
 	// === Database Configuration ===
-	DatabaseURL string `env:"DATABASE_URL" envDefault:"postgres://pentagiuser:pentagipass@pgvector:5432/pentagidb?sslmode=disable"`
+	DatabaseURL string `env:"DATABASE_URL" envDefault:"postgres://nebohackbotuser:nebohackbotpass@pgvector:5432/nebohackbotdb?sslmode=disable"`
 
 	// === Database Connection Pool Sizing ===
 	DBMaxOpenConns   int `env:"DATABASE_MAX_OPEN_CONNS" envDefault:"25"`

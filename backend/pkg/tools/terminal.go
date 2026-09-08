@@ -22,7 +22,7 @@ import (
 )
 
 // PrimaryTerminalNamePrefix is the prefix used for all primary terminal container names.
-const PrimaryTerminalNamePrefix = "pentagi-terminal-"
+const PrimaryTerminalNamePrefix = "nebo-hackbot-terminal-"
 
 const (
 	maxExplicitExecCommandTimeout = 3 * time.Hour

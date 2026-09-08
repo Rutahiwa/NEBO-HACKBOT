@@ -32,5 +32,5 @@ func GetBinaryName() string {
 	if PackageName != "" {
 		return PackageName
 	}
-	return "pentagi"
+	return "nebo-hackbot"
 }

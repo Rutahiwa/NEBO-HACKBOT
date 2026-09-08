@@ -22,10 +22,10 @@ const (
 	// Default values for PostgreSQL configuration
 	DefaultPostgreSQLUser     = "postgres"
 	DefaultPostgreSQLPassword = "postgres"
-	DefaultPostgreSQLDatabase = "pentagidb"
+	DefaultPostgreSQLDatabase = "nebohackbotdb"
 
 	// Admin user email
-	AdminEmail = "admin@pentagi.com"
+	AdminEmail = "admin@nebo-hackbot.local"
 
 	// Environment variable names
 	EnvPostgreSQLUser     = "PENTAGI_POSTGRES_USER"

@@ -69,7 +69,7 @@ func (d *dockerOperationsImpl) removeWorkerContainers(ctx context.Context, state
 	//
 	// The prefix is anchored on the tenant regardless, so that if the slash is
 	// ever handled the sweep can only ever reach this instance's own containers.
-	workerPrefix := d.tenantPrefix() + "pentagi-"
+	workerPrefix := d.tenantPrefix() + "nebo-hackbot-"
 	var containers []container.Summary
 	for _, c := range allContainers.Items {
 		for _, name := range c.Names {

@@ -172,7 +172,7 @@ func (u *updateOperationsImpl) downloadBinaryToTemp(ctx context.Context, downloa
 		return "", fmt.Errorf("download failed with status: %s", resp.Status)
 	}
 
-	tempFile, err := os.CreateTemp("", "pentagi-update-*.bin")
+	tempFile, err := os.CreateTemp("", "nebo-hackbot-update-*.bin")
 	if err != nil {
 		return "", fmt.Errorf("failed to create temp file: %w", err)
 	}

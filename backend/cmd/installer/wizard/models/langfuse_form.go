@@ -21,7 +21,7 @@ const (
 	LangfuseProjectIDPlaceholder     = "cm000000000000000000000000"
 	LangfusePublicKeyPlaceholder     = "pk-lf-00000000-0000-0000-0000-000000000000"
 	LangfuseSecretKeyPlaceholder     = ""
-	LangfuseAdminEmailPlaceholder    = "admin@pentagi.com"
+	LangfuseAdminEmailPlaceholder    = "admin@nebo-hackbot.local"
 	LangfuseAdminPasswordPlaceholder = ""
 	LangfuseAdminNamePlaceholder     = "admin"
 	LangfuseLicenseKeyPlaceholder    = "sk-lf-ee-xxxxxxxxxxxxxxxxxxxxxxxx"

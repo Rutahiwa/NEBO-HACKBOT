@@ -11,7 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**PentAGI** is an automated security testing platform powered by AI agents. It runs autonomous penetration testing workflows using a multi-agent system (Researcher, Developer, Executor agents) that coordinates LLM providers, Docker-sandboxed tool execution, and a persistent vector memory store.
+**NEBO-HACKBOT** is an automated security testing platform powered by AI agents. It runs autonomous penetration testing workflows using a multi-agent system (Researcher, Developer, Executor agents) that coordinates LLM providers, Docker-sandboxed tool execution, and a persistent vector memory store.
 
 The application is a monorepo with:
 - **`backend/`** — Go REST + GraphQL API server
@@ -56,7 +56,7 @@ docker compose up -d                                                          # 
 docker compose -f docker-compose.yml -f docker-compose-observability.yml up -d  # + monitoring
 docker compose -f docker-compose.yml -f docker-compose-langfuse.yml up -d       # + LLM analytics
 docker compose -f docker-compose.yml -f docker-compose-graphiti.yml up -d       # + knowledge graph
-docker build -t local/pentagi:latest .                                        # Build image
+docker build -t local/nebo-hackbot:latest .                                        # Build image
 ```
 
 The full stack runs at `https://localhost:8443` when using Docker Compose. Copy `.env.example` to `.env` and fill in at minimum the database and at least one LLM provider key.

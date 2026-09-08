@@ -1,4 +1,4 @@
-# PentAGI
+# NEBO-HACKBOT
 
 <div align="center" style="font-size: 1.5em; margin: 20px 0;">
     <strong>P</strong>enetration testing <strong>A</strong>rtificial <strong>G</strong>eneral <strong>I</strong>ntelligence
@@ -6,7 +6,7 @@
 <br>
 <div align="center">
 
-> **Join the Community!** Connect with security researchers, AI enthusiasts, and fellow ethical hackers. Get support, share insights, and stay updated with the latest PentAGI developments.
+> **Join the Community!** Connect with security researchers, AI enthusiasts, and fellow ethical hackers. Get support, share insights, and stay updated with the latest NEBO-HACKBOT developments.
 
 [![Discord](https://img.shields.io/badge/Discord-7289DA?logo=discord&logoColor=white)](https://discord.gg/2xrMh7qX6m)⠀[![Telegram](https://img.shields.io/badge/Telegram-2CA5E0?logo=telegram&logoColor=white)](https://t.me/+Ka9i6CNwe71hMWQy)
 
@@ -23,7 +23,7 @@
 - [Quick Start](#quick-start)
   - [Agent Docker Access](#giving-agents-docker-without-giving-away-the-host)
   - [Running Several Instances](#running-several-instances-tenant_id)
-- [How to Use PentAGI After Login](#how-to-use-pentagi-after-login)
+- [How to Use NEBO-HACKBOT After Login](#how-to-use-nebo-hackbot-after-login)
 - [API Access](#api-access)
   - [LLM Provider Configuration](#custom-llm-provider-configuration)
     - [Ollama](#ollama-provider-configuration)
@@ -52,10 +52,10 @@
 
 ## Overview
 
-PentAGI is an innovative tool for automated security testing that leverages cutting-edge artificial intelligence technologies. The project is designed for information security professionals, researchers, and enthusiasts who need a powerful and flexible solution for conducting penetration tests.
+NEBO-HACKBOT is an innovative tool for automated security testing that leverages cutting-edge artificial intelligence technologies. The project is designed for information security professionals, researchers, and enthusiasts who need a powerful and flexible solution for conducting penetration tests.
 
-You can watch the video **PentAGI overview**:
-[![PentAGI Overview Video](https://github.com/user-attachments/assets/0828dc3e-15f1-4a1d-858e-9696a146e478)](https://youtu.be/R70x5Ddzs1o)
+You can watch the video **NEBO-HACKBOT overview**:
+[![NEBO-HACKBOT Overview Video](https://github.com/user-attachments/assets/0828dc3e-15f1-4a1d-858e-9696a146e478)](https://youtu.be/R70x5Ddzs1o)
 
 ## Features
 
@@ -81,7 +81,7 @@ You can watch the video **PentAGI overview**:
 
 ### Current Capability Boundaries
 
-- PentAGI today is an autonomous and assistant-guided penetration testing platform, not a CALDERA-style Breach and Attack Simulation (BAS) or adversary emulation product with predefined campaigns or attack plans.
+- NEBO-HACKBOT today is an autonomous and assistant-guided penetration testing platform, not a CALDERA-style Breach and Attack Simulation (BAS) or adversary emulation product with predefined campaigns or attack plans.
 - BAS-like agent-authored attack scripts should be treated as conceptual or future work, not as a feature that is implemented today.
 - The current flow report UI supports web view, copy to clipboard, Markdown download, and PDF download. JSON flow-report export is not documented as a supported output format today.
 - Provider flexibility is available today through built-in providers and custom/OpenAI-compatible endpoints. See [Custom LLM Provider Configuration](#custom-llm-provider-configuration) and the [vLLM + Qwen3.5-27B-FP8 guide](examples/guides/vllm-qwen35-27b-fp8.md).
@@ -99,7 +99,7 @@ flowchart TB
     pentester["👤 Security Engineer
     (User of the system)"]
 
-    pentagi["✨ PentAGI
+    pentagi["✨ NEBO-HACKBOT
     (Autonomous penetration testing system)"]
 
     target["🎯 target-system
@@ -461,7 +461,7 @@ ASSISTANT_SUMMARIZER_KEEP_QA_SECTIONS=3
 <details>
 <summary><b>Advanced Agent Supervision</b> (click to expand)</summary>
 
-PentAGI includes sophisticated multi-layered agent supervision mechanisms to ensure efficient task execution, prevent infinite loops, and provide intelligent recovery from stuck states:
+NEBO-HACKBOT includes sophisticated multi-layered agent supervision mechanisms to ensure efficient task execution, prevent infinite loops, and provide intelligent recovery from stuck states:
 
 ### Execution Monitoring (Beta)
 - **Automatic Mentor Intervention**: Adviser agent (mentor) is automatically invoked when execution patterns indicate potential issues
@@ -529,7 +529,7 @@ For optimal performance with smaller models, configure adviser agent with enhanc
 
 </details>
 
-The architecture of PentAGI is designed to be modular, scalable, and secure. Here are the key components:
+The architecture of NEBO-HACKBOT is designed to be modular, scalable, and secure. Here are the key components:
 
 1. **Core Services**
    - Frontend UI: React-based web interface with TypeScript for type safety
@@ -572,11 +572,11 @@ The system uses Docker containers for isolation and easy deployment, with separa
 
 ## Quick Start
 
-For a step-by-step walkthrough that connects installation, configuration, LLM and embedding provider testing, and your first login, see the [Installing and Configuring PentAGI](examples/guides/installation_configuration.md) guide. The sections below remain the detailed reference for each step.
+For a step-by-step walkthrough that connects installation, configuration, LLM and embedding provider testing, and your first login, see the [Installing and Configuring NEBO-HACKBOT](examples/guides/installation_configuration.md) guide. The sections below remain the detailed reference for each step.
 
 ### System Requirements
 
-- Docker and Docker Compose (or Podman - see [Podman configuration](#running-pentagi-with-podman))
+- Docker and Docker Compose (or Podman - see [Podman configuration](#running-nebo-hackbot-with-podman))
 - Minimum 2 vCPU
 - Minimum 4GB RAM
 - 20GB free disk space
@@ -584,14 +584,14 @@ For a step-by-step walkthrough that connects installation, configuration, LLM an
 
 ### Using Installer (Recommended)
 
-PentAGI provides an interactive installer with a terminal-based UI for streamlined configuration and deployment. The installer guides you through system checks, LLM provider setup, search engine configuration, and security hardening.
+NEBO-HACKBOT provides an interactive installer with a terminal-based UI for streamlined configuration and deployment. The installer guides you through system checks, LLM provider setup, search engine configuration, and security hardening.
 
 **Supported Platforms:**
 - **Linux**: amd64 [download](https://pentagi.com/downloads/linux/amd64/installer-latest.zip) | arm64 [download](https://pentagi.com/downloads/linux/arm64/installer-latest.zip)
 - **Windows**: amd64 [download](https://pentagi.com/downloads/windows/amd64/installer-latest.zip)
 - **macOS**: amd64 (Intel) [download](https://pentagi.com/downloads/darwin/amd64/installer-latest.zip) | arm64 (M-series) [download](https://pentagi.com/downloads/darwin/arm64/installer-latest.zip)
 
-> **macOS security warning:** If macOS flags a downloaded installer, use only the official PentAGI links above, choose the archive that matches your CPU architecture, verify the source before continuing, and follow the [installer troubleshooting guide](backend/docs/installer/installer-troubleshooting.md#macos-reports-the-installer-as-malware) before allowing the app to run.
+> **macOS security warning:** If macOS flags a downloaded installer, use only the official NEBO-HACKBOT links above, choose the archive that matches your CPU architecture, verify the source before continuing, and follow the [installer troubleshooting guide](backend/docs/installer/installer-troubleshooting.md#macos-reports-the-installer-as-malware) before allowing the app to run.
 
 **Quick Installation (Linux amd64):**
 
@@ -638,15 +638,15 @@ The installer will:
 3. **Provider Configuration**: Set up LLM providers (OpenAI, Anthropic, Gemini, Bedrock, Ollama, DeepSeek, GLM, Kimi, Qwen, MiniMax, Custom)
 4. **Search Engines**: Configure DuckDuckGo, Google, Tavily, Firecrawl, Traversaal, Perplexity, Sploitus, Searxng, and the optional internal browser-analytics fallback engine
 5. **Security Hardening**: Generate secure credentials and configure SSL certificates
-6. **Deployment**: Start PentAGI with docker-compose
+6. **Deployment**: Start NEBO-HACKBOT with docker-compose
 
 ### Current Web Settings Coverage
 
-The PentAGI web console already manages several settings areas after the server is up and running:
+The NEBO-HACKBOT web console already manages several settings areas after the server is up and running:
 
 - **Settings -> Providers**: Create, edit, delete, and test user-defined provider profiles for supported provider types. These profiles control per-agent model selection, runtime parameters, reasoning options, and pricing metadata.
 - **Settings -> Prompts**: Manage system, human, and tool prompt templates.
-- **Settings -> PentAGI API**: Create and manage PentAGI Bearer tokens for REST and GraphQL access.
+- **Settings -> NEBO-HACKBOT API**: Create and manage NEBO-HACKBOT Bearer tokens for REST and GraphQL access.
 - **Other UI-managed preferences**: Favorite flows are stored as user preferences, and theme selection is handled from the main sidebar/profile controls rather than the Settings pages.
 
 ### Still Server-Managed
@@ -684,12 +684,12 @@ DOCKER_INSIDE_TLS_VERIFY=1
 DOCKER_INSIDE_CERT_PATH=/etc/docker/dind/certs/client   # path on the worker node
 ```
 
-PentAGI injects these into every worker container as `DOCKER_HOST`, `DOCKER_TLS_VERIFY` and `DOCKER_CERT_PATH` (the `_INSIDE_` segment is dropped) and bind-mounts the certificate directory read-only at the same path, so `docker` works inside the sandbox with no further setup.
+NEBO-HACKBOT injects these into every worker container as `DOCKER_HOST`, `DOCKER_TLS_VERIFY` and `DOCKER_CERT_PATH` (the `_INSIDE_` segment is dropped) and bind-mounts the certificate directory read-only at the same path, so `docker` works inside the sandbox with no further setup.
 
 **Not recommended — bind-mounting a Docker socket (`DOCKER_SOCKET`).** This has two failure modes:
 
 - **Boot-order race**: a bind-mount source that does not exist yet is created by Docker as a *directory*. After a worker-node reboot, a worker container can start before dind has recreated its socket — Docker then puts a directory where the socket belongs, and dind cannot start until it is removed by hand.
-- **Blast radius**: the race is only reliably avoided when the mounted socket is the **host** daemon's, since that one always exists first. But that grants an autonomous agent the host Docker API: it can start a privileged container, mount `/`, and compromise the entire node — PentAGI included.
+- **Blast radius**: the race is only reliably avoided when the mounted socket is the **host** daemon's, since that one always exists first. But that grants an autonomous agent the host Docker API: it can start a privileged container, mount `/`, and compromise the entire node — NEBO-HACKBOT included.
 
 Use `DOCKER_SOCKET` only on single-node development setups where the host daemon is already trusted.
 
@@ -697,14 +697,14 @@ Use `DOCKER_SOCKET` only on single-node development setups where the host daemon
 
 #### Running Several Instances (`TENANT_ID`)
 
-A single PentAGI installation needs none of this — leave `TENANT_ID` empty (the default) and nothing changes.
+A single NEBO-HACKBOT installation needs none of this — leave `TENANT_ID` empty (the default) and nothing changes.
 
-Set it when several PentAGI installations share external resources: one PostgreSQL server, one worker node, one Neo4j/Graphiti, one Langfuse. The typical case is a management backend per server with a common worker node and database. Because every instance numbers its flows from `1`, they would otherwise collide on container names, database rows, knowledge-graph namespaces and session cookies. `TENANT_ID` namespaces all of it:
+Set it when several NEBO-HACKBOT installations share external resources: one PostgreSQL server, one worker node, one Neo4j/Graphiti, one Langfuse. The typical case is a management backend per server with a common worker node and database. Because every instance numbers its flows from `1`, they would otherwise collide on container names, database rows, knowledge-graph namespaces and session cookies. `TENANT_ID` namespaces all of it:
 
 | Area | Effect when `TENANT_ID=acme` |
 | ---- | ---------------------------- |
 | PostgreSQL | The instance creates and works inside schema `acme` instead of `public`; extensions stay shared in `DATABASE_EXTENSIONS_SCHEMA` (default `public`, `extensions` on Supabase) |
-| Worker containers | `acme-pentagi-terminal-<flow>` instead of `pentagi-terminal-<flow>`; volumes and hostnames follow, and both carry a `pentagi.tenant` label |
+| Worker containers | `acme-nebo-hackbot-terminal-<flow>` instead of `nebo-hackbot-terminal-<flow>`; volumes and hostnames follow, and both carry a `nebo-hackbot.tenant` label |
 | Knowledge graph | Graphiti/Neo4j group ids become `acme-flow-<id>` |
 | Auth | Cookie and API token keys are derived from `COOKIE_SIGNING_SALT` **plus** the tenant, and the session cookie is renamed |
 | Telemetry | Langfuse traces carry the tenant as their `environment` and a `tenant:acme` tag; OTel resources gain `tenant_id` |
@@ -822,16 +822,16 @@ ASSISTANT_USE_AGENTS=false         # Default value for agent usage when creating
 
 ### Main Security Settings
 - `COOKIE_SIGNING_SALT` - Salt for cookie signing, change to random value
-- `PUBLIC_URL` - Public URL of your server (eg. `https://pentagi.example.com`)
+- `PUBLIC_URL` - Public URL of your server (eg. `https://nebo-hackbot.example.com`)
 - `SERVER_SSL_CRT` and `SERVER_SSL_KEY` - Custom paths to your existing SSL certificate and key for HTTPS (these paths should be used in the docker-compose.yml file to mount as volumes)
-- `TENANT_ID` - Leave empty unless this instance shares external resources with another PentAGI installation. When set, it is mixed into the cookie and API token signing keys and renames the session cookie, so a session minted by one instance is rejected by the others even though they share the same `COOKIE_SIGNING_SALT`. See [Running Several Instances](#running-several-instances-tenant_id)
+- `TENANT_ID` - Leave empty unless this instance shares external resources with another NEBO-HACKBOT installation. When set, it is mixed into the cookie and API token signing keys and renames the session cookie, so a session minted by one instance is rejected by the others even though they share the same `COOKIE_SIGNING_SALT`. See [Running Several Instances](#running-several-instances-tenant_id)
 
 ### Scraper Access
 - `SCRAPER_PUBLIC_URL` - Public URL for scraper if you want to use different scraper server for public URLs
 - `SCRAPER_PRIVATE_URL` - Private URL for scraper (local scraper server in docker-compose.yml file to access it to local URLs)
 
 ### Access Credentials
-- `PENTAGI_POSTGRES_USER` and `PENTAGI_POSTGRES_PASSWORD` - PostgreSQL credentials
+- `NEBO_HACKBOT_POSTGRES_USER` and `NEBO_HACKBOT_POSTGRES_PASSWORD` - PostgreSQL credentials
 - `NEO4J_USER` and `NEO4J_PASSWORD` - Neo4j credentials (for Graphiti knowledge graph)
 
 </details>
@@ -842,42 +842,42 @@ ASSISTANT_USE_AGENTS=false         # Default value for agent usage when creating
 perl -i -pe 's/\s+#.*$//' .env
 ```
 
-7. Run the PentAGI stack:
+7. Run the NEBO-HACKBOT stack:
 
 ```bash
 curl -O https://raw.githubusercontent.com/vxcontrol/pentagi/master/docker-compose.yml
 docker compose up -d
 ```
 
-Visit [localhost:8443](https://localhost:8443) to access PentAGI Web UI (default is `admin@pentagi.com` / `admin`)
+Visit [localhost:8443](https://localhost:8443) to access NEBO-HACKBOT Web UI (default is `admin@nebo-hackbot.local` / `admin`)
 
 #### Web UI Accounts
 
-PentAGI does not expose public self-service sign-up from the login page. A fresh installation creates the default local administrator account:
+NEBO-HACKBOT does not expose public self-service sign-up from the login page. A fresh installation creates the default local administrator account:
 
-- **Email**: `admin@pentagi.com`
+- **Email**: `admin@nebo-hackbot.local`
 - **Password**: `admin`
 
-On first login, change the default password before using the instance for real work. If the administrator password is lost later, use the installer maintenance menu to reset the default `admin@pentagi.com` account password.
+On first login, change the default password before using the instance for real work. If the administrator password is lost later, use the installer maintenance menu to reset the default `admin@nebo-hackbot.local` account password.
 
 For multi-user setups, an authenticated administrator can manage local users through the Users REST API (`/api/v1/users/`). The OpenAPI UI is available at `https://localhost:8443/api/v1/swagger/index.html` after the instance is running.
 
 > [!NOTE]
-> If you caught an error about `pentagi-network` or `observability-network` or `langfuse-network` you need to run `docker-compose.yml` firstly to create these networks and after that run `docker-compose-langfuse.yml`, `docker-compose-graphiti.yml`, and `docker-compose-observability.yml` to use Langfuse, Graphiti, and Observability services.
+> If you caught an error about `nebo-hackbot-network` or `observability-network` or `langfuse-network` you need to run `docker-compose.yml` firstly to create these networks and after that run `docker-compose-langfuse.yml`, `docker-compose-graphiti.yml`, and `docker-compose-observability.yml` to use Langfuse, Graphiti, and Observability services.
 >
-> You have to set at least one Language Model provider (OpenAI, Anthropic, Gemini, AWS Bedrock, or Ollama) to use PentAGI. AWS Bedrock provides enterprise-grade access to multiple foundation models from leading AI companies, while Ollama provides zero-cost local inference if you have sufficient computational resources. Additional API keys for search engines are optional but recommended for better results.
+> You have to set at least one Language Model provider (OpenAI, Anthropic, Gemini, AWS Bedrock, or Ollama) to use NEBO-HACKBOT. AWS Bedrock provides enterprise-grade access to multiple foundation models from leading AI companies, while Ollama provides zero-cost local inference if you have sufficient computational resources. Additional API keys for search engines are optional but recommended for better results.
 >
-> **For fully local deployment with advanced models**: See our comprehensive guide on [Running PentAGI with vLLM and Qwen3.5-27B-FP8](examples/guides/vllm-qwen35-27b-fp8.md) for a production-grade local LLM setup. This configuration achieves ~13,000 TPS for prompt processing and ~650 TPS for completion on 4× RTX 5090 GPUs, supporting 12+ concurrent flows with complete independence from cloud providers.
+> **For fully local deployment with advanced models**: See our comprehensive guide on [Running NEBO-HACKBOT with vLLM and Qwen3.5-27B-FP8](examples/guides/vllm-qwen35-27b-fp8.md) for a production-grade local LLM setup. This configuration achieves ~13,000 TPS for prompt processing and ~650 TPS for completion on 4× RTX 5090 GPUs, supporting 12+ concurrent flows with complete independence from cloud providers.
 >
 > `LLM_SERVER_*` environment variables are experimental feature and will be changed in the future. Right now you can use them to specify custom LLM server URL and one model for all agent types.
 >
 > `PROXY_URL` is a global proxy URL for all LLM providers and external search systems. You can use it for isolation from external networks.
 >
-> The `docker-compose.yml` file runs the PentAGI service as root user because it needs access to docker.sock for container management. If you're using TCP/IP network connection to Docker instead of socket file, you can remove root privileges and use the default `pentagi` user for better security.
+> The `docker-compose.yml` file runs the NEBO-HACKBOT service as root user because it needs access to docker.sock for container management. If you're using TCP/IP network connection to Docker instead of socket file, you can remove root privileges and use the default `nebo-hackbot` user for better security.
 
-### Accessing PentAGI from External Networks
+### Accessing NEBO-HACKBOT from External Networks
 
-By default, PentAGI binds to `127.0.0.1` (localhost only) for security. To access PentAGI from other machines on your network, you need to configure external access.
+By default, NEBO-HACKBOT binds to `127.0.0.1` (localhost only) for security. To access NEBO-HACKBOT from other machines on your network, you need to configure external access.
 
 #### Configuration Steps
 
@@ -885,14 +885,14 @@ By default, PentAGI binds to `127.0.0.1` (localhost only) for security. To acces
 
 ```bash
 # Network binding - allow external connections
-PENTAGI_LISTEN_IP=0.0.0.0
-PENTAGI_LISTEN_PORT=8443
+NEBO_HACKBOT_LISTEN_IP=0.0.0.0
+NEBO_HACKBOT_LISTEN_PORT=8443
 
 # Public URL - use your actual server IP or hostname
 # Replace 192.168.1.100 with your server's IP address
 PUBLIC_URL=https://192.168.1.100:8443
 
-# CORS origins - list all URLs that will access PentAGI
+# CORS origins - list all URLs that will access NEBO-HACKBOT
 # Include localhost for local access AND your server IP for external access
 CORS_ORIGINS=https://localhost:8443,https://192.168.1.100:8443
 ```
@@ -912,7 +912,7 @@ docker compose up -d --force-recreate
 3. **Verify port binding:**
 
 ```bash
-docker ps | grep pentagi
+docker ps | grep nebo-hackbot
 ```
 
 You should see `0.0.0.0:8443->8443/tcp` or `:::8443->8443/tcp`.
@@ -938,7 +938,7 @@ sudo firewall-cmd --permanent --add-port=8443/tcp
 sudo firewall-cmd --reload
 ```
 
-5. **Access PentAGI:**
+5. **Access NEBO-HACKBOT:**
 
 - **Local access:** `https://localhost:8443`
 - **Network access:** `https://your-server-ip:8443`
@@ -948,9 +948,9 @@ sudo firewall-cmd --reload
 
 ---
 
-### Running PentAGI with Podman
+### Running NEBO-HACKBOT with Podman
 
-PentAGI fully supports Podman as a Docker alternative. However, when using **Podman in rootless mode**, the scraper service requires special configuration because rootless containers cannot bind privileged ports (ports below 1024).
+NEBO-HACKBOT fully supports Podman as a Docker alternative. However, when using **Podman in rootless mode**, the scraper service requires special configuration because rootless containers cannot bind privileged ports (ports below 1024).
 
 #### Podman Rootless Configuration
 
@@ -979,7 +979,7 @@ scraper:
   volumes:
     - scraper-ssl:/usr/src/app/ssl
   networks:
-    - pentagi-network
+    - nebo-hackbot-network
   shm_size: 2g
 ```
 
@@ -1010,7 +1010,7 @@ podman-compose up -d --force-recreate
 
 ```bash
 # Test from within the pentagi container
-podman exec -it pentagi wget -O- "http://someuser:somepass@scraper:3000/html?url=http://example.com"
+podman exec -it nebo-hackbot wget -O- "http://someuser:somepass@scraper:3000/html?url=http://example.com"
 ```
 
 If you see HTML output, the scraper is working correctly.
@@ -1025,7 +1025,7 @@ All Podman configurations remain fully compatible with Docker. The non-privilege
 
 ### Assistant Configuration
 
-PentAGI allows you to configure default behavior for assistants:
+NEBO-HACKBOT allows you to configure default behavior for assistants:
 
 | Variable               | Default | Description                                                             |
 | ---------------------- | ------- | ----------------------------------------------------------------------- |
@@ -1037,7 +1037,7 @@ The `ASSISTANT_USE_AGENTS` setting affects the initial state of the "Use Agents"
 
 Note that users can always override this setting by toggling the "Use Agents" button in the UI when creating or editing an assistant. This environment variable only controls the initial default state.
 
-## How to Use PentAGI After Login
+## How to Use NEBO-HACKBOT After Login
 
 Once the stack is running and you can sign in to the web UI, the fastest way to start is through the Flows workflow.
 
@@ -1046,8 +1046,8 @@ Once the stack is running and you can sign in to the web UI, the fastest way to 
 1. Open **Flows** in the sidebar.
 2. Click **New Flow**.
 3. Choose the mode that fits your goal:
-   - **Automation**: fully autonomous execution for a testing goal you want PentAGI to carry out end-to-end
-   - **Assistant**: interactive back-and-forth help when you want to steer the investigation step by step. In this mode you can also enable the **Use Agents** toggle to let PentAGI delegate subtasks to specialized sub-agents for more complex investigations.
+   - **Automation**: fully autonomous execution for a testing goal you want NEBO-HACKBOT to carry out end-to-end
+   - **Assistant**: interactive back-and-forth help when you want to steer the investigation step by step. In this mode you can also enable the **Use Agents** toggle to let NEBO-HACKBOT delegate subtasks to specialized sub-agents for more complex investigations.
 4. Select the LLM provider you want to use for this flow.
 5. Describe the target and the objective in natural language in the message box.
 
@@ -1074,15 +1074,15 @@ The new flow form includes a template picker, which can prefill the message box 
 - Start from the example prompt in [`examples/prompts/base_web_pentest.md`](examples/prompts/base_web_pentest.md) if you need a practical baseline for web testing
 - Adjust the target, scope, and constraints before starting the flow
 
-Templates are starting points. You do not need special syntax to use PentAGI: plain natural-language instructions work well as long as the target and goal are clear.
+Templates are starting points. You do not need special syntax to use NEBO-HACKBOT: plain natural-language instructions work well as long as the target and goal are clear.
 
 ### 3. Monitor execution and review output
 
-After submitting the flow, PentAGI opens the flow page automatically.
+After submitting the flow, NEBO-HACKBOT opens the flow page automatically.
 
 - Use the main flow view to follow messages, agent activity, and task progress
 - Inspect tool activity and terminal output as the flow runs
-- Review generated tasks and subtasks to understand what PentAGI is doing
+- Review generated tasks and subtasks to understand what NEBO-HACKBOT is doing
 
 Once the flow has enough results, use the **Report** menu on the flow page to:
 
@@ -1125,11 +1125,11 @@ For early testing, start with a narrow target and a single clear objective. This
 
 ## API Access
 
-PentAGI provides comprehensive programmatic access through both REST and GraphQL APIs, allowing you to integrate penetration testing workflows into your automation pipelines, CI/CD processes, and custom applications.
+NEBO-HACKBOT provides comprehensive programmatic access through both REST and GraphQL APIs, allowing you to integrate penetration testing workflows into your automation pipelines, CI/CD processes, and custom applications.
 
 ### Generating API Tokens
 
-API tokens are managed through the PentAGI web interface:
+API tokens are managed through the NEBO-HACKBOT web interface:
 
 1. Navigate to **Settings** → **API Tokens** in the web UI
 2. Click **Create Token** to generate a new API token
@@ -1147,23 +1147,23 @@ Include the API token in the `Authorization` header of your HTTP requests:
 
 ```bash
 # GraphQL API example
-curl -X POST https://your-pentagi-instance:8443/api/v1/graphql \
+curl -X POST https://your-nebo-hackbot-instance:8443/api/v1/graphql \
   -H "Authorization: Bearer YOUR_API_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"query": "{ flows { id title status } }"}'
 
 # REST API example
-curl https://your-pentagi-instance:8443/api/v1/flows \
+curl https://your-nebo-hackbot-instance:8443/api/v1/flows \
   -H "Authorization: Bearer YOUR_API_TOKEN"
 ```
 
 ### API Exploration and Testing
 
-PentAGI provides interactive documentation for exploring and testing API endpoints:
+NEBO-HACKBOT provides interactive documentation for exploring and testing API endpoints:
 
 #### GraphQL Playground
 
-Access the GraphQL Playground at `https://your-pentagi-instance:8443/api/v1/graphql/playground`
+Access the GraphQL Playground at `https://your-nebo-hackbot-instance:8443/api/v1/graphql/playground`
 
 1. Click the **HTTP Headers** tab at the bottom
 2. Add your authorization header:
@@ -1176,7 +1176,7 @@ Access the GraphQL Playground at `https://your-pentagi-instance:8443/api/v1/grap
 
 #### Swagger UI
 
-Access the REST API documentation at `https://your-pentagi-instance:8443/api/v1/swagger/index.html`
+Access the REST API documentation at `https://your-nebo-hackbot-instance:8443/api/v1/swagger/index.html`
 
 1. Click the **Authorize** button
 2. Enter your token in the format: `Bearer YOUR_API_TOKEN`
@@ -1185,7 +1185,7 @@ Access the REST API documentation at `https://your-pentagi-instance:8443/api/v1/
 
 ### Generating API Clients
 
-You can generate type-safe API clients for your preferred programming language using the schema files included with PentAGI:
+You can generate type-safe API clients for your preferred programming language using the schema files included with NEBO-HACKBOT:
 
 #### GraphQL Clients
 
@@ -1201,32 +1201,32 @@ Generate clients using tools like:
 #### REST API Clients
 
 The OpenAPI specification is available at:
-- **Swagger JSON**: `https://your-pentagi-instance:8443/api/v1/swagger/doc.json`
+- **Swagger JSON**: `https://your-nebo-hackbot-instance:8443/api/v1/swagger/doc.json`
 - **Swagger YAML**: Available in `backend/pkg/server/docs/swagger.yaml`
 
 Generate clients using:
 - **OpenAPI Generator**: [https://openapi-generator.tech](https://openapi-generator.tech)
   ```bash
   openapi-generator-cli generate \
-    -i https://your-pentagi-instance:8443/api/v1/swagger/doc.json \
+    -i https://your-nebo-hackbot-instance:8443/api/v1/swagger/doc.json \
     -g python \
-    -o ./pentagi-client
+    -o ./nebo-hackbot-client
   ```
 
 - **Swagger Codegen**: [https://github.com/swagger-api/swagger-codegen](https://github.com/swagger-api/swagger-codegen)
   ```bash
   swagger-codegen generate \
-    -i https://your-pentagi-instance:8443/api/v1/swagger/doc.json \
+    -i https://your-nebo-hackbot-instance:8443/api/v1/swagger/doc.json \
     -l typescript-axios \
-    -o ./pentagi-client
+    -o ./nebo-hackbot-client
   ```
 
 - **swagger-typescript-api** (TypeScript): [https://github.com/acacode/swagger-typescript-api](https://github.com/acacode/swagger-typescript-api)
   ```bash
   npx swagger-typescript-api \
-    -p https://your-pentagi-instance:8443/api/v1/swagger/doc.json \
+    -p https://your-nebo-hackbot-instance:8443/api/v1/swagger/doc.json \
     -o ./src/api \
-    -n pentagi-api.ts
+    -n nebo-hackbot-api.ts
   ```
 
 ### API Usage Examples
@@ -1254,7 +1254,7 @@ mutation CreateFlow {
 <summary><b>Listing Flows (REST API)</b></summary>
 
 ```bash
-curl https://your-pentagi-instance:8443/api/v1/flows \
+curl https://your-nebo-hackbot-instance:8443/api/v1/flows \
   -H "Authorization: Bearer YOUR_API_TOKEN" \
   | jq '.flows[] | {id, title, status}'
 ```
@@ -1267,7 +1267,7 @@ curl https://your-pentagi-instance:8443/api/v1/flows \
 ```python
 import requests
 
-class PentAGIClient:
+class NeboHackbotClient:
     def __init__(self, base_url, api_token):
         self.base_url = base_url
         self.headers = {
@@ -1306,8 +1306,8 @@ class PentAGIClient:
         return response.json()
 
 # Usage
-client = PentAGIClient(
-    "https://your-pentagi-instance:8443",
+client = NeboHackbotClient(
+    "https://your-nebo-hackbot-instance:8443",
     "your_api_token_here"
 )
 
@@ -1335,7 +1335,7 @@ interface Flow {
   createdAt: string;
 }
 
-class PentAGIClient {
+class NeboHackbotClient {
   private client: AxiosInstance;
 
   constructor(baseURL: string, apiToken: string) {
@@ -1380,8 +1380,8 @@ class PentAGIClient {
 }
 
 // Usage
-const client = new PentAGIClient(
-  'https://your-pentagi-instance:8443',
+const client = new NeboHackbotClient(
+  'https://your-nebo-hackbot-instance:8443',
   'your_api_token_here'
 );
 
@@ -1457,9 +1457,9 @@ This setting is required by some LLM providers (e.g., Moonshot) that return erro
 
 #### Troubleshooting: tool-call (function-call) parser errors
 
-PentAGI drives its agents with tool calls (also called function calls), so any custom OpenAI-compatible backend configured through `LLM_SERVER_*` must return valid tool-call JSON in the format the OpenAI Chat Completions API defines. When the backend emits malformed, truncated, or non-conforming tool-call arguments, the agent chain cannot continue.
+NEBO-HACKBOT drives its agents with tool calls (also called function calls), so any custom OpenAI-compatible backend configured through `LLM_SERVER_*` must return valid tool-call JSON in the format the OpenAI Chat Completions API defines. When the backend emits malformed, truncated, or non-conforming tool-call arguments, the agent chain cannot continue.
 
-Self-hosted engines such as llama.cpp, SGLang, and vLLM usually require a specific tool-call parser and a matching chat template to produce correct tool-call output. If the parser is missing or mismatched for the model you are serving, tool-call arguments can come back corrupted. Compatibility therefore depends on the backend's tool-call/function-call behavior and configuration, not on PentAGI alone; not every llama.cpp or SGLang setup produces valid tool calls out of the box.
+Self-hosted engines such as llama.cpp, SGLang, and vLLM usually require a specific tool-call parser and a matching chat template to produce correct tool-call output. If the parser is missing or mismatched for the model you are serving, tool-call arguments can come back corrupted. Compatibility therefore depends on the backend's tool-call/function-call behavior and configuration, not on NEBO-HACKBOT alone; not every llama.cpp or SGLang setup produces valid tool calls out of the box.
 
 Typical symptoms:
 
@@ -1470,14 +1470,14 @@ Typical symptoms:
 
 How to investigate:
 
-1. Check both sides of the connection: the PentAGI logs (`docker compose logs -f pentagi`) and the inference backend or proxy logs (llama.cpp, SGLang, vLLM, or LiteLLM). The backend log usually shows the same parse error when it produced the malformed tool call.
+1. Check both sides of the connection: the NEBO-HACKBOT logs (`docker compose logs -f nebo-hackbot`) and the inference backend or proxy logs (llama.cpp, SGLang, vLLM, or LiteLLM). The backend log usually shows the same parse error when it produced the malformed tool call.
 2. Validate the provider before running a full flow with the `ctester` utility, which exercises tool-calling agent types directly. See [Testing LLM Agents](https://github.com/vxcontrol/pentagi#testing-llm-agents).
 3. Confirm the backend's tool-call parser and chat template are the ones recommended for the model you are serving, and that the model itself supports tool calling.
-4. Update PentAGI to the latest build. Recent versions sanitize malformed function-call arguments returned by the model so a single bad response no longer stalls the whole flow; older builds forwarded the corrupted arguments and could get stuck.
+4. Update NEBO-HACKBOT to the latest build. Recent versions sanitize malformed function-call arguments returned by the model so a single bad response no longer stalls the whole flow; older builds forwarded the corrupted arguments and could get stuck.
 
 ### Ollama Provider Configuration
 
-PentAGI supports Ollama for both local LLM inference (zero-cost, enhanced privacy) and Ollama Cloud (managed service with free tier).
+NEBO-HACKBOT supports Ollama for both local LLM inference (zero-cost, enhanced privacy) and Ollama Cloud (managed service with free tier).
 
 #### Configuration Variables
 
@@ -1512,7 +1512,7 @@ For paid tiers supporting multiple concurrent models, use the pre-built Ollama C
 # Using pre-built Ollama Cloud configuration (included in Docker image)
 OLLAMA_SERVER_URL=https://ollama.com
 OLLAMA_SERVER_API_KEY=your_ollama_cloud_api_key
-OLLAMA_SERVER_CONFIG_PATH=/opt/pentagi/conf/ollama-cloud.provider.yml
+OLLAMA_SERVER_CONFIG_PATH=/opt/nebo-hackbot/conf/ollama-cloud.provider.yml
 ```
 
 The pre-built `ollama-cloud.provider.yml` configuration includes optimized model assignments for all agent types:
@@ -1532,13 +1532,13 @@ To create your own agent configuration, mount a custom file from your host files
 # Using custom provider configuration
 OLLAMA_SERVER_URL=https://ollama.com
 OLLAMA_SERVER_API_KEY=your_ollama_cloud_api_key
-OLLAMA_SERVER_CONFIG_PATH=/opt/pentagi/conf/ollama.provider.yml
+OLLAMA_SERVER_CONFIG_PATH=/opt/nebo-hackbot/conf/ollama.provider.yml
 
 # Mount custom configuration from host filesystem (in .env or docker-compose override)
-PENTAGI_OLLAMA_SERVER_CONFIG_PATH=/path/on/host/my-ollama-config.yml
+NEBO_HACKBOT_OLLAMA_SERVER_CONFIG_PATH=/path/on/host/my-ollama-config.yml
 ```
 
-The `PENTAGI_OLLAMA_SERVER_CONFIG_PATH` environment variable maps your host configuration file to `/opt/pentagi/conf/ollama.provider.yml` inside the container.
+The `NEBO_HACKBOT_OLLAMA_SERVER_CONFIG_PATH` environment variable maps your host configuration file to `/opt/nebo-hackbot/conf/ollama.provider.yml` inside the container.
 
 **Example custom configuration** (`my-ollama-config.yml`):
 
@@ -1573,11 +1573,11 @@ OLLAMA_SERVER_PULL_MODELS_TIMEOUT=900
 OLLAMA_SERVER_LOAD_MODELS_ENABLED=true
 
 # Using pre-built configurations from Docker image
-OLLAMA_SERVER_CONFIG_PATH=/opt/pentagi/conf/ollama-llama318b.provider.yml
+OLLAMA_SERVER_CONFIG_PATH=/opt/nebo-hackbot/conf/ollama-llama318b.provider.yml
 # or
-OLLAMA_SERVER_CONFIG_PATH=/opt/pentagi/conf/ollama-qwen332b-fp16-tc.provider.yml
+OLLAMA_SERVER_CONFIG_PATH=/opt/nebo-hackbot/conf/ollama-qwen332b-fp16-tc.provider.yml
 # or
-OLLAMA_SERVER_CONFIG_PATH=/opt/pentagi/conf/ollama-qwq32b-fp16-tc.provider.yml
+OLLAMA_SERVER_CONFIG_PATH=/opt/nebo-hackbot/conf/ollama-qwq32b-fp16-tc.provider.yml
 ```
 
 **Performance Considerations:**
@@ -1589,7 +1589,7 @@ OLLAMA_SERVER_CONFIG_PATH=/opt/pentagi/conf/ollama-qwq32b-fp16-tc.provider.yml
 
 #### Creating Custom Ollama Models with Extended Context
 
-PentAGI requires models with larger context windows than the default Ollama configurations. You need to create custom models with increased `num_ctx` parameter through Modelfiles. While typical agent workflows consume around 64K tokens, PentAGI uses 110K context size for safety margin and handling complex penetration testing scenarios.
+NEBO-HACKBOT requires models with larger context windows than the default Ollama configurations. You need to create custom models with increased `num_ctx` parameter through Modelfiles. While typical agent workflows consume around 64K tokens, NEBO-HACKBOT uses 110K context size for safety margin and handling complex penetration testing scenarios.
 
 **Important**: The `num_ctx` parameter can only be set during model creation via Modelfile - it cannot be changed after model creation or overridden at runtime.
 
@@ -1635,11 +1635,11 @@ ollama create qwq:32b-fp16-tc -f Modelfile_qwq_32b_fp16_tc
 
 > **Note**: The QwQ 32B FP16 model requires approximately **71.3 GB VRAM** for inference. Ensure your system has sufficient GPU memory before attempting to use this model.
 
-These custom models are referenced in the pre-built provider configuration files (`ollama-qwen332b-fp16-tc.provider.yml` and `ollama-qwq32b-fp16-tc.provider.yml`) that are included in the Docker image at `/opt/pentagi/conf/`.
+These custom models are referenced in the pre-built provider configuration files (`ollama-qwen332b-fp16-tc.provider.yml` and `ollama-qwq32b-fp16-tc.provider.yml`) that are included in the Docker image at `/opt/nebo-hackbot/conf/`.
 
 ### OpenAI Provider Configuration
 
-PentAGI integrates with OpenAI's comprehensive model lineup, featuring advanced reasoning capabilities with extended chain-of-thought, agentic models with enhanced tool integration, and specialized code models for security engineering.
+NEBO-HACKBOT integrates with OpenAI's comprehensive model lineup, featuring advanced reasoning capabilities with extended chain-of-thought, agentic models with enhanced tool integration, and specialized code models for security engineering.
 
 #### Configuration Variables
 
@@ -1662,7 +1662,7 @@ PROXY_URL=http://your-proxy:8080
 
 #### Supported Models
 
-PentAGI supports 32 OpenAI models with tool calling, streaming, reasoning modes, and prompt caching. Models marked with `*` are used in default configuration. Models marked `⚠️` are deprecated by OpenAI and kept only for backward compatibility with agent configs already pinned to those names — avoid them for new assignments.
+NEBO-HACKBOT supports 32 OpenAI models with tool calling, streaming, reasoning modes, and prompt caching. Models marked with `*` are used in default configuration. Models marked `⚠️` are deprecated by OpenAI and kept only for backward compatibility with agent configs already pinned to those names — avoid them for new assignments.
 
 **GPT-5.6 Series - Latest Frontier (Feb 2026 knowledge cutoff, 1.05M context, 128K max output)**
 
@@ -1726,7 +1726,7 @@ PentAGI supports 32 OpenAI models with tool calling, streaming, reasoning modes,
 
 **Deprecated Models - Kept for Backward Compatibility ⚠️**
 
-These models were marked deprecated by OpenAI. PentAGI keeps them defined only so that pre-existing agent configs pinned to these names keep working; do not assign them to new agents.
+These models were marked deprecated by OpenAI. NEBO-HACKBOT keeps them defined only so that pre-existing agent configs pinned to these names keep working; do not assign them to new agents.
 
 | Model ID              | Thinking | Price (Input/Output/Cache) | Notes                                        |
 | --------------------- | -------- | -------------------------- | --------------------------------------------- |
@@ -1748,7 +1748,7 @@ These models were marked deprecated by OpenAI. PentAGI keeps them defined only s
 > [!WARNING]
 > **GPT-5/5.1/5.2 Models - Trusted Access Required**
 >
-> The original GPT-5, GPT-5.1, and GPT-5.2 models (`gpt-5`, `gpt-5.1`, `gpt-5.2`, `gpt-5-pro`, `gpt-5.2-pro`, and all deprecated Codex variants) work **unstably with PentAGI** and may trigger OpenAI's cybersecurity safety mechanisms without verified access. This does not affect the newer GPT-5.4/5.5/5.6 series used in PentAGI's default configuration below.
+> The original GPT-5, GPT-5.1, and GPT-5.2 models (`gpt-5`, `gpt-5.1`, `gpt-5.2`, `gpt-5-pro`, `gpt-5.2-pro`, and all deprecated Codex variants) work **unstably with NEBO-HACKBOT** and may trigger OpenAI's cybersecurity safety mechanisms without verified access. This does not affect the newer GPT-5.4/5.5/5.6 series used in NEBO-HACKBOT's default configuration below.
 >
 > **To use these models reliably:**
 > 1. **Individual users**: Verify your identity at [chatgpt.com/cyber](https://chatgpt.com/cyber)
@@ -1756,12 +1756,12 @@ These models were marked deprecated by OpenAI. PentAGI keeps them defined only s
 > 3. **Security researchers**: Apply for the [Cybersecurity Grant Program](https://openai.com/form/cybersecurity-grant-program/) (includes $10M in API credits)
 >
 > **Recommended alternatives without verification:**
-> - Use PentAGI's defaults — `gpt-5.4-mini`/`gpt-5.4-nano`/`gpt-5.6-terra` — which work out of the box
+> - Use NEBO-HACKBOT's defaults — `gpt-5.4-mini`/`gpt-5.4-nano`/`gpt-5.6-terra` — which work out of the box
 > - Use `o3`/`o3-pro` for reasoning tasks
 > - Use `gpt-4.1` series for general intelligence and function calling without reasoning
 
 **Reasoning Configuration**:
-- **Reasoning forced off by default**: every default agent assigned `gpt-5.4-mini` or `gpt-5.6-terra` (primary_agent, assistant, generator, refiner, adviser, reflector, coder, installer, pentester) sets `reasoning: {mode: off}` — this genuinely disables reasoning, it is not simply "low effort". PentAGI calls OpenAI exclusively through `/v1/chat/completions` (never `/v1/responses`), and this endpoint rejects requests that combine function tools with these models' default-on thinking; forcing thinking off is required for tool calls to work reliably (see the investigation notes in [`backend/pkg/providers/openai/config.yml`](backend/pkg/providers/openai/config.yml)).
+- **Reasoning forced off by default**: every default agent assigned `gpt-5.4-mini` or `gpt-5.6-terra` (primary_agent, assistant, generator, refiner, adviser, reflector, coder, installer, pentester) sets `reasoning: {mode: off}` — this genuinely disables reasoning, it is not simply "low effort". NEBO-HACKBOT calls OpenAI exclusively through `/v1/chat/completions` (never `/v1/responses`), and this endpoint rejects requests that combine function tools with these models' default-on thinking; forcing thinking off is required for tool calls to work reliably (see the investigation notes in [`backend/pkg/providers/openai/config.yml`](backend/pkg/providers/openai/config.yml)).
 - **No override needed for `gpt-5.4-nano`**: used for simple, simple_json, searcher, and enricher, this tier does not default to thinking on, so tools attach without conflict and no `reasoning` override is required.
 - **Manual tuning available**: outside the default assignments, GPT-5.6/5.5/5.4/5.2 series models expose explicit reasoning effort levels (`low`/`medium`/`high`/`xhigh`, plus `none` on GPT-5.5) for custom agent configs that need variable reasoning depth with tool calling disabled or via `/v1/responses`.
 
@@ -1777,7 +1777,7 @@ These models were marked deprecated by OpenAI. PentAGI keeps them defined only s
 
 ### Anthropic Provider Configuration
 
-PentAGI integrates with Anthropic's Claude models, featuring advanced extended thinking capabilities, exceptional safety mechanisms, and sophisticated understanding of complex security contexts with prompt caching.
+NEBO-HACKBOT integrates with Anthropic's Claude models, featuring advanced extended thinking capabilities, exceptional safety mechanisms, and sophisticated understanding of complex security contexts with prompt caching.
 
 #### Configuration Variables
 
@@ -1801,16 +1801,16 @@ PROXY_URL=http://your-proxy:8080
 > [!NOTE]
 > **Google Vertex AI for Claude models**
 >
-> PentAGI does not currently expose a dedicated Google Vertex AI configuration path for Anthropic Claude in `.env`. There is no separate Vertex AI API key field at this time, and the existing Anthropic variables (`ANTHROPIC_API_KEY`, `ANTHROPIC_SERVER_URL`) target the direct Anthropic API. Supported routes for Claude are:
+> NEBO-HACKBOT does not currently expose a dedicated Google Vertex AI configuration path for Anthropic Claude in `.env`. There is no separate Vertex AI API key field at this time, and the existing Anthropic variables (`ANTHROPIC_API_KEY`, `ANTHROPIC_SERVER_URL`) target the direct Anthropic API. Supported routes for Claude are:
 >
 > - **Direct Anthropic API**: `ANTHROPIC_API_KEY` and `ANTHROPIC_SERVER_URL` (see above).
 > - **AWS Bedrock**: `BEDROCK_*` variables (see [AWS Bedrock Provider Configuration](#aws-bedrock-provider-configuration)).
 >
-> If you need to use Vertex AI today, the safest supported workaround is to expose Vertex AI through an OpenAI-compatible proxy or gateway that translates Vertex AI calls into the Chat Completions format while preserving the chat and tool-call behavior PentAGI relies on, then point the Custom LLM provider at that gateway via `LLM_SERVER_URL`, `LLM_SERVER_KEY`, and `LLM_SERVER_MODEL`. This path is only as reliable as the gateway you choose.
+> If you need to use Vertex AI today, the safest supported workaround is to expose Vertex AI through an OpenAI-compatible proxy or gateway that translates Vertex AI calls into the Chat Completions format while preserving the chat and tool-call behavior NEBO-HACKBOT relies on, then point the Custom LLM provider at that gateway via `LLM_SERVER_URL`, `LLM_SERVER_KEY`, and `LLM_SERVER_MODEL`. This path is only as reliable as the gateway you choose.
 
 #### Supported Models
 
-PentAGI supports 9 Claude models with tool calling, streaming, extended thinking, adaptive thinking, and prompt caching. Models marked with `*` are used in default configuration.
+NEBO-HACKBOT supports 9 Claude models with tool calling, streaming, extended thinking, adaptive thinking, and prompt caching. Models marked with `*` are used in default configuration.
 
 **Claude 5 Series - Newest Models (2026)**
 
@@ -1857,7 +1857,7 @@ PentAGI supports 9 Claude models with tool calling, streaming, extended thinking
 
 ### Google AI (Gemini) Provider Configuration
 
-PentAGI integrates with Google's Gemini models through the Google AI API, offering state-of-the-art multimodal reasoning capabilities with extended thinking and context caching.
+NEBO-HACKBOT integrates with Google's Gemini models through the Google AI API, offering state-of-the-art multimodal reasoning capabilities with extended thinking and context caching.
 
 #### Configuration Variables
 
@@ -1880,7 +1880,7 @@ PROXY_URL=http://your-proxy:8080
 
 #### Supported Models
 
-PentAGI supports 9 Gemini models with tool calling, streaming, thinking modes, and context caching. Models marked with `*` are used in default configuration.
+NEBO-HACKBOT supports 9 Gemini models with tool calling, streaming, thinking modes, and context caching. Models marked with `*` are used in default configuration.
 
 **Gemini 3.5 Series - Latest Stable Flash (May 2026)**
 
@@ -1947,7 +1947,7 @@ PentAGI supports 9 Gemini models with tool calling, streaming, thinking modes, a
 
 ### AWS Bedrock Provider Configuration
 
-PentAGI integrates with Amazon Bedrock, offering access to 20+ foundation models from leading AI companies including Anthropic, Amazon, Cohere, DeepSeek, OpenAI, Qwen, Mistral, and Moonshot.
+NEBO-HACKBOT integrates with Amazon Bedrock, offering access to 20+ foundation models from leading AI companies including Anthropic, Amazon, Cohere, DeepSeek, OpenAI, Qwen, Mistral, and Moonshot.
 
 #### Configuration Variables
 
@@ -1998,15 +1998,15 @@ This is useful to expose a Bedrock model newer than the compiled-in catalog — 
 With Docker Compose, set the host-side mount source and the in-container path together:
 
 ```bash
-# host file mounted into the container at /opt/pentagi/conf/bedrock.provider.yml
-PENTAGI_BEDROCK_CONFIG_PATH=./examples/configs/bedrock-glm-flash.provider.yml
+# host file mounted into the container at /opt/nebo-hackbot/conf/bedrock.provider.yml
+NEBO_HACKBOT_BEDROCK_CONFIG_PATH=./examples/configs/bedrock-glm-flash.provider.yml
 # tell the backend to read the mounted file
-BEDROCK_CONFIG_PATH=/opt/pentagi/conf/bedrock.provider.yml
+BEDROCK_CONFIG_PATH=/opt/nebo-hackbot/conf/bedrock.provider.yml
 ```
 
 #### Supported Models
 
-PentAGI supports 24 AWS Bedrock models with tool calling, streaming, and multimodal capabilities. Models marked with `*` are used in default configuration.
+NEBO-HACKBOT supports 24 AWS Bedrock models with tool calling, streaming, and multimodal capabilities. Models marked with `*` are used in default configuration.
 
 | Model ID                                         | Provider        | Thinking | Multimodal | Price (Input/Output) | Use Case                                |
 | ------------------------------------------------ | --------------- | -------- | ---------- | -------------------- | --------------------------------------- |
@@ -2065,7 +2065,7 @@ Some AWS Bedrock models were tested but are **not supported** due to technical l
 > [!WARNING]
 > **Converse API Requirements**
 >
-> PentAGI uses Amazon Bedrock **Converse API** for unified model access. All supported models require:
+> NEBO-HACKBOT uses Amazon Bedrock **Converse API** for unified model access. All supported models require:
 >
 > - ✅ Converse/ConverseStream API support
 > - ✅ Tool use (function calling) for penetration testing workflows
@@ -2082,7 +2082,7 @@ Some AWS Bedrock models were tested but are **not supported** due to technical l
 
 ### DeepSeek Provider Configuration
 
-PentAGI integrates with DeepSeek, providing access to advanced AI models with strong reasoning, coding capabilities, and context caching at competitive prices.
+NEBO-HACKBOT integrates with DeepSeek, providing access to advanced AI models with strong reasoning, coding capabilities, and context caching at competitive prices.
 
 #### Configuration Variables
 
@@ -2107,7 +2107,7 @@ DEEPSEEK_PROVIDER=deepseek  # Adds prefix to model names (deepseek/deepseek-v4-f
 
 #### Supported Models
 
-PentAGI supports 2 DeepSeek V4 models with tool calling, streaming, hybrid thinking/non-thinking modes, and context caching. Both models support thinking mode by default and can be switched to non-thinking mode via `extra_body`. Models marked with `*` are used in default configuration.
+NEBO-HACKBOT supports 2 DeepSeek V4 models with tool calling, streaming, hybrid thinking/non-thinking modes, and context caching. Both models support thinking mode by default and can be switched to non-thinking mode via `extra_body`. Models marked with `*` are used in default configuration.
 
 | Model ID              | Thinking | Max Output | Context | Price (Input/Output/Cache) | Use Case                                             |
 | --------------------- | -------- | ---------- | ------- | -------------------------- | ---------------------------------------------------- |
@@ -2153,11 +2153,11 @@ Strategy: prefer `deepseek-v4-flash` (12x cheaper input, 12x cheaper output) as 
 
 **Concurrency Limits**: `deepseek-v4-flash`: 2500 concurrent requests; `deepseek-v4-pro`: 500 concurrent requests.
 
-**LiteLLM Integration**: Set `DEEPSEEK_PROVIDER=deepseek` to enable model name prefixing when using default PentAGI configurations with LiteLLM proxy. Leave empty for direct API usage.
+**LiteLLM Integration**: Set `DEEPSEEK_PROVIDER=deepseek` to enable model name prefixing when using default NEBO-HACKBOT configurations with LiteLLM proxy. Leave empty for direct API usage.
 
 ### GLM Provider Configuration
 
-PentAGI integrates with GLM from Zhipu AI (Z.AI), providing advanced language models with MoE architecture, strong reasoning, and agentic capabilities developed by Tsinghua University.
+NEBO-HACKBOT integrates with GLM from Zhipu AI (Z.AI), providing advanced language models with MoE architecture, strong reasoning, and agentic capabilities developed by Tsinghua University.
 
 #### Configuration Variables
 
@@ -2186,7 +2186,7 @@ GLM_PROVIDER=zai  # Adds prefix to model names (zai/glm-4) for LiteLLM
 
 #### Supported Models
 
-PentAGI supports 14 GLM models with tool calling, streaming, hybrid thinking modes, and prompt caching. Models marked with `*` are used in default configuration. Thinking is controlled via `extra_body.thinking.type` ("enabled"/"disabled"); unlike Kimi, GLM is permissive about temperature in either mode.
+NEBO-HACKBOT supports 14 GLM models with tool calling, streaming, hybrid thinking modes, and prompt caching. Models marked with `*` are used in default configuration. Thinking is controlled via `extra_body.thinking.type` ("enabled"/"disabled"); unlike Kimi, GLM is permissive about temperature in either mode.
 
 **GLM-5.x Series - Latest Generation (200K context, 128K max output)**
 
@@ -2251,7 +2251,7 @@ Generator, refiner, and adviser additionally set `reasoning.effort: max`, which 
 - **Hybrid** (GLM-5.x, GLM-4.7): Explicit toggle via `extra_body.thinking.type`
 - **Auto** (GLM-4.6, GLM-4.5 series): Model automatically determines when reasoning is needed
 - **Reasoning Effort** (GLM-5.2 only): supports an explicit `reasoning_effort` parameter (`high`/`max`) on top of hybrid thinking, for finer control over reasoning depth than the other GLM-5.x models
-- **Preserved Thinking** (Z.AI Coding capability): all thinking-enabled agents in PentAGI also pass `extra_body.thinking.clear_thinking: false` so that `reasoning_content` from previous assistant turns is retained across the conversation. This is required on the standard API endpoint (`/api/paas/v4`) — on the Coding Plan endpoint it would be enabled by default. Improves reasoning continuity and cache hit rates in multi-turn tool call chains.
+- **Preserved Thinking** (Z.AI Coding capability): all thinking-enabled agents in NEBO-HACKBOT also pass `extra_body.thinking.clear_thinking: false` so that `reasoning_content` from previous assistant turns is retained across the conversation. This is required on the standard API endpoint (`/api/paas/v4`) — on the Coding Plan endpoint it would be enabled by default. Improves reasoning continuity and cache hit rates in multi-turn tool call chains.
 - All thinking-enabled agents also pass `extra_body.tool_choice: auto` defensively
 
 **Key Features**:
@@ -2265,11 +2265,11 @@ Generator, refiner, and adviser additionally set `reasoning.effort: max`, which 
 - **Multilingual**: Exceptional Chinese and English NLP capabilities
 - **Free Options**: GLM-4.7-Flash and GLM-4.5-Flash for prototyping and experimentation
 
-**LiteLLM Integration**: Set `GLM_PROVIDER=zai` to enable model name prefixing when using default PentAGI configurations with LiteLLM proxy. Leave empty for direct API usage.
+**LiteLLM Integration**: Set `GLM_PROVIDER=zai` to enable model name prefixing when using default NEBO-HACKBOT configurations with LiteLLM proxy. Leave empty for direct API usage.
 
 ### Kimi Provider Configuration
 
-PentAGI integrates with Kimi from Moonshot AI, providing ultra-long context models with multimodal capabilities perfect for analyzing extensive codebases and documentation.
+NEBO-HACKBOT integrates with Kimi from Moonshot AI, providing ultra-long context models with multimodal capabilities perfect for analyzing extensive codebases and documentation.
 
 #### Configuration Variables
 
@@ -2297,7 +2297,7 @@ KIMI_PROVIDER=moonshot  # Adds prefix to model names (moonshot/kimi-k2.5) for Li
 
 #### Supported Models
 
-PentAGI supports 11 Kimi/Moonshot models with tool calling, streaming, hybrid thinking modes, and multimodal capabilities (text/image/video for K2.x). All `kimi-k2-*` legacy models (turbo-preview, 0905-preview, 0711-preview, thinking, thinking-turbo) were deprecated by Moonshot on 2026-05-25 and are NOT included. Models marked with `*` are used in default configuration.
+NEBO-HACKBOT supports 11 Kimi/Moonshot models with tool calling, streaming, hybrid thinking modes, and multimodal capabilities (text/image/video for K2.x). All `kimi-k2-*` legacy models (turbo-preview, 0905-preview, 0711-preview, thinking, thinking-turbo) were deprecated by Moonshot on 2026-05-25 and are NOT included. Models marked with `*` are used in default configuration.
 
 **Kimi K3 - Flagship (Always Reasoning)**
 
@@ -2338,7 +2338,7 @@ PentAGI supports 11 Kimi/Moonshot models with tool calling, streaming, hybrid th
 **Prices**: Per 1M tokens. Cache pricing applies to prompt tokens served from automatic context cache (only Kimi K3/K2.7/K2.x models support cache).
 
 > **CRITICAL — Kimi parameter constraints per model family**: API returns `invalid_request_error` for any deviation:
-> - `kimi-k3`: always reasons, no `thinking` param at all; reasoning depth is set via the top-level `reasoning_effort` field (`low`/`high`/`max`, default `max`) — PentAGI pins it to `max` for all agents using this model. `temperature` MUST be `1.0`, `top_p` MUST be `0.95`, `n` MUST be `1`, `presence_penalty`/`frequency_penalty` MUST be `0`. Do not switch effort per call — it invalidates the prefix cache.
+> - `kimi-k3`: always reasons, no `thinking` param at all; reasoning depth is set via the top-level `reasoning_effort` field (`low`/`high`/`max`, default `max`) — NEBO-HACKBOT pins it to `max` for all agents using this model. `temperature` MUST be `1.0`, `top_p` MUST be `0.95`, `n` MUST be `1`, `presence_penalty`/`frequency_penalty` MUST be `0`. Do not switch effort per call — it invalidates the prefix cache.
 > - `kimi-k2.7-code` / `kimi-k2.7-code-highspeed`: `thinking` may be omitted; if set explicitly, only `{"type":"enabled","keep":"all"}` is accepted (`type: disabled` is rejected). `reasoning_effort` is not supported. `temperature` MUST be `1.0`, `top_p` MUST be `0.95`, `n` MUST be `1`; `tool_choice: required` is not supported (use `auto`).
 > - `kimi-k2.6`: thinking mode needs `temperature=1.0`, `top_p=0.95`, `n=1`, `thinking.keep="all"`; non-thinking mode needs `temperature=0.6`, `top_p=0.95`, `n=1`.
 > - `kimi-k2.5`: thinking mode needs `temperature=1.0`, `top_p=0.95`, `n=1` (no `keep` support); non-thinking mode needs `temperature=0.6`, `top_p=0.95`, `n=1`.
@@ -2362,7 +2362,7 @@ Strategy: `kimi-k2.5` for utility/orchestration, `kimi-k2.7-code-highspeed` for 
 | Simple                                       | `kimi-k2.5`                 | Disabled              | 0.6         | 0.95  | 8192       |
 | Simple JSON                                  | `kimi-k2.5`                 | Disabled              | 0.6         | 0.95  | 4096       |
 
-> **Note**: for `kimi-k2.5` non-thinking agents, PentAGI also duplicates `temperature: 0.6` into `extra_body` as a workaround — langchaingo's `IsReasoningModel` matches the substring `2.5` and force-overrides temperature to `1.0`, and `extra_body` bypasses that override.
+> **Note**: for `kimi-k2.5` non-thinking agents, NEBO-HACKBOT also duplicates `temperature: 0.6` into `extra_body` as a workaround — langchaingo's `IsReasoningModel` matches the substring `2.5` and force-overrides temperature to `1.0`, and `extra_body` bypasses that override.
 
 **Key Features**:
 - **Always-On Reasoning Flagship**: `kimi-k3` never disables thinking and offers a 1M token context for the most demanding long-horizon coding and knowledge work
@@ -2375,13 +2375,13 @@ Strategy: `kimi-k2.5` for utility/orchestration, `kimi-k2.7-code-highspeed` for 
 - **Coding-Optimized Variants**: `kimi-k2.7-code`/`kimi-k2.7-code-highspeed` target higher success rates on long-context programming tasks, with the highspeed variant tuned for throughput
 - **Multilingual**: Strong Chinese, English, and multi-language support
 
-**Multi-turn with thinking + tool calls**: PentAGI's universal reasoning preservation pattern (`TextPartWithReasoning` + `WithPreserveReasoningContent`) automatically ensures `reasoning_content` is sent back in the required TextContent → ToolCall order, satisfying Moonshot's "thinking is enabled but reasoning_content is missing in assistant tool call message" requirement.
+**Multi-turn with thinking + tool calls**: NEBO-HACKBOT's universal reasoning preservation pattern (`TextPartWithReasoning` + `WithPreserveReasoningContent`) automatically ensures `reasoning_content` is sent back in the required TextContent → ToolCall order, satisfying Moonshot's "thinking is enabled but reasoning_content is missing in assistant tool call message" requirement.
 
-**LiteLLM Integration**: Set `KIMI_PROVIDER=moonshot` to enable model name prefixing when using default PentAGI configurations with LiteLLM proxy. Leave empty for direct API usage.
+**LiteLLM Integration**: Set `KIMI_PROVIDER=moonshot` to enable model name prefixing when using default NEBO-HACKBOT configurations with LiteLLM proxy. Leave empty for direct API usage.
 
 ### Qwen Provider Configuration
 
-PentAGI integrates with Qwen from Alibaba Cloud Model Studio (DashScope), providing powerful multilingual models with reasoning capabilities and context caching support.
+NEBO-HACKBOT integrates with Qwen from Alibaba Cloud Model Studio (DashScope), providing powerful multilingual models with reasoning capabilities and context caching support.
 
 #### Configuration Variables
 
@@ -2410,7 +2410,7 @@ QWEN_PROVIDER=dashscope  # Adds prefix to model names (dashscope/qwen-plus) for 
 
 #### Supported Models
 
-PentAGI supports 33 Qwen models curated for agent workflows: text reasoning, code generation, and vision-language (browser screenshots). All models are non-snapshot main aliases with tool calling, streaming, thinking modes, and context caching. Models marked with `*` are used in default configuration.
+NEBO-HACKBOT supports 33 Qwen models curated for agent workflows: text reasoning, code generation, and vision-language (browser screenshots). All models are non-snapshot main aliases with tool calling, streaming, thinking modes, and context caching. Models marked with `*` are used in default configuration.
 
 **Flagship Models (Top-tier Reasoning)**
 
@@ -2517,11 +2517,11 @@ PentAGI supports 33 Qwen models curated for agent workflows: text reasoning, cod
 - **Multilingual**: Strong Chinese, English, and multi-language support
 - **Open-Source Variants**: Dense and MoE models from 0.6B to 480B for on-premises/air-gapped deployments
 
-**LiteLLM Integration**: Set `QWEN_PROVIDER=dashscope` to enable model name prefixing when using default PentAGI configurations with LiteLLM proxy. Leave empty for direct API usage.
+**LiteLLM Integration**: Set `QWEN_PROVIDER=dashscope` to enable model name prefixing when using default NEBO-HACKBOT configurations with LiteLLM proxy. Leave empty for direct API usage.
 
 #### Alternative Integrations
 
-DashScope is fully OpenAI-compatible, so Qwen can also power two other PentAGI subsystems through the standard OpenAI client.
+DashScope is fully OpenAI-compatible, so Qwen can also power two other NEBO-HACKBOT subsystems through the standard OpenAI client.
 
 **As embedding provider** (`text-embedding-v4`, see [Alibaba Cloud Model Studio pricing](https://modelstudio.console.alibabacloud.com/ap-southeast-1?tab=doc#/doc/?type=model&url=prices)):
 
@@ -2537,11 +2537,11 @@ EMBEDDING_STRIP_NEW_LINES=    # optional, default applies
 
 > Note: the Global/US DashScope endpoint (`dashscope-us.aliyuncs.com`) does **not** expose embedding APIs — use the International or China endpoints for `text-embedding-v4`.
 
-**As OpenAI-typed custom LLM provider**: instead of the dedicated `QWEN_*` variables, you can wire any Qwen chat model through PentAGI's custom OpenAI-compatible provider by pointing `OPENAI_SERVER_URL` (or a custom provider entry) to the DashScope `/compatible-mode/v1` endpoint and selecting the desired Qwen model name. Useful when you already manage all model traffic through a single OpenAI-shaped client (e.g. shared with LiteLLM/OneAPI proxies).
+**As OpenAI-typed custom LLM provider**: instead of the dedicated `QWEN_*` variables, you can wire any Qwen chat model through NEBO-HACKBOT's custom OpenAI-compatible provider by pointing `OPENAI_SERVER_URL` (or a custom provider entry) to the DashScope `/compatible-mode/v1` endpoint and selecting the desired Qwen model name. Useful when you already manage all model traffic through a single OpenAI-shaped client (e.g. shared with LiteLLM/OneAPI proxies).
 
 ### MiniMax Provider Configuration
 
-PentAGI integrates with MiniMax's M-series through the OpenAI-compatible `https://api.minimax.io/v1` endpoint: large-context agentic models with tool calling, JSON output, and streaming.
+NEBO-HACKBOT integrates with MiniMax's M-series through the OpenAI-compatible `https://api.minimax.io/v1` endpoint: large-context agentic models with tool calling, JSON output, and streaming.
 
 #### Configuration Variables
 
@@ -2566,7 +2566,7 @@ MINIMAX_PROVIDER=minimax  # Adds prefix to model names (minimax/MiniMax-M3) for 
 
 #### Supported Models
 
-PentAGI ships 3 MiniMax models with tool calling, JSON output, and streaming. `MiniMax-M3` is the default for all agent types.
+NEBO-HACKBOT ships 3 MiniMax models with tool calling, JSON output, and streaming. `MiniMax-M3` is the default for all agent types.
 
 | Model ID                 | Context | Price (Input/Output, ≤512K context) | Use Case                                                                                            |
 | ------------------------ | ------- | ------------------------------------ | --------------------------------------------------------------------------------------------------- |
@@ -2574,7 +2574,7 @@ PentAGI ships 3 MiniMax models with tool calling, JSON output, and streaming. `M
 | `MiniMax-M2.7`           | 204K    | $0.30/$1.20                          | Previous-generation model with strong reasoning and coding                                          |
 | `MiniMax-M2.7-highspeed` | 204K    | $0.60/$2.40                          | Low-latency variant of M2.7 for fast-response scenarios                                             |
 
-**LiteLLM Integration**: Set `MINIMAX_PROVIDER=minimax` to enable model name prefixing when using default PentAGI configurations with LiteLLM proxy. Leave empty for direct API usage.
+**LiteLLM Integration**: Set `MINIMAX_PROVIDER=minimax` to enable model name prefixing when using default NEBO-HACKBOT configurations with LiteLLM proxy. Leave empty for direct API usage.
 
 ## Advanced Setup
 
@@ -2603,8 +2603,8 @@ Langfuse provides advanced capabilities for monitoring and analyzing AI agent op
 - `LANGFUSE_INIT_USER_NAME` - Admin username
 
 ### API Keys and Tokens
-- `LANGFUSE_INIT_PROJECT_PUBLIC_KEY` - Project public key (used from PentAGI side too)
-- `LANGFUSE_INIT_PROJECT_SECRET_KEY` - Project secret key (used from PentAGI side too)
+- `LANGFUSE_INIT_PROJECT_PUBLIC_KEY` - Project public key (used from NEBO-HACKBOT side too)
+- `LANGFUSE_INIT_PROJECT_SECRET_KEY` - Project secret key (used from NEBO-HACKBOT side too)
 
 ### S3 Storage
 - `LANGFUSE_S3_ACCESS_KEY_ID` - S3 access key ID
@@ -2612,7 +2612,7 @@ Langfuse provides advanced capabilities for monitoring and analyzing AI agent op
 
 </details>
 
-2. Enable integration with Langfuse for PentAGI service in `.env` file.
+2. Enable integration with Langfuse for NEBO-HACKBOT service in `.env` file.
 
 ```bash
 LANGFUSE_BASE_URL=http://langfuse-web:3000
@@ -2637,7 +2637,7 @@ Visit [localhost:4000](http://localhost:4000) to access Langfuse Web UI with cre
 
 For detailed system operation tracking, integration with monitoring tools is available.
 
-1. Enable integration with OpenTelemetry and all observability services for PentAGI in `.env` file.
+1. Enable integration with OpenTelemetry and all observability services for NEBO-HACKBOT in `.env` file.
 
 ```bash
 OTEL_HOST=otelcol:8148
@@ -2664,7 +2664,7 @@ Visit [localhost:3000](http://localhost:3000) to access Grafana Web UI.
 > You can also register aliases for these commands in your shell to run it faster:
 >
 > ```bash
-> alias pentagi="docker compose -f docker-compose.yml -f docker-compose-langfuse.yml -f docker-compose-graphiti.yml -f docker-compose-observability.yml"
+> alias nebo-hackbot="docker compose -f docker-compose.yml -f docker-compose-langfuse.yml -f docker-compose-graphiti.yml -f docker-compose-observability.yml"
 > alias pentagi-up="docker compose -f docker-compose.yml -f docker-compose-langfuse.yml -f docker-compose-graphiti.yml -f docker-compose-observability.yml up -d"
 > alias pentagi-down="docker compose -f docker-compose.yml -f docker-compose-langfuse.yml -f docker-compose-graphiti.yml -f docker-compose-observability.yml down"
 > ```
@@ -2674,18 +2674,18 @@ Visit [localhost:3000](http://localhost:3000) to access Grafana Web UI.
 > [!IMPORTANT]
 > Graphiti is an optional **beta** integration and is disabled by default. Review [Limitations and Security](#limitations-and-security) before enabling it in production.
 
-PentAGI integrates with [Graphiti](https://github.com/vxcontrol/pentagi-graphiti), a temporal knowledge graph system powered by Neo4j, to provide advanced semantic understanding and relationship tracking for AI agent operations. The vxcontrol fork provides custom entity and edge types that are specific to pentesting purposes.
+NEBO-HACKBOT integrates with [Graphiti](https://github.com/vxcontrol/pentagi-graphiti), a temporal knowledge graph system powered by Neo4j, to provide advanced semantic understanding and relationship tracking for AI agent operations. The vxcontrol fork provides custom entity and edge types that are specific to pentesting purposes.
 
 #### What is Graphiti?
 
-Graphiti asynchronously extracts structured knowledge from agent interactions and builds a graph of entities, relationships, evidence, and temporal context. PentAGI sends agent responses and tool executions to Graphiti and exposes the `graphiti_search` tool to enabled agents. Graphiti complements the primary pgvector memory; it does not replace it.
+Graphiti asynchronously extracts structured knowledge from agent interactions and builds a graph of entities, relationships, evidence, and temporal context. NEBO-HACKBOT sends agent responses and tool executions to Graphiti and exposes the `graphiti_search` tool to enabled agents. Graphiti complements the primary pgvector memory; it does not replace it.
 
 - **Semantic Memory**: Store and recall relationships between tools, targets, vulnerabilities, and techniques
 - **Contextual Understanding**: Track how different pentesting actions relate to each other over time
 - **Flow-Scoped Recall**: Reuse knowledge within the active flow without exposing data from other engagements by default
 - **Advanced Querying**: Search temporal context, relationships, successful tools, recent episodes, and entities by type
 
-When enabled, PentAGI captures agent responses, tool execution details, and flow/task/subtask context. Ingestion is asynchronous, so newly submitted events can take time to become searchable.
+When enabled, NEBO-HACKBOT captures agent responses, tool execution details, and flow/task/subtask context. Ingestion is asynchronous, so newly submitted events can take time to become searchable.
 
 #### Deployment Modes and Enabling
 
@@ -2717,11 +2717,11 @@ curl -O https://raw.githubusercontent.com/vxcontrol/pentagi/master/docker-compos
 docker compose -f docker-compose.yml -f docker-compose-graphiti.yml up -d
 ```
 
-The base stack must create the external `pentagi-network` before the Graphiti stack can start. The installer handles stack ordering automatically.
+The base stack must create the external `nebo-hackbot-network` before the Graphiti stack can start. The installer handles stack ordering automatically.
 
 For an external Graphiti deployment, set `GRAPHITI_ENABLED=true` and point `GRAPHITI_URL` to its API. Do not start `docker-compose-graphiti.yml`; configure providers, embeddings, the graph database, and ingest tuning on the external service itself.
 
-PentAGI enables its client only when both `GRAPHITI_ENABLED=true` and `GRAPHITI_URL` is non-empty. At startup it performs three health-check attempts with a two-second backoff. If they all fail, PentAGI logs a warning and continues with Graphiti disabled.
+NEBO-HACKBOT enables its client only when both `GRAPHITI_ENABLED=true` and `GRAPHITI_URL` is non-empty. At startup it performs three health-check attempts with a two-second backoff. If they all fail, NEBO-HACKBOT logs a warning and continues with Graphiti disabled.
 
 #### LLM Provider and Model Presets
 
@@ -2752,7 +2752,7 @@ GRAPHITI_CONFIG_DIR=llm_configs
 
 #### Graphiti Embedding Configuration
 
-By default, Graphiti uses the active LLM preset's credentials and its default OpenAI embedding model. To use PentAGI's shared embedding endpoint explicitly:
+By default, Graphiti uses the active LLM preset's credentials and its default OpenAI embedding model. To use NEBO-HACKBOT's shared embedding endpoint explicitly:
 
 ```bash
 GRAPHITI_SEPARATE_EMBEDDING=true
@@ -2761,7 +2761,7 @@ EMBEDDING_KEY=your_embedding_api_key
 EMBEDDING_MODEL=openai/text-embedding-3-large
 ```
 
-Graphiti's embedder is OpenAI-compatible. `EMBEDDING_PROVIDER` is used by PentAGI but is not passed to Graphiti, so a non-OpenAI-compatible embedding provider cannot be shared directly.
+Graphiti's embedder is OpenAI-compatible. `EMBEDDING_PROVIDER` is used by NEBO-HACKBOT but is not passed to Graphiti, so a non-OpenAI-compatible embedding provider cannot be shared directly.
 
 #### Ingestion and Extraction Tuning
 
@@ -2807,7 +2807,7 @@ These flags are passed as process environment variables by the bundled compose f
 
 #### Runtime, Logging, and Neo4j
 
-The values below are PentAGI's recommended `.env.example`/compose defaults, not the raw Graphiti image fallbacks. Running a freshly pulled image behind an old compose file can instead enable telemetry and global search, use one shared-pool worker with `PROCESS` as the unmatched ingest action, enable the full taxonomy, and disable combined extraction. Keep the image, compose file, `.env`, and presets in sync.
+The values below are NEBO-HACKBOT's recommended `.env.example`/compose defaults, not the raw Graphiti image fallbacks. Running a freshly pulled image behind an old compose file can instead enable telemetry and global search, use one shared-pool worker with `PROCESS` as the unmatched ingest action, enable the full taxonomy, and disable combined extraction. Keep the image, compose file, `.env`, and presets in sync.
 
 | Variable | Default | Guidance |
 | --- | --- | --- |
@@ -2857,7 +2857,7 @@ Common failures:
 
 - A missing API key or base URL for the selected preset, a missing YAML file, or a YAML `provider` mismatch causes the Graphiti container to fail startup validation.
 - `LLM_CLIENT_TYPE=openai` rejects local/custom model prefixes; use the `custom` preset for an OpenAI-compatible local server.
-- In `flowid` search mode, requests without a group ID are rejected. PentAGI supplies the flow-derived group ID automatically.
+- In `flowid` search mode, requests without a group ID are rejected. NEBO-HACKBOT supplies the flow-derived group ID automatically.
 - A bounded full queue returns HTTP 429. `/queue-size` reports waiting, processing, active-group, and dropped counters.
 - Invalid retry, timeout, or anchor ranges fail startup rather than being silently normalized.
 
@@ -2866,12 +2866,12 @@ Update `.env`, `docker-compose-graphiti.yml`, the Graphiti image, and the `graph
 #### Limitations and Security
 
 - Graphiti is beta and has no in-app graph explorer.
-- One provider preset is active for the entire Graphiti deployment; it is not selected per PentAGI agent or flow.
-- Graphiti extraction, reranking, and embeddings incur billing independently of the model used by the main PentAGI flow.
+- One provider preset is active for the entire Graphiti deployment; it is not selected per NEBO-HACKBOT agent or flow.
+- Graphiti extraction, reranking, and embeddings incur billing independently of the model used by the main NEBO-HACKBOT flow.
 - Search is flow-scoped by default. Cross-flow reuse requires an explicit global-search design and must not be enabled on shared or multi-tenant deployments without additional isolation.
 - The Graphiti HTTP API has no authentication layer in the bundled service. The stock compose binds it and Neo4j to `127.0.0.1`; secure external deployments with network controls and authentication at a trusted reverse proxy.
 - Agent and tool output may contain credentials and exploitation evidence. Protect Neo4j data, logs, dead letters, diagnostics, and backups accordingly.
-- If Graphiti is unavailable, PentAGI continues with its primary memory and vector store after logging the failed startup health check. Set `GRAPHITI_ENABLED=false` to disable the integration explicitly.
+- If Graphiti is unavailable, NEBO-HACKBOT continues with its primary memory and vector store after logging the failed startup health check. Set `GRAPHITI_ENABLED=false` to disable the integration explicitly.
 
 ### GitHub and Google OAuth Integration
 
@@ -2882,7 +2882,7 @@ OAuth integration with GitHub and Google allows users to authenticate using thei
 - Access to user profile information from GitHub/Google accounts
 - Seamless integration with existing development workflows
 
-PentAGI uses `PUBLIC_URL` as the public origin/base URL for OAuth redirects. In the default deployment, both GitHub and Google callbacks are handled by:
+NEBO-HACKBOT uses `PUBLIC_URL` as the public origin/base URL for OAuth redirects. In the default deployment, both GitHub and Google callbacks are handled by:
 
 ```text
 ${PUBLIC_URL}/api/v1/auth/login-callback
@@ -2896,7 +2896,7 @@ For GitHub OAuth:
 4. Add the client credentials to your `.env` file:
 
 ```bash
-PUBLIC_URL=https://pentagi.example.com
+PUBLIC_URL=https://nebo-hackbot.example.com
 OAUTH_GITHUB_CLIENT_ID=your_github_client_id
 OAUTH_GITHUB_CLIENT_SECRET=your_github_client_secret
 ```
@@ -2908,24 +2908,24 @@ For Google OAuth:
 3. Add the client credentials to your `.env` file:
 
 ```bash
-PUBLIC_URL=https://pentagi.example.com
+PUBLIC_URL=https://nebo-hackbot.example.com
 OAUTH_GOOGLE_CLIENT_ID=your_google_client_id
 OAUTH_GOOGLE_CLIENT_SECRET=your_google_client_secret
 ```
 
-Make sure `PUBLIC_URL` matches the externally accessible HTTPS address of your PentAGI instance and does not include the callback path itself. If the URL configured in the OAuth provider does not exactly match the callback generated by PentAGI, the provider will reject the login attempt with a redirect URI mismatch error.
+Make sure `PUBLIC_URL` matches the externally accessible HTTPS address of your NEBO-HACKBOT instance and does not include the callback path itself. If the URL configured in the OAuth provider does not exactly match the callback generated by NEBO-HACKBOT, the provider will reject the login attempt with a redirect URI mismatch error.
 
 ### Docker Image Configuration
 
-PentAGI allows you to configure Docker image selection for executing various tasks. The system automatically chooses the most appropriate image based on the task type, but you can constrain this selection by specifying your preferred images:
+NEBO-HACKBOT allows you to configure Docker image selection for executing various tasks. The system automatically chooses the most appropriate image based on the task type, but you can constrain this selection by specifying your preferred images:
 
 | Variable                           | Default                | Description                                                 |
 | ---------------------------------- | ---------------------- | ----------------------------------------------------------- |
-| `PENTAGI_IMAGE`                    | `vxcontrol/pentagi:latest` | Docker image used for the main PentAGI application service |
+| `NEBO_HACKBOT_IMAGE`                    | `vxcontrol/pentagi:latest` | Docker image used for the main NEBO-HACKBOT application service |
 | `DOCKER_DEFAULT_IMAGE`             | `debian:latest`        | Default Docker image for general tasks and ambiguous cases  |
 | `DOCKER_DEFAULT_IMAGE_FOR_PENTEST` | `vxcontrol/kali-linux` | Default Docker image for security/penetration testing tasks |
 
-`PENTAGI_IMAGE` changes the image used by the main `pentagi` service in `docker-compose.yml`. The `DOCKER_DEFAULT_IMAGE` and `DOCKER_DEFAULT_IMAGE_FOR_PENTEST` variables only affect automatic worker image selection for task execution inside PentAGI. They do not rewrite the rest of the Compose stack, so services such as `pgvector`, `scraper`, and the optional `graphiti` stack still use the image references defined in the compose files.
+`NEBO_HACKBOT_IMAGE` changes the image used by the main `pentagi` service in `docker-compose.yml`. The `DOCKER_DEFAULT_IMAGE` and `DOCKER_DEFAULT_IMAGE_FOR_PENTEST` variables only affect automatic worker image selection for task execution inside NEBO-HACKBOT. They do not rewrite the rest of the Compose stack, so services such as `pgvector`, `scraper`, and the optional `graphiti` stack still use the image references defined in the compose files.
 
 When `DOCKER_DEFAULT_IMAGE` and `DOCKER_DEFAULT_IMAGE_FOR_PENTEST` are set, AI agents will be limited to the image choices you specify. This is particularly useful for:
 
@@ -2936,8 +2936,8 @@ When `DOCKER_DEFAULT_IMAGE` and `DOCKER_DEFAULT_IMAGE_FOR_PENTEST` are set, AI a
 Configuration examples:
 
 ```bash
-# Using a custom PentAGI application image
-PENTAGI_IMAGE=registry.example.com/security/pentagi:latest
+# Using a custom NEBO-HACKBOT application image
+NEBO_HACKBOT_IMAGE=registry.example.com/security/nebo-hackbot:latest
 
 # Using a custom image for general tasks
 DOCKER_DEFAULT_IMAGE=mycompany/custom-debian:latest
@@ -2953,12 +2953,12 @@ For an advanced OpenVAS/GVM experiment that uses a custom pentest image, see [Op
 
 #### Restricted Networks, Docker Mirrors, and Proxies
 
-If your environment cannot reach Docker Hub (`docker.io`) directly, changing PentAGI environment variables is usually not enough to fix image download failures. PentAGI still relies on Docker's own registry access for Compose-managed services, and the installer network checks also validate Docker Hub reachability.
+If your environment cannot reach Docker Hub (`docker.io`) directly, changing NEBO-HACKBOT environment variables is usually not enough to fix image download failures. NEBO-HACKBOT still relies on Docker's own registry access for Compose-managed services, and the installer network checks also validate Docker Hub reachability.
 
 For restricted networks:
 
 1. Confirm that the host can resolve and reach `docker.io`.
-2. If your environment requires an outbound proxy for PentAGI or installer HTTP traffic, set the `PROXY_URL` environment variable. To route Docker image pulls through a proxy, configure the Docker daemon or Docker Desktop proxy separately — Docker does not use PentAGI's `PROXY_URL` for registry access.
+2. If your environment requires an outbound proxy for NEBO-HACKBOT or installer HTTP traffic, set the `PROXY_URL` environment variable. To route Docker image pulls through a proxy, configure the Docker daemon or Docker Desktop proxy separately — Docker does not use NEBO-HACKBOT's `PROXY_URL` for registry access.
 3. If Docker Hub is blocked or heavily rate-limited, configure an organization-approved registry mirror or registry proxy before running the installer or `docker compose up`.
 4. Restart Docker after changing the daemon configuration, then rerun the installer checks or Compose startup.
 
@@ -2976,15 +2976,15 @@ See the official Docker documentation for [registry mirrors](https://docs.docker
 
 #### Troubleshooting: "failed to select primary docker image via llm call"
 
-A flow that fails immediately with `failed to select primary docker image via llm call` usually indicates a problem with the configured LLM backend, not with Docker or the image registry. Older PentAGI versions reported the same failure as `failed to get primary docker image`, which led users to debug Docker even though the registry was healthy.
+A flow that fails immediately with `failed to select primary docker image via llm call` usually indicates a problem with the configured LLM backend, not with Docker or the image registry. Older NEBO-HACKBOT versions reported the same failure as `failed to get primary docker image`, which led users to debug Docker even though the registry was healthy.
 
-When a flow starts, PentAGI makes its first LLM call to choose the primary Docker image for the task. This image-selection call runs through the `simple` agent type, so a failure here points at the model assigned to that agent type rather than at Docker. A message such as `API returned unexpected status code: 502` or `404` in this context is returned by the LLM backend, not by Docker Hub.
+When a flow starts, NEBO-HACKBOT makes its first LLM call to choose the primary Docker image for the task. This image-selection call runs through the `simple` agent type, so a failure here points at the model assigned to that agent type rather than at Docker. A message such as `API returned unexpected status code: 502` or `404` in this context is returned by the LLM backend, not by Docker Hub.
 
 This is distinct from the registry reachability problems described above: if Docker pulls succeed and the Compose stack starts, but flow creation still fails at image selection, investigate the LLM backend rather than Docker.
 
 To diagnose:
 
-1. Check PentAGI logs first: `docker logs pentagi`.
+1. Check NEBO-HACKBOT logs first: `docker logs nebo-hackbot`.
 2. Check the logs of your configured LLM backend (the server behind your provider or `LLM_SERVER_URL`).
 3. Verify that the base URL, API key, and model name in [Custom LLM Provider Configuration](#custom-llm-provider-configuration) are correct and reachable from the container. If you assign different models per agent type, check the model used by the `simple` agent type, since image selection runs through it.
 4. For custom, OpenAI-compatible, vLLM, or SGLang backends, confirm that the model supports tool calling (function calling) and that the matching tool-call parser is enabled. A missing or mismatched tool-call parser is a known cause of this failure.
@@ -3027,7 +3027,7 @@ after that you can see the generated files in `pkg/graph` folder.
 For generating ORM methods (database package) from sqlc configuration
 
 ```bash
-docker run --rm -v $(pwd):/src -w /src --network pentagi-network -e DATABASE_URL="{URL}" sqlc/sqlc:1.27.0 generate -f sqlc/sqlc.yml
+docker run --rm -v $(pwd):/src -w /src --network nebo-hackbot-network -e DATABASE_URL="{URL}" sqlc/sqlc:1.27.0 generate -f sqlc/sqlc.yml
 ```
 
 For generating Langfuse SDK from OpenAPI specification
@@ -3069,7 +3069,7 @@ For generating SSL certificates you need to run `pnpm run ssl:generate` which us
 #### Backend Configuration
 
 Edit the configuration for `backend` in `.vscode/launch.json` file:
-- `DATABASE_URL` - PostgreSQL database URL (eg. `postgres://postgres:postgres@localhost:5432/pentagidb?sslmode=disable`)
+- `DATABASE_URL` - PostgreSQL database URL (eg. `postgres://postgres:postgres@localhost:5432/nebohackbotdb?sslmode=disable`)
 - `DOCKER_HOST` - Docker SDK API (eg. for macOS `DOCKER_HOST=unix:///Users/<my-user>/Library/Containers/com.docker.docker/Data/docker.raw.sock`) [more info](https://stackoverflow.com/a/62757128/5922857)
 
 Optional:
@@ -3078,7 +3078,7 @@ Optional:
 
 ##### PostgreSQL / pgvector connection pool sizing
 
-PentAGI opens two independent connection pools to the same Postgres instance:
+NEBO-HACKBOT opens two independent connection pools to the same Postgres instance:
 
 | Pool | Env var | Default | Used by |
 |---|---|---|---|
@@ -3101,7 +3101,7 @@ Available for client connections  = 97
   Free buffer                                 = 56  (≈ 58 %)
 ```
 
-The defaults are sized for **10 parallel flows** with concurrent API requests. If you run more flows or deploy multiple PentAGI instances against the same Postgres, raise `max_connections` via the `command` override in `docker-compose.yml` and increase the pool sizes proportionally:
+The defaults are sized for **10 parallel flows** with concurrent API requests. If you run more flows or deploy multiple NEBO-HACKBOT instances against the same Postgres, raise `max_connections` via the `command` override in `docker-compose.yml` and increase the pool sizes proportionally:
 
 ```yaml
 pgvector:
@@ -3133,7 +3133,7 @@ docker exec pgvector sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c \
 
 ##### External PostgreSQL and schema handling
 
-`DATABASE_URL` may point at any PostgreSQL instance, not only the bundled `pgvector` container. Two extra knobs apply when — and only when — `TENANT_ID` is set, because that is when PentAGI creates its own schema and rewrites the connection's `search_path`:
+`DATABASE_URL` may point at any PostgreSQL instance, not only the bundled `pgvector` container. Two extra knobs apply when — and only when — `TENANT_ID` is set, because that is when NEBO-HACKBOT creates its own schema and rewrites the connection's `search_path`:
 
 | Env var | Default | Purpose |
 |---|---|---|
@@ -3143,7 +3143,7 @@ docker exec pgvector sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c \
 **Supabase (cloud or self-hosted)** needs both of them considered, and is the reason they exist:
 
 - Supabase installs its bundled extensions into an `extensions` schema instead of `public`, so set `DATABASE_EXTENSIONS_SCHEMA=extensions`. Without it, startup aborts with an error naming the schema where `vector` was actually found — no need to move a provider-managed extension with `ALTER EXTENSION`.
-- Supabase's pooler (Supavisor) does not reliably forward a bare `search_path` connection parameter. Prefer a **direct** PostgreSQL connection: self-hosted, expose the `db` service port and bypass the `supavisor` service; cloud, use the "Direct connection" string (or the IPv4 add-on on IPv4-only networks). If the pooler cannot be bypassed, use its session mode and try `DATABASE_SEARCH_PATH_VIA_OPTIONS=true` — PentAGI verifies the effective schema on boot and refuses to start if it did not take effect, so a silent cross-tenant data mix-up is not possible.
+- Supabase's pooler (Supavisor) does not reliably forward a bare `search_path` connection parameter. Prefer a **direct** PostgreSQL connection: self-hosted, expose the `db` service port and bypass the `supavisor` service; cloud, use the "Direct connection" string (or the IPv4 add-on on IPv4-only networks). If the pooler cannot be bypassed, use its session mode and try `DATABASE_SEARCH_PATH_VIA_OPTIONS=true` — NEBO-HACKBOT verifies the effective schema on boot and refuses to start if it did not take effect, so a silent cross-tenant data mix-up is not possible.
 
 Both settings are managed by the installer under *Server Settings*, next to `TENANT_ID` — see [Running Several Instances](#running-several-instances-tenant_id) for that scenario, and [Multi-Instance Deployment](backend/docs/config.md#multi-instance-deployment-tenant_id) for the full matrix, including the PgBouncer recipe (`pool_mode = session`, `ignore_startup_parameters`, per-tenant `connect_query`).
 
@@ -3177,7 +3177,7 @@ Open your browser and visit the web app URL.
 
 ## Testing LLM Agents
 
-PentAGI includes a powerful utility called `ctester` for testing and validating LLM agent capabilities. This tool helps ensure your LLM provider configurations work correctly with different agent types, allowing you to optimize model selection for each specific agent role.
+NEBO-HACKBOT includes a powerful utility called `ctester` for testing and validating LLM agent capabilities. This tool helps ensure your LLM provider configurations work correctly with different agent types, allowing you to optimize model selection for each specific agent role.
 
 The utility features parallel testing of multiple agents, detailed reporting, and flexible configuration options.
 
@@ -3219,19 +3219,19 @@ If you prefer to use the pre-built Docker image without setting up a development
 
 ```bash
 # Using Docker to test with default environment
-docker run --rm -v $(pwd)/.env:/opt/pentagi/.env vxcontrol/pentagi /opt/pentagi/bin/ctester -verbose
+docker run --rm -v $(pwd)/.env:/opt/nebo-hackbot/.env vxcontrol/pentagi /opt/nebo-hackbot/bin/ctester -verbose
 
 # Test with your custom provider configuration
 docker run --rm \
-  -v $(pwd)/.env:/opt/pentagi/.env \
-  -v $(pwd)/my-config.yml:/opt/pentagi/config.yml \
-  vxcontrol/pentagi /opt/pentagi/bin/ctester -config /opt/pentagi/config.yml -agents simple,primary_agent,coder -verbose
+  -v $(pwd)/.env:/opt/nebo-hackbot/.env \
+  -v $(pwd)/my-config.yml:/opt/nebo-hackbot/config.yml \
+  vxcontrol/pentagi /opt/nebo-hackbot/bin/ctester -config /opt/nebo-hackbot/config.yml -agents simple,primary_agent,coder -verbose
 
 # Generate a detailed report
 docker run --rm \
-  -v $(pwd)/.env:/opt/pentagi/.env \
-  -v $(pwd):/opt/pentagi/output \
-  vxcontrol/pentagi /opt/pentagi/bin/ctester -report /opt/pentagi/output/report.md
+  -v $(pwd)/.env:/opt/nebo-hackbot/.env \
+  -v $(pwd):/opt/nebo-hackbot/output \
+  vxcontrol/pentagi /opt/nebo-hackbot/bin/ctester -report /opt/nebo-hackbot/output/report.md
 ```
 
 #### Using Pre-configured Providers
@@ -3240,61 +3240,61 @@ The Docker image comes with built-in support for major providers (OpenAI, Anthro
 
 ```bash
 # Test with OpenRouter configuration
-docker exec -it pentagi /opt/pentagi/bin/ctester -config /opt/pentagi/conf/openrouter.provider.yml
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -config /opt/nebo-hackbot/conf/openrouter.provider.yml
 
 # Test with OpenCode Go plan configuration
-docker exec -it pentagi /opt/pentagi/bin/ctester -config /opt/pentagi/conf/opencode.provider.yml
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -config /opt/nebo-hackbot/conf/opencode.provider.yml
 
 # Test with DeepInfra configuration
-docker exec -it pentagi /opt/pentagi/bin/ctester -config /opt/pentagi/conf/deepinfra.provider.yml
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -config /opt/nebo-hackbot/conf/deepinfra.provider.yml
 
 # Test with DeepSeek configuration
-docker exec -it pentagi /opt/pentagi/bin/ctester -provider deepseek
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -provider deepseek
 
 # Test with GLM configuration
-docker exec -it pentagi /opt/pentagi/bin/ctester -provider glm
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -provider glm
 
 # Test with Kimi configuration
-docker exec -it pentagi /opt/pentagi/bin/ctester -provider kimi
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -provider kimi
 
 # Test with Qwen configuration
-docker exec -it pentagi /opt/pentagi/bin/ctester -provider qwen
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -provider qwen
 
 # Test with DeepSeek configuration file for custom provider
-docker exec -it pentagi /opt/pentagi/bin/ctester -config /opt/pentagi/conf/deepseek.provider.yml
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -config /opt/nebo-hackbot/conf/deepseek.provider.yml
 
 # Test with Moonshot configuration file for custom provider
-docker exec -it pentagi /opt/pentagi/bin/ctester -config /opt/pentagi/conf/moonshot.provider.yml
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -config /opt/nebo-hackbot/conf/moonshot.provider.yml
 
 # Test with Novita configuration
-docker exec -it pentagi /opt/pentagi/bin/ctester -config /opt/pentagi/conf/novita.provider.yml
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -config /opt/nebo-hackbot/conf/novita.provider.yml
 
 # Test with xAI configuration
-docker exec -it pentagi /opt/pentagi/bin/ctester -config /opt/pentagi/conf/xai.provider.yml
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -config /opt/nebo-hackbot/conf/xai.provider.yml
 
 # Test with OpenAI configuration
-docker exec -it pentagi /opt/pentagi/bin/ctester -type openai
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -type openai
 
 # Test with Anthropic configuration
-docker exec -it pentagi /opt/pentagi/bin/ctester -type anthropic
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -type anthropic
 
 # Test with Gemini configuration
-docker exec -it pentagi /opt/pentagi/bin/ctester -type gemini
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -type gemini
 
 # Test with AWS Bedrock configuration
-docker exec -it pentagi /opt/pentagi/bin/ctester -type bedrock
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -type bedrock
 
 # Test with Custom OpenAI configuration
-docker exec -it pentagi /opt/pentagi/bin/ctester -config /opt/pentagi/conf/custom-openai.provider.yml
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -config /opt/nebo-hackbot/conf/custom-openai.provider.yml
 
 # Test with Ollama configuration (local inference)
-docker exec -it pentagi /opt/pentagi/bin/ctester -config /opt/pentagi/conf/ollama-llama318b.provider.yml
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -config /opt/nebo-hackbot/conf/ollama-llama318b.provider.yml
 
 # Test with Ollama Qwen3 32B configuration (requires custom model creation)
-docker exec -it pentagi /opt/pentagi/bin/ctester -config /opt/pentagi/conf/ollama-qwen332b-fp16-tc.provider.yml
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -config /opt/nebo-hackbot/conf/ollama-qwen332b-fp16-tc.provider.yml
 
 # Test with Ollama QwQ 32B configuration (requires custom model creation and 71.3GB VRAM)
-docker exec -it pentagi /opt/pentagi/bin/ctester -config /opt/pentagi/conf/ollama-qwq32b-fp16-tc.provider.yml
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -config /opt/nebo-hackbot/conf/ollama-qwq32b-fp16-tc.provider.yml
 ```
 
 To use these configurations, your `.env` file only needs to contain:
@@ -3303,7 +3303,7 @@ To use these configurations, your `.env` file only needs to contain:
 LLM_SERVER_URL=https://openrouter.ai/api/v1      # or https://api.deepinfra.com/v1/openai or https://api.openai.com/v1 or https://opencode.ai/zen/go/v1 or https://api.novita.ai/openai or https://api.atlascloud.ai/v1 or https://api.orcarouter.ai/v1 or https://api.x.ai/v1
 LLM_SERVER_KEY=your_api_key
 LLM_SERVER_MODEL=                                # Leave empty, as models are specified in the config
-LLM_SERVER_CONFIG_PATH=/opt/pentagi/conf/openrouter.provider.yml  # or deepinfra.provider.ymll or opencode.provider.ymll or custom-openai.provider.yml or novita.provider.yml or atlas.provider.yml or orcarouter.provider.yml or xai.provider.yml
+LLM_SERVER_CONFIG_PATH=/opt/nebo-hackbot/conf/openrouter.provider.yml  # or deepinfra.provider.ymll or opencode.provider.ymll or custom-openai.provider.yml or novita.provider.yml or atlas.provider.yml or orcarouter.provider.yml or xai.provider.yml
 LLM_SERVER_PROVIDER=                             # Provider name for LiteLLM proxy (e.g., openrouter, deepseek, moonshot, novita, opencode, orcarouter, xai)
 LLM_SERVER_LEGACY_REASONING=false                # Controls reasoning format, for OpenAI must be true (default: false)
 LLM_SERVER_PRESERVE_REASONING=false              # Preserve reasoning content in multi-turn conversations (required by Moonshot, default: false)
@@ -3363,7 +3363,7 @@ QWEN_PROVIDER=                                   # Optional: LiteLLM prefix (e.g
 # For Ollama (local inference) use variables above
 OLLAMA_SERVER_URL=http://localhost:11434
 OLLAMA_SERVER_MODEL=llama3.1:8b-instruct-q8_0
-OLLAMA_SERVER_CONFIG_PATH=/opt/pentagi/conf/ollama-llama318b.provider.yml
+OLLAMA_SERVER_CONFIG_PATH=/opt/nebo-hackbot/conf/ollama-llama318b.provider.yml
 OLLAMA_SERVER_PULL_MODELS_ENABLED=false
 OLLAMA_SERVER_LOAD_MODELS_ENABLED=false
 ```
@@ -3378,7 +3378,7 @@ To use OpenAI with unverified organization accounts, configure your `.env` file 
 LLM_SERVER_URL=https://api.openai.com/v1
 LLM_SERVER_KEY=your_openai_api_key
 LLM_SERVER_MODEL=                                # Leave empty, models are specified in config
-LLM_SERVER_CONFIG_PATH=/opt/pentagi/conf/custom-openai.provider.yml
+LLM_SERVER_CONFIG_PATH=/opt/nebo-hackbot/conf/custom-openai.provider.yml
 LLM_SERVER_LEGACY_REASONING=true                 # Required for OpenAI reasoning format
 ```
 
@@ -3388,7 +3388,7 @@ You can test this configuration using:
 
 ```bash
 # Test with custom OpenAI configuration for unverified accounts
-docker exec -it pentagi /opt/pentagi/bin/ctester -config /opt/pentagi/conf/custom-openai.provider.yml
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -config /opt/nebo-hackbot/conf/custom-openai.provider.yml
 ```
 
 > [!NOTE]
@@ -3402,13 +3402,13 @@ When using LiteLLM proxy to access various LLM providers, model names are prefix
 # Direct access to Moonshot API
 LLM_SERVER_URL=https://api.moonshot.ai/v1
 LLM_SERVER_KEY=your_moonshot_api_key
-LLM_SERVER_CONFIG_PATH=/opt/pentagi/conf/moonshot.provider.yml
+LLM_SERVER_CONFIG_PATH=/opt/nebo-hackbot/conf/moonshot.provider.yml
 LLM_SERVER_PROVIDER=                             # Empty for direct access
 
 # Access via LiteLLM proxy
 LLM_SERVER_URL=http://litellm-proxy:4000
 LLM_SERVER_KEY=your_litellm_api_key
-LLM_SERVER_CONFIG_PATH=/opt/pentagi/conf/moonshot.provider.yml
+LLM_SERVER_CONFIG_PATH=/opt/nebo-hackbot/conf/moonshot.provider.yml
 LLM_SERVER_PROVIDER=moonshot                     # Provider prefix for LiteLLM
 ```
 
@@ -3451,20 +3451,20 @@ This approach allows you to:
 
 #### Running Tests in a Production Environment
 
-If you already have a running PentAGI container and want to test the current configuration:
+If you already have a running NEBO-HACKBOT container and want to test the current configuration:
 
 ```bash
 # Run ctester in an existing container using current environment variables
-docker exec -it pentagi /opt/pentagi/bin/ctester -verbose
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -verbose
 
 # Test specific agent types with deterministic ordering
-docker exec -it pentagi /opt/pentagi/bin/ctester -agents simple,primary_agent,pentester -groups basic,knowledge -verbose
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -agents simple,primary_agent,pentester -groups basic,knowledge -verbose
 
 # Generate a report file inside the container
-docker exec -it pentagi /opt/pentagi/bin/ctester -report /opt/pentagi/data/agent-test-report.md
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ctester -report /opt/nebo-hackbot/data/agent-test-report.md
 
 # Access the report from the host
-docker cp pentagi:/opt/pentagi/data/agent-test-report.md ./
+docker cp nebo-hackbot:/opt/nebo-hackbot/data/agent-test-report.md ./
 ```
 
 ### Command-line Options
@@ -3544,11 +3544,11 @@ This tool helps ensure your AI agents are using the most effective models for th
 
 ## Embedding Configuration and Testing
 
-PentAGI uses vector embeddings for semantic search, knowledge storage, and memory management. The system supports multiple embedding providers that can be configured according to your needs and preferences.
+NEBO-HACKBOT uses vector embeddings for semantic search, knowledge storage, and memory management. The system supports multiple embedding providers that can be configured according to your needs and preferences.
 
 ### Supported Embedding Providers
 
-PentAGI supports the following embedding providers:
+NEBO-HACKBOT supports the following embedding providers:
 
 - **OpenAI** (default): Uses OpenAI's text embedding models
 - **Ollama**: Local embedding model through Ollama
@@ -3584,7 +3584,7 @@ TERMINAL_TOOL_TIMEOUT=1200      # Default timeout in seconds for terminal tool c
 
 # SSL/TLS Certificate Configuration (for external communication with LLM backends and tool servers)
 EXTERNAL_SSL_CA_PATH=           # Path to custom CA certificate file (PEM format) inside the container
-                                # Must point to /opt/pentagi/ssl/ directory (e.g., /opt/pentagi/ssl/ca-bundle.pem)
+                                # Must point to /opt/nebo-hackbot/ssl/ directory (e.g., /opt/nebo-hackbot/ssl/ca-bundle.pem)
 EXTERNAL_SSL_INSECURE=false     # Skip certificate verification (use only for testing)
 ```
 
@@ -3597,28 +3597,28 @@ If you see this error: `tls: failed to verify certificate: x509: certificate sig
 
 **Step 2:** Place the file in the SSL directory on your host machine:
 ```bash
-# Default location (if PENTAGI_SSL_DIR is not set)
-cp ca-bundle.pem ./pentagi-ssl/
+# Default location (if NEBO_HACKBOT_SSL_DIR is not set)
+cp ca-bundle.pem ./nebo-hackbot-ssl/
 
-# Or custom location (if using PENTAGI_SSL_DIR in docker-compose.yml)
+# Or custom location (if using NEBO_HACKBOT_SSL_DIR in docker-compose.yml)
 cp ca-bundle.pem /path/to/your/ssl/dir/
 ```
 
 **Step 3:** Set the path in `.env` file (path must be inside the container):
 ```bash
-# The volume pentagi-ssl is mounted to /opt/pentagi/ssl inside the container
-EXTERNAL_SSL_CA_PATH=/opt/pentagi/ssl/ca-bundle.pem
+# The volume nebo-hackbot-ssl is mounted to /opt/nebo-hackbot/ssl inside the container
+EXTERNAL_SSL_CA_PATH=/opt/nebo-hackbot/ssl/ca-bundle.pem
 EXTERNAL_SSL_INSECURE=false
 ```
 
-**Step 4:** Restart PentAGI:
+**Step 4:** Restart NEBO-HACKBOT:
 ```bash
-docker compose restart pentagi
+docker compose restart nebo-hackbot
 ```
 
 **Notes:**
-- The `pentagi-ssl` volume is mounted to `/opt/pentagi/ssl` inside the container
-- You can change host directory using `PENTAGI_SSL_DIR` variable in docker-compose.yml
+- The `nebo-hackbot-ssl` volume is mounted to `/opt/nebo-hackbot/ssl` inside the container
+- You can change host directory using `NEBO_HACKBOT_SSL_DIR` variable in docker-compose.yml
 - File supports multiple certificates and intermediate CAs in one PEM file
 - Use `EXTERNAL_SSL_INSECURE=true` only for testing (not recommended for production)
 
@@ -3652,7 +3652,7 @@ If you change your embedding provider, you should flush and reindex your entire 
 
 ### Embedding Tester Utility (etester)
 
-PentAGI includes a specialized `etester` utility for testing, managing, and debugging embedding functionality. This tool is essential for diagnosing and resolving issues related to vector embeddings and knowledge storage.
+NEBO-HACKBOT includes a specialized `etester` utility for testing, managing, and debugging embedding functionality. This tool is essential for diagnosing and resolving issues related to vector embeddings and knowledge storage.
 
 <details>
 <summary><b>Etester Commands</b> (click to expand)</summary>
@@ -3677,14 +3677,14 @@ go run cmd/etester/main.go search -query "How to install PostgreSQL" -limit 5
 
 ### Using Docker
 
-If you're running PentAGI in Docker, you can use etester from within the container:
+If you're running NEBO-HACKBOT in Docker, you can use etester from within the container:
 
 ```bash
 # Test embedding provider
-docker exec -it pentagi /opt/pentagi/bin/etester test
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/etester test
 
 # Show detailed database information
-docker exec -it pentagi /opt/pentagi/bin/etester info -verbose
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/etester info -verbose
 ```
 
 ### Advanced Search Options
@@ -3693,13 +3693,13 @@ The `search` command supports various filters to narrow down results:
 
 ```bash
 # Filter by document type
-docker exec -it pentagi /opt/pentagi/bin/etester search -query "Security vulnerability" -doc_type guide -threshold 0.8
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/etester search -query "Security vulnerability" -doc_type guide -threshold 0.8
 
 # Filter by flow ID
-docker exec -it pentagi /opt/pentagi/bin/etester search -query "Code examples" -doc_type code -flow_id 42
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/etester search -query "Code examples" -doc_type code -flow_id 42
 
 # All available search options
-docker exec -it pentagi /opt/pentagi/bin/etester search -help
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/etester search -help
 ```
 
 Available search parameters:
@@ -3713,7 +3713,7 @@ Available search parameters:
 
 ### Memory Lifecycle Across Flows
 
-PentAGI stores several kinds of vector documents, and they serve different purposes:
+NEBO-HACKBOT stores several kinds of vector documents, and they serve different purposes:
 
 - `memory` captures flow-specific execution history such as tool results and agent observations
 - `guide`, `answer`, and `code` are intended for reusable knowledge that can help future runs
@@ -3722,7 +3722,7 @@ If you want to inspect what happened in one engagement, search the vector store 
 
 For example, if a target has recurring setup notes, authentication quirks, or target-specific testing methodology, instruct the agent to save that information as a `guide` and search for it at the beginning of the next engagement. This is the safest current workflow when you want a new flow to start with reusable context.
 
-Flow deletion removes the flow from normal queries through PentAGI's soft-delete mechanism, so reusable knowledge should be treated as a separate concern from per-flow execution history. If you enable the optional Graphiti knowledge graph described earlier in this README, treat its current search context as scoped to the active flow or engagement unless you explicitly build a separate cross-flow reuse workflow.
+Flow deletion removes the flow from normal queries through NEBO-HACKBOT's soft-delete mechanism, so reusable knowledge should be treated as a separate concern from per-flow execution history. If you enable the optional Graphiti knowledge graph described earlier in this README, treat its current search context as scoped to the active flow or engagement unless you explicitly build a separate cross-flow reuse workflow.
 
 ### Common Troubleshooting Scenarios
 
@@ -3735,12 +3735,12 @@ Flow deletion removes the flow from normal queries through PentAGI's soft-delete
 
 ### Troubleshooting: Flow Stalls or Hangs Without Progress
 
-If a flow starts but then appears to wait indefinitely with no subtasks progressing, a common cause is an embedding provider that is misconfigured or unreachable. PentAGI uses the embedding provider to store and search vector memory while a flow runs, so embedding calls that fail or hang can leave a flow waiting instead of advancing.
+If a flow starts but then appears to wait indefinitely with no subtasks progressing, a common cause is an embedding provider that is misconfigured or unreachable. NEBO-HACKBOT uses the embedding provider to store and search vector memory while a flow runs, so embedding calls that fail or hang can leave a flow waiting instead of advancing.
 
-**1. Check the container logs first.** Embedding errors surface in the PentAGI logs:
+**1. Check the container logs first.** Embedding errors surface in the NEBO-HACKBOT logs:
 
 ```bash
-docker logs pentagi
+docker logs nebo-hackbot
 ```
 
 Look for embedding-related failures such as authentication errors (401/403), wrong-model or not-found errors (404), connection timeouts, or TLS certificate errors. These point at the embedding provider configuration rather than at the flow itself.
@@ -3748,7 +3748,7 @@ Look for embedding-related failures such as authentication errors (401/403), wro
 **2. Validate the provider with etester.** The [Embedding Tester Utility (etester)](#embedding-tester-utility-etester) checks both the embedding provider and the database connection without starting a flow:
 
 ```bash
-docker exec -it pentagi /opt/pentagi/bin/etester test -verbose
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/etester test -verbose
 ```
 
 A failing `test` confirms the problem is in the embedding configuration rather than in the flow.
@@ -3757,19 +3757,19 @@ A failing `test` confirms the problem is in the embedding configuration rather t
 
 - `EMBEDDING_PROVIDER` is one of the supported providers (default `openai`).
 - `EMBEDDING_MODEL` is a valid model name for that provider.
-- `EMBEDDING_URL` and `EMBEDDING_KEY` are correct for the provider. If both are left empty, PentAGI falls back to the matching LLM provider settings (for example `OPEN_AI_KEY` and `OPEN_AI_SERVER_URL` when `EMBEDDING_PROVIDER=openai`), so a missing or wrong key there can break embeddings too.
-- The endpoint is reachable from inside the container. If outbound calls go through a proxy, confirm `PROXY_URL` is set; if calls hang rather than fail quickly, `HTTP_CLIENT_TIMEOUT` controls how long PentAGI waits on the provider before giving up.
+- `EMBEDDING_URL` and `EMBEDDING_KEY` are correct for the provider. If both are left empty, NEBO-HACKBOT falls back to the matching LLM provider settings (for example `OPEN_AI_KEY` and `OPEN_AI_SERVER_URL` when `EMBEDDING_PROVIDER=openai`), so a missing or wrong key there can break embeddings too.
+- The endpoint is reachable from inside the container. If outbound calls go through a proxy, confirm `PROXY_URL` is set; if calls hang rather than fail quickly, `HTTP_CLIENT_TIMEOUT` controls how long NEBO-HACKBOT waits on the provider before giving up.
 
 > **Changing provider?** If you switch embedding providers after data has already been indexed, run `flush` or `reindex` with etester so old and new vectors are not mixed. See [Why Consistent Embedding Providers Matter](#why-consistent-embedding-providers-matter) above.
 
 ## Function Testing with ftester
 
-PentAGI includes a versatile utility called `ftester` for debugging, testing, and developing specific functions and AI agent behaviors. While `ctester` focuses on testing LLM model capabilities, `ftester` allows you to directly invoke individual system functions and AI agent components with precise control over execution context.
+NEBO-HACKBOT includes a versatile utility called `ftester` for debugging, testing, and developing specific functions and AI agent behaviors. While `ctester` focuses on testing LLM model capabilities, `ftester` allows you to directly invoke individual system functions and AI agent components with precise control over execution context.
 
 ### Key Features
 
 - **Direct Function Access**: Test individual functions without running the entire system
-- **Mock Mode**: Test functions without a live PentAGI deployment using built-in mocks
+- **Mock Mode**: Test functions without a live NEBO-HACKBOT deployment using built-in mocks
 - **Interactive Input**: Fill function arguments interactively for exploratory testing
 - **Detailed Output**: Color-coded terminal output with formatted responses and errors
 - **Context-Aware Testing**: Debug AI agents within the context of specific flows, tasks, and subtasks
@@ -3850,7 +3850,7 @@ go run cmd/ftester/main.go browser
 <details>
 <summary><b>Debugging Flow Context</b> (click to expand)</summary>
 
-The `describe` function provides detailed information about tasks and subtasks within a flow. This is particularly useful for diagnosing issues when PentAGI encounters problems or gets stuck.
+The `describe` function provides detailed information about tasks and subtasks within a flow. This is particularly useful for diagnosing issues when NEBO-HACKBOT encounters problems or gets stuck.
 
 ```bash
 # List all flows in the system
@@ -3918,7 +3918,7 @@ JSON and Markdown responses are automatically formatted for readability.
 
 ### Debugging Stuck AI Flows
 
-When PentAGI gets stuck in a flow:
+When NEBO-HACKBOT gets stuck in a flow:
 
 1. Pause the flow through the UI
 2. Use `describe` to identify the current task and subtask
@@ -3960,15 +3960,15 @@ go run cmd/ftester/main.go -flow 123 terminal -command "env | grep -i proxy" -me
 <details>
 <summary><b>Docker Container Usage</b> (click to expand)</summary>
 
-If you have PentAGI running in Docker, you can use ftester from within the container:
+If you have NEBO-HACKBOT running in Docker, you can use ftester from within the container:
 
 ```bash
-# Run ftester inside the running PentAGI container
-docker exec -it pentagi /opt/pentagi/bin/ftester [arguments]
+# Run ftester inside the running NEBO-HACKBOT container
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ftester [arguments]
 
 # Examples:
-docker exec -it pentagi /opt/pentagi/bin/ftester -flow 123 describe
-docker exec -it pentagi /opt/pentagi/bin/ftester -flow 123 terminal -command "ps aux" -message "List processes"
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ftester -flow 123 describe
+docker exec -it nebo-hackbot /opt/nebo-hackbot/bin/ftester -flow 123 terminal -command "ps aux" -message "List processes"
 ```
 
 This is particularly useful for production deployments where you don't have a local development environment.
@@ -4015,7 +4015,7 @@ When refining prompts for offensive security work, give the agent a clear method
 4. Validate findings with reproducible evidence before escalating to deeper exploitation
 5. Finish with report-ready notes that capture impact, prerequisites, and next steps
 
-For PentAGI-specific prompt guidance, see [`backend/docs/prompt_engineering_pentagi.md`](backend/docs/prompt_engineering_pentagi.md). For a practical starting point, reuse and adapt [`examples/prompts/base_web_pentest.md`](examples/prompts/base_web_pentest.md) to match the target application, technology stack, and engagement scope.
+For NEBO-HACKBOT-specific prompt guidance, see [`backend/docs/prompt_engineering_pentagi.md`](backend/docs/prompt_engineering_pentagi.md). For a practical starting point, reuse and adapt [`examples/prompts/base_web_pentest.md`](examples/prompts/base_web_pentest.md) to match the target application, technology stack, and engagement scope.
 
 ## Building
 
@@ -4033,21 +4033,21 @@ source ./scripts/version.sh
 docker build \
   --build-arg PACKAGE_VER=$PACKAGE_VER \
   --build-arg PACKAGE_REV=$PACKAGE_REV \
-  -t pentagi:$PACKAGE_VER .
+  -t nebo-hackbot:$PACKAGE_VER .
 
 # Multi-platform build
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
   --build-arg PACKAGE_VER=$PACKAGE_VER \
   --build-arg PACKAGE_REV=$PACKAGE_REV \
-  -t pentagi:$PACKAGE_VER .
+  -t nebo-hackbot:$PACKAGE_VER .
 
 # Build and push
 docker buildx build \
   --platform linux/amd64,linux/arm64 \
   --build-arg PACKAGE_VER=$PACKAGE_VER \
   --build-arg PACKAGE_REV=$PACKAGE_REV \
-  -t myregistry/pentagi:$PACKAGE_VER \
+  -t myregistry/nebo-hackbot:$PACKAGE_VER \
   --push .
 ```
 
@@ -4061,14 +4061,14 @@ docker buildx build \
 docker build `
   --build-arg PACKAGE_VER=$env:PACKAGE_VER `
   --build-arg PACKAGE_REV=$env:PACKAGE_REV `
-  -t pentagi:$env:PACKAGE_VER .
+  -t nebo-hackbot:$env:PACKAGE_VER .
 
 # Multi-platform build
 docker buildx build `
   --platform linux/amd64,linux/arm64 `
   --build-arg PACKAGE_VER=$env:PACKAGE_VER `
   --build-arg PACKAGE_REV=$env:PACKAGE_REV `
-  -t pentagi:$env:PACKAGE_VER .
+  -t nebo-hackbot:$env:PACKAGE_VER .
 ```
 
 #### Quick build without version
@@ -4076,7 +4076,7 @@ docker buildx build `
 For development builds without version tracking:
 
 ```bash
-docker build -t pentagi:dev .
+docker build -t nebo-hackbot:dev .
 ```
 
 > [!NOTE]
@@ -4094,9 +4094,9 @@ This project is made possible thanks to the following research and developments:
 
 ## License
 
-**PentAGI** is licensed under the [MIT License](LICENSE).
+**NEBO-HACKBOT** is licensed under the [MIT License](LICENSE).
 
-Copyright (c) 2025 PentAGI Development Team
+Copyright (c) 2025 NEBO-HACKBOT Development Team
 
 ### Third-Party Dependencies
 

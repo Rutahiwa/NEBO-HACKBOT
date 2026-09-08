@@ -16,7 +16,7 @@ import (
 
 var (
 	InstallerVersion = version.GetBinaryVersion()
-	UserAgent        = "PentAGI-Installer/" + InstallerVersion
+	UserAgent        = "NEBO-HACKBOT-Installer/" + InstallerVersion
 )
 
 const (
@@ -26,8 +26,8 @@ const (
 	ObservabilityComposeFile     = "docker-compose-observability.yml"
 	ExampleCustomConfigLLMFile   = "example.custom.provider.yml"
 	ExampleOllamaConfigLLMFile   = "example.ollama.provider.yml"
-	PentagiScriptFile            = "/usr/local/bin/pentagi"
-	PentagiContainerName         = "pentagi"
+	PentagiScriptFile            = "/usr/local/bin/nebo-hackbot"
+	PentagiContainerName         = "nebo-hackbot"
 	GraphitiContainerName        = "graphiti"
 	Neo4jContainerName           = "neo4j"
 	LangfuseWorkerContainerName  = "langfuse-worker"
@@ -275,7 +275,7 @@ func (c *CheckResult) CanRemoveAll() bool { return c.CanFactoryReset() }
 // CanPurgeAll returns true when any compose stack is installed
 func (c *CheckResult) CanPurgeAll() bool { return c.CanFactoryReset() }
 
-// CanResetPassword returns true when PentAGI is running
+// CanResetPassword returns true when NEBO-HACKBOT is running
 func (c *CheckResult) CanResetPassword() bool { return c.PentagiRunning }
 
 // CanInstallAll returns true when main stack is not installed yet
@@ -408,7 +408,7 @@ func (h *defaultCheckHandler) GatherPentagiInfo(ctx context.Context, c *CheckRes
 		c.PentagiRunning = running
 
 		// check if pentagi-related volumes exist (indicates previous installation)
-		pentagiVolumes := []string{"pentagi-postgres-data", "pentagi-data", "pentagi-ssl", "scraper-ssl"}
+		pentagiVolumes := []string{"nebo-hackbot-postgres-data", "nebo-hackbot-data", "nebo-hackbot-ssl", "scraper-ssl"}
 		c.PentagiVolumesExist = checkVolumesExist(ctx, h.dockerClient, pentagiVolumes)
 	}
 
@@ -571,7 +571,7 @@ func (h *defaultCheckHandler) GatherUpdatesInfo(ctx context.Context, c *CheckRes
 		ObservabilityInstalled: c.ObservabilityInstalled,
 	}
 
-	// get PentAGI container image info
+	// get NEBO-HACKBOT container image info
 	if h.dockerClient != nil && c.PentagiInstalled {
 		if imageInfo := getContainerImageInfo(ctx, h.dockerClient, PentagiContainerName); imageInfo != nil {
 			request.PentagiImageName = &imageInfo.Name

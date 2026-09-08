@@ -1,13 +1,9 @@
 <question_reflector_context>
   <instruction>
-  Analyze the agent message below that was sent as unstructured text instead of a proper tool call.
+  The agent sent plain text instead of a tool call. This is a failure. Reply in one terse sentence telling it which tool to call. Do not explain or encourage.
 
-  Respond as the user who requested the task - direct, concise, and without formalities.
-  Answer any questions if present, then guide the agent to use the appropriate tool call format.
-
-  IMPORTANT: Clearly emphasize that the agent MUST use structured tool calls instead of plain text (completion mode) responses.
-  Explain that the system can only process properly formatted tool calls and that unstructured responses block the workflow.
-  Remind the agent that to finish the task, it must use one of the following tools:
+  IMPORTANT: The agent MUST use structured tool calls. Plain text blocks the workflow.
+  To finish the task, it must call one of:
   <barrier_tools>
     {{range .BarrierToolNames}}
     <tool>{{.}}</tool>

@@ -92,10 +92,10 @@ RUN mkdir -p /licenses/backend && \
 # Compile main application binary with embedded version metadata
 RUN go build -trimpath \
     -ldflags "\
-        -X pentagi/pkg/version.PackageName=pentagi \
+        -X pentagi/pkg/version.PackageName=nebo-hackbot \
         -X pentagi/pkg/version.PackageVer=${PACKAGE_VER} \
         -X pentagi/pkg/version.PackageRev=${PACKAGE_REV}" \
-    -o /pentagi ./cmd/pentagi
+    -o /nebo-hackbot ./cmd/pentagi
 
 # Build ctester utility
 RUN go build -trimpath \
@@ -128,79 +128,79 @@ FROM alpine:3.23.5
 
 # Establish non-privileged execution context with docker socket access
 RUN addgroup -g 998 docker && \
-    addgroup -S pentagi && \
-    adduser -S pentagi -G pentagi && \
-    addgroup pentagi docker
+    addgroup -S nebo-hackbot && \
+    adduser -S nebo-hackbot -G nebo-hackbot && \
+    addgroup nebo-hackbot docker
 
 # Install required packages
 RUN apk --no-cache add ca-certificates openssl openssh-keygen shadow
 
-ADD scripts/entrypoint.sh /opt/pentagi/bin/
+ADD scripts/entrypoint.sh /opt/nebo-hackbot/bin/
 
-RUN sed -i 's/\r//' /opt/pentagi/bin/entrypoint.sh && \
-    chmod +x /opt/pentagi/bin/entrypoint.sh
+RUN sed -i 's/\r//' /opt/nebo-hackbot/bin/entrypoint.sh && \
+    chmod +x /opt/nebo-hackbot/bin/entrypoint.sh
 
 RUN mkdir -p \
     /root/.ollama \
-    /opt/pentagi/bin \
-    /opt/pentagi/ssl \
-    /opt/pentagi/fe \
-    /opt/pentagi/logs \
-    /opt/pentagi/data \
-    /opt/pentagi/conf && \
+    /opt/nebo-hackbot/bin \
+    /opt/nebo-hackbot/ssl \
+    /opt/nebo-hackbot/fe \
+    /opt/nebo-hackbot/logs \
+    /opt/nebo-hackbot/data \
+    /opt/nebo-hackbot/conf && \
     chmod 777 /root/.ollama
 
-COPY --from=api-builder /pentagi /opt/pentagi/bin/pentagi
-COPY --from=api-builder /ctester /opt/pentagi/bin/ctester
-COPY --from=api-builder /ftester /opt/pentagi/bin/ftester
-COPY --from=api-builder /etester /opt/pentagi/bin/etester
-COPY --from=frontend-compiler /app/ui/dist /opt/pentagi/fe
-COPY --from=api-builder /licenses/backend /opt/pentagi/licenses/backend
-COPY --from=frontend-compiler /licenses/frontend /opt/pentagi/licenses/frontend
+COPY --from=api-builder /nebo-hackbot /opt/nebo-hackbot/bin/nebo-hackbot
+COPY --from=api-builder /ctester /opt/nebo-hackbot/bin/ctester
+COPY --from=api-builder /ftester /opt/nebo-hackbot/bin/ftester
+COPY --from=api-builder /etester /opt/nebo-hackbot/bin/etester
+COPY --from=frontend-compiler /app/ui/dist /opt/nebo-hackbot/fe
+COPY --from=api-builder /licenses/backend /opt/nebo-hackbot/licenses/backend
+COPY --from=frontend-compiler /licenses/frontend /opt/nebo-hackbot/licenses/frontend
 
 # Copy provider configuration files
-COPY examples/configs/atlas.provider.yml /opt/pentagi/conf/
-COPY examples/configs/azure-openai.provider.yml /opt/pentagi/conf/
-COPY examples/configs/bedrock-glm-flash.provider.yml /opt/pentagi/conf/
-COPY examples/configs/custom-openai.provider.yml /opt/pentagi/conf/
-COPY examples/configs/deepinfra.provider.yml /opt/pentagi/conf/
-COPY examples/configs/deepseek.provider.yml /opt/pentagi/conf/
-COPY examples/configs/hcnsec.provider.yml /opt/pentagi/conf/
-COPY examples/configs/moonshot.provider.yml /opt/pentagi/conf/
-COPY examples/configs/novita.provider.yml /opt/pentagi/conf/
-COPY examples/configs/nvidia-glm-5.1.provider.yml /opt/pentagi/conf/
-COPY examples/configs/ollama-cloud.provider.yml /opt/pentagi/conf/
-COPY examples/configs/ollama-llama318b-instruct.provider.yml /opt/pentagi/conf/
-COPY examples/configs/ollama-llama318b.provider.yml /opt/pentagi/conf/
-COPY examples/configs/ollama-qwen332b-fp16-tc.provider.yml /opt/pentagi/conf/
-COPY examples/configs/ollama-qwq32b-fp16-tc.provider.yml /opt/pentagi/conf/
-COPY examples/configs/opencode.provider.yml /opt/pentagi/conf/
-COPY examples/configs/openrouter.provider.yml /opt/pentagi/conf/
-COPY examples/configs/orcarouter.provider.yml /opt/pentagi/conf/
-COPY examples/configs/vllm-mixed.provider.yml /opt/pentagi/conf/
-COPY examples/configs/vllm-qwen3.5-27b-fp8-no-think.provider.yml /opt/pentagi/conf/
-COPY examples/configs/vllm-qwen3.5-27b-fp8.provider.yml /opt/pentagi/conf/
-COPY examples/configs/vllm-qwen3.6-27b-fp8-no-think.provider.yml /opt/pentagi/conf/
-COPY examples/configs/vllm-qwen3.6-27b-fp8.provider.yml /opt/pentagi/conf/
-COPY examples/configs/vllm-qwen3.6-35b-a3b-fp8-no-think.provider.yml /opt/pentagi/conf/
-COPY examples/configs/vllm-qwen3.6-35b-a3b-fp8.provider.yml /opt/pentagi/conf/
-COPY examples/configs/vllm-qwen332b-fp16.provider.yml /opt/pentagi/conf/
+COPY examples/configs/atlas.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/azure-openai.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/bedrock-glm-flash.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/custom-openai.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/deepinfra.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/deepseek.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/hcnsec.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/moonshot.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/novita.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/nvidia-glm-5.1.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/ollama-cloud.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/ollama-llama318b-instruct.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/ollama-llama318b.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/ollama-qwen332b-fp16-tc.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/ollama-qwq32b-fp16-tc.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/opencode.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/openrouter.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/orcarouter.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/vllm-mixed.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/vllm-qwen3.5-27b-fp8-no-think.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/vllm-qwen3.5-27b-fp8.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/vllm-qwen3.6-27b-fp8-no-think.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/vllm-qwen3.6-27b-fp8.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/vllm-qwen3.6-35b-a3b-fp8-no-think.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/vllm-qwen3.6-35b-a3b-fp8.provider.yml /opt/nebo-hackbot/conf/
+COPY examples/configs/vllm-qwen332b-fp16.provider.yml /opt/nebo-hackbot/conf/
 
-COPY LICENSE /opt/pentagi/LICENSE
-COPY NOTICE /opt/pentagi/NOTICE
-COPY EULA.md /opt/pentagi/EULA
-COPY EULA.md /opt/pentagi/fe/EULA.md
+COPY LICENSE /opt/nebo-hackbot/LICENSE
+COPY NOTICE /opt/nebo-hackbot/NOTICE
+COPY EULA.md /opt/nebo-hackbot/EULA
+COPY EULA.md /opt/nebo-hackbot/fe/EULA.md
 
-RUN chown -R pentagi:pentagi /opt/pentagi
+RUN chown -R nebo-hackbot:nebo-hackbot /opt/nebo-hackbot
 
-WORKDIR /opt/pentagi
+WORKDIR /opt/nebo-hackbot
 
-USER pentagi
+USER nebo-hackbot
 
-ENTRYPOINT ["/opt/pentagi/bin/entrypoint.sh", "/opt/pentagi/bin/pentagi"]
+ENTRYPOINT ["/opt/nebo-hackbot/bin/entrypoint.sh", "/opt/nebo-hackbot/bin/nebo-hackbot"]
 
 # Image Metadata
 LABEL org.opencontainers.image.source="https://github.com/vxcontrol/pentagi"
 LABEL org.opencontainers.image.description="Fully autonomous AI Agents system capable of performing complex penetration testing tasks"
-LABEL org.opencontainers.image.authors="PentAGI Development Team"
+LABEL org.opencontainers.image.authors="NEBO-HACKBOT Development Team"
 LABEL org.opencontainers.image.licenses="MIT License"

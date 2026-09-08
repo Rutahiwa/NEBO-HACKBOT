@@ -1,11 +1,11 @@
 # Tier-2 e2e stack. Runs beside a developer stack: use its own project name,
 # container names, network, and host ports —
 #
-#   docker build -t local/pentagi:e2e .
-#   PENTAGI_IMAGE=local/pentagi:e2e PENTAGI_LISTEN_PORT=8444 PGVECTOR_LISTEN_PORT=5433 \
-#     docker compose -p pentagi-e2e --env-file /dev/null \
+#   docker build -t local/nebo-hackbot:e2e .
+#   NEBO_HACKBOT_IMAGE=local/nebo-hackbot:e2e NEBO_HACKBOT_LISTEN_PORT=8444 PGVECTOR_LISTEN_PORT=5433 \
+#     docker compose -p nebo-hackbot-e2e --env-file /dev/null \
 #     -f docker-compose.yml -f docker-compose.e2e.yml \
-#     up -d --wait --wait-timeout 240 pentagi mock-llm
+#     up -d --wait --wait-timeout 240 nebo-hackbot mock-llm
 #
 # --env-file /dev/null is load-bearing: without it compose auto-loads the
 # developer's .env and the stack inherits live provider keys and DOCKER_HOST.
@@ -15,23 +15,23 @@
 # `name:`s, so leaving any un-overridden would join this stack to the
 # developer's live observability/langfuse networks.
 networks:
-  pentagi-network:
-    name: pentagi-e2e-network
+  nebo-hackbot-network:
+    name: nebo-hackbot-e2e-network
   observability-network:
-    name: pentagi-e2e-observability-network
+    name: nebo-hackbot-e2e-observability-network
   langfuse-network:
-    name: pentagi-e2e-langfuse-network
+    name: nebo-hackbot-e2e-langfuse-network
 
 services:
   mock-llm:
     image: node:24-alpine
-    container_name: pentagi-e2e-mock-llm
+    container_name: nebo-hackbot-e2e-mock-llm
     restart: unless-stopped
     command: ["node", "/app/server.mjs"]
     volumes:
       - ./frontend/e2e/mock-llm:/app:ro
     networks:
-      - pentagi-network
+      - nebo-hackbot-network
     # Keeps a crash-looping mock (restart would silently mask it) from ever
     # reading as a started dependency.
     healthcheck:
@@ -40,8 +40,8 @@ services:
       timeout: 5s
       retries: 20
 
-  pentagi:
-    container_name: pentagi-e2e
+  nebo-hackbot:
+    container_name: nebo-hackbot-e2e
     depends_on:
       pgvector:
         condition: service_healthy
@@ -69,4 +69,4 @@ services:
       start_period: 10s
 
   pgvector:
-    container_name: pentagi-e2e-pgvector
+    container_name: nebo-hackbot-e2e-pgvector

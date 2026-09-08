@@ -27,7 +27,7 @@ if ($currentCommit -and ($currentCommit -ne $tagCommit)) {
 
 # Print version information
 Write-Host "======================================"
-Write-Host "PentAGI Build Version"
+Write-Host "NEBO-HACKBOT Build Version"
 Write-Host "======================================"
 Write-Host "PACKAGE_VER: $env:PACKAGE_VER"
 if ($env:PACKAGE_REV) {

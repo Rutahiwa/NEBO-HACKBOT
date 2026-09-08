@@ -13,10 +13,10 @@ networks:
     driver: bridge
     external: true
     name: langfuse-network
-  pentagi-network:
+  nebo-hackbot-network:
     driver: bridge
     external: true
-    name: pentagi-network
+    name: nebo-hackbot-network
 
 services:
   langfuse-worker:
@@ -109,12 +109,12 @@ services:
       NEXTAUTH_SECRET: ${LANGFUSE_NEXTAUTH_SECRET:-mysecret}
       LANGFUSE_LOG_LEVEL: ${LANGFUSE_LOG_LEVEL:-info}
       LANGFUSE_INIT_ORG_ID: ${LANGFUSE_INIT_ORG_ID:-ocm47619l0000872mcd2dlbqwb}
-      LANGFUSE_INIT_ORG_NAME: ${LANGFUSE_INIT_ORG_NAME:-PentAGI Demo}
+      LANGFUSE_INIT_ORG_NAME: ${LANGFUSE_INIT_ORG_NAME:-NEBO-HACKBOT Demo}
       LANGFUSE_INIT_PROJECT_ID: ${LANGFUSE_INIT_PROJECT_ID:-cm47619l0000872mcd2dlbqwb}
-      LANGFUSE_INIT_PROJECT_NAME: ${LANGFUSE_INIT_PROJECT_NAME:-PentAGI}
+      LANGFUSE_INIT_PROJECT_NAME: ${LANGFUSE_INIT_PROJECT_NAME:-NEBO-HACKBOT}
       LANGFUSE_INIT_PROJECT_PUBLIC_KEY: ${LANGFUSE_INIT_PROJECT_PUBLIC_KEY:-pk-lf-5946031c-ae6c-4451-98d2-9882a59e1707} # change this to a random string
       LANGFUSE_INIT_PROJECT_SECRET_KEY: ${LANGFUSE_INIT_PROJECT_SECRET_KEY:-sk-lf-d9035680-89dd-4950-8688-7870720bf359} # change this to a random string
-      LANGFUSE_INIT_USER_EMAIL: ${LANGFUSE_INIT_USER_EMAIL:-admin@pentagi.com}
+      LANGFUSE_INIT_USER_EMAIL: ${LANGFUSE_INIT_USER_EMAIL:-admin@nebo-hackbot.local}
       LANGFUSE_INIT_USER_NAME: ${LANGFUSE_INIT_USER_NAME:-admin}
       LANGFUSE_INIT_USER_PASSWORD: ${LANGFUSE_INIT_USER_PASSWORD:-P3nTagIsD0d} # change this to a random password
       LANGFUSE_SDK_CI_SYNC_PROCESSING_ENABLED: ${LANGFUSE_SDK_CI_SYNC_PROCESSING_ENABLED:-false}
@@ -144,7 +144,7 @@ services:
         max-file: "7"
     networks:
       - langfuse-network
-      - pentagi-network
+      - nebo-hackbot-network
 
   clickhouse:
     image: clickhouse/clickhouse-server:24

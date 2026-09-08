@@ -15,10 +15,10 @@ networks:
     driver: bridge
     external: true
     name: langfuse-network
-  pentagi-network:
+  nebo-hackbot-network:
     driver: bridge
     external: true
-    name: pentagi-network
+    name: nebo-hackbot-network
 
 services:
   grafana:
@@ -129,7 +129,7 @@ services:
     networks:
       - observability-network
       - langfuse-network
-      - pentagi-network
+      - nebo-hackbot-network
 
   victoriametrics:
     image: victoriametrics/victoria-metrics:v1.108.1

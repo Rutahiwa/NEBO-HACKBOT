@@ -1,19 +1,19 @@
 volumes:
-  pentagi-data:
+  nebo-hackbot-data:
     driver: local
-  pentagi-ssl:
+  nebo-hackbot-ssl:
     driver: local
-  pentagi-ollama:
+  nebo-hackbot-ollama:
     driver: local
   scraper-ssl:
     driver: local
-  pentagi-postgres-data:
+  nebo-hackbot-postgres-data:
     driver: local
 
 networks:
-  pentagi-network:
+  nebo-hackbot-network:
     driver: bridge
-    name: pentagi-network
+    name: nebo-hackbot-network
   observability-network:
     driver: bridge
     name: observability-network
@@ -22,15 +22,15 @@ networks:
     name: langfuse-network
 
 services:
-  pentagi:
-    image: ${PENTAGI_IMAGE:-vxcontrol/pentagi:latest}
+  nebo-hackbot:
+    image: ${NEBO_HACKBOT_IMAGE:-nebo-hackbot:latest}
     restart: unless-stopped
-    container_name: pentagi
-    hostname: pentagi
+    container_name: nebo-hackbot
+    hostname: nebo-hackbot
     expose:
       - 8443/tcp
     ports:
-      - ${PENTAGI_LISTEN_IP:-127.0.0.1}:${PENTAGI_LISTEN_PORT:-8443}:8443
+      - ${NEBO_HACKBOT_LISTEN_IP:-127.0.0.1}:${NEBO_HACKBOT_LISTEN_PORT:-8443}:8443
     depends_on:
       pgvector:
         condition: service_healthy
@@ -146,7 +146,7 @@ services:
       - OAUTH_GOOGLE_CLIENT_SECRET=${OAUTH_GOOGLE_CLIENT_SECRET:-}
       - OAUTH_GITHUB_CLIENT_ID=${OAUTH_GITHUB_CLIENT_ID:-}
       - OAUTH_GITHUB_CLIENT_SECRET=${OAUTH_GITHUB_CLIENT_SECRET:-}
-      - DATABASE_URL=postgres://${PENTAGI_POSTGRES_USER:-postgres}:${PENTAGI_POSTGRES_PASSWORD:-postgres}@pgvector:5432/${PENTAGI_POSTGRES_DB:-pentagidb}?sslmode=disable
+      - DATABASE_URL=postgres://${NEBO_HACKBOT_POSTGRES_USER:-postgres}:${NEBO_HACKBOT_POSTGRES_PASSWORD:-postgres}@pgvector:5432/${NEBO_HACKBOT_POSTGRES_DB:-nebohackbotdb}?sslmode=disable
       - DATABASE_EXTENSIONS_SCHEMA=${DATABASE_EXTENSIONS_SCHEMA:-}
       - DATABASE_SEARCH_PATH_VIA_OPTIONS=${DATABASE_SEARCH_PATH_VIA_OPTIONS:-}
       - DATABASE_MAX_OPEN_CONNS=${DATABASE_MAX_OPEN_CONNS:-}
@@ -200,17 +200,17 @@ services:
         max-size: 50m
         max-file: "7"
     volumes:
-      - ${PENTAGI_DATA_DIR:-pentagi-data}:/opt/pentagi/data
-      - ${PENTAGI_SSL_DIR:-pentagi-ssl}:/opt/pentagi/ssl
-      - ${PENTAGI_OLLAMA_DIR:-pentagi-ollama}:/root/.ollama
-      - ${PENTAGI_DOCKER_SOCKET:-/var/run/docker.sock}:/var/run/docker.sock
-      - ${PENTAGI_LLM_SERVER_CONFIG_PATH:-./example.custom.provider.yml}:/opt/pentagi/conf/custom.provider.yml
-      - ${PENTAGI_OLLAMA_SERVER_CONFIG_PATH:-./example.ollama.provider.yml}:/opt/pentagi/conf/ollama.provider.yml
-      - ${PENTAGI_BEDROCK_CONFIG_PATH:-./example.bedrock.provider.yml}:/opt/pentagi/conf/bedrock.provider.yml
-      - ${PENTAGI_DOCKER_CERT_PATH:-./docker-ssl}:/opt/pentagi/docker/ssl
+      - ${NEBO_HACKBOT_DATA_DIR:-nebo-hackbot-data}:/opt/nebo-hackbot/data
+      - ${NEBO_HACKBOT_SSL_DIR:-nebo-hackbot-ssl}:/opt/nebo-hackbot/ssl
+      - ${NEBO_HACKBOT_OLLAMA_DIR:-nebo-hackbot-ollama}:/root/.ollama
+      - ${NEBO_HACKBOT_DOCKER_SOCKET:-/var/run/docker.sock}:/var/run/docker.sock
+      - ${NEBO_HACKBOT_LLM_SERVER_CONFIG_PATH:-./example.custom.provider.yml}:/opt/nebo-hackbot/conf/custom.provider.yml
+      - ${NEBO_HACKBOT_OLLAMA_SERVER_CONFIG_PATH:-./example.ollama.provider.yml}:/opt/nebo-hackbot/conf/ollama.provider.yml
+      - ${NEBO_HACKBOT_BEDROCK_CONFIG_PATH:-./example.bedrock.provider.yml}:/opt/nebo-hackbot/conf/bedrock.provider.yml
+      - ${NEBO_HACKBOT_DOCKER_CERT_PATH:-./docker-ssl}:/opt/nebo-hackbot/docker/ssl
     user: root:root # while using docker.sock
     networks:
-      - pentagi-network
+      - nebo-hackbot-network
       - observability-network
       - langfuse-network
 
@@ -224,23 +224,23 @@ services:
     ports:
       - ${PGVECTOR_LISTEN_IP:-127.0.0.1}:${PGVECTOR_LISTEN_PORT:-5432}:5432
     environment:
-      POSTGRES_USER: ${PENTAGI_POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${PENTAGI_POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${PENTAGI_POSTGRES_DB:-pentagidb}
+      POSTGRES_USER: ${NEBO_HACKBOT_POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${NEBO_HACKBOT_POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${NEBO_HACKBOT_POSTGRES_DB:-nebohackbotdb}
     logging:
       options:
         max-size: 50m
         max-file: "7"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${PENTAGI_POSTGRES_USER:-postgres}"]
+      test: ["CMD-SHELL", "pg_isready -U $${NEBO_HACKBOT_POSTGRES_USER:-postgres}"]
       interval: 3s
       timeout: 3s
       retries: 10
       start_period: 5s
     volumes:
-      - pentagi-postgres-data:/var/lib/postgresql/data
+      - nebo-hackbot-postgres-data:/var/lib/postgresql/data
     networks:
-      - pentagi-network
+      - nebo-hackbot-network
 
   pgexporter:
     image: quay.io/prometheuscommunity/postgres-exporter:v0.16.0
@@ -255,13 +255,13 @@ services:
     ports:
       - ${POSTGRES_EXPORTER_LISTEN_IP:-127.0.0.1}:${POSTGRES_EXPORTER_LISTEN_PORT:-9187}:9187
     environment:
-      - DATA_SOURCE_NAME=postgresql://${PENTAGI_POSTGRES_USER:-postgres}:${PENTAGI_POSTGRES_PASSWORD:-postgres}@pgvector:5432/${PENTAGI_POSTGRES_DB:-pentagidb}?sslmode=disable
+      - DATA_SOURCE_NAME=postgresql://${NEBO_HACKBOT_POSTGRES_USER:-postgres}:${NEBO_HACKBOT_POSTGRES_PASSWORD:-postgres}@pgvector:5432/${NEBO_HACKBOT_POSTGRES_DB:-nebohackbotdb}?sslmode=disable
     logging:
       options:
         max-size: 50m
         max-file: "7"
     networks:
-      - pentagi-network
+      - nebo-hackbot-network
 
   scraper:
     image: vxcontrol/scraper:latest
@@ -283,5 +283,5 @@ services:
     volumes:
       - scraper-ssl:/usr/src/app/ssl
     networks:
-      - pentagi-network
+      - nebo-hackbot-network
     shm_size: 2g

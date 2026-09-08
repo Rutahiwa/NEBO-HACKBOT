@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Generate license reports for PentAGI dependencies
+# Generate license reports for NEBO-HACKBOT dependencies
 #
 
 set -e

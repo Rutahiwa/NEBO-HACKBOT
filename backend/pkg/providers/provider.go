@@ -674,6 +674,12 @@ func (fp *flowProvider) PrepareAgentChain(ctx context.Context, taskID, subtaskID
 		"AdviceToolName":          tools.AdviceToolName,
 		"MemoristToolName":        tools.MemoristToolName,
 		"MaintenanceToolName":     tools.MaintenanceToolName,
+		"ReconToolName":           tools.ReconToolName,
+		"InjectionToolName":       tools.InjectionToolName,
+		"XSSToolName":             tools.XSSToolName,
+		"AuthToolName":            tools.AuthToolName,
+		"IDORToolName":            tools.IDORToolName,
+		"SSRFToolName":            tools.SSRFToolName,
 		"SummarizationToolName":   cast.SummarizationToolName,
 		"SummarizedContentPrefix": strings.ReplaceAll(csum.SummarizedContentPrefix, "\n", "\\n"),
 		"AskUserToolName":         tools.AskUserToolName,
@@ -766,6 +772,26 @@ func (fp *flowProvider) PerformAgentChain(ctx context.Context, taskID, subtaskID
 		return PerformResultError, fmt.Errorf("failed to get searcher handler: %w", err)
 	}
 
+	// Build specialist handlers -- errors are non-fatal; a nil handler means the
+	// specialist tool simply won't be registered in the primary executor.
+	specialistToolNames := []string{
+		tools.ReconToolName,
+		tools.InjectionToolName,
+		tools.XSSToolName,
+		tools.AuthToolName,
+		tools.IDORToolName,
+		tools.SSRFToolName,
+	}
+	specialistHandlers := make(map[string]tools.ExecutorHandler, len(specialistToolNames))
+	for _, stn := range specialistToolNames {
+		h, err := fp.GetSpecialistHandler(ctx, stn, &taskID, &subtaskID)
+		if err != nil {
+			logger.WithField("specialist", stn).WithError(err).Warn("failed to get specialist handler, skipping")
+			continue
+		}
+		specialistHandlers[stn] = h
+	}
+
 	subtask, err := fp.db.GetSubtask(ctx, subtaskID)
 	if err != nil {
 		logger.WithError(err).Error("failed to get subtask")
@@ -799,6 +825,12 @@ func (fp *flowProvider) PerformAgentChain(ctx context.Context, taskID, subtaskID
 		Memorist:  memorist,
 		Pentester: pentester,
 		Searcher:  searcher,
+		Recon:     specialistHandlers[tools.ReconToolName],
+		Injection: specialistHandlers[tools.InjectionToolName],
+		XSS:       specialistHandlers[tools.XSSToolName],
+		Auth:      specialistHandlers[tools.AuthToolName],
+		IDOR:      specialistHandlers[tools.IDORToolName],
+		SSRF:      specialistHandlers[tools.SSRFToolName],
 		Barrier: func(ctx context.Context, name string, args json.RawMessage) (string, error) {
 			loggerFunc := logger.WithContext(ctx).WithFields(logrus.Fields{
 				"name": name,

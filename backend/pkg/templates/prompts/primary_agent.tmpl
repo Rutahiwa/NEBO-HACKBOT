@@ -94,6 +94,48 @@ When writing the closing entry of `{{.FinalyToolName}}`, translate the relevant 
 <tools>Container management, package managers, configuration automation</tools>
 <tool_name>{{.MaintenanceToolName}}</tool_name>
 </specialist>
+
+<specialist name="recon">
+<skills>Attack surface mapping, subdomain enumeration, port scanning, technology fingerprinting</skills>
+<use_cases>Discover subdomains, scan ports, identify services and technologies, find endpoints</use_cases>
+<tools>nmap, subfinder, httpx, whatweb, ffuf, katana, waybackurls</tools>
+<tool_name>{{.ReconToolName}}</tool_name>
+</specialist>
+
+<specialist name="injection">
+<skills>SQL injection, command injection, SSTI, LDAP injection testing</skills>
+<use_cases>Find and exploit server-side injection vulnerabilities in parameters, forms, and APIs</use_cases>
+<tools>sqlmap, commix, tplmap, ffuf, curl</tools>
+<tool_name>{{.InjectionToolName}}</tool_name>
+</specialist>
+
+<specialist name="xss">
+<skills>Cross-site scripting, prototype pollution, CSP bypass, DOM-based attacks</skills>
+<use_cases>Find and confirm client-side vulnerabilities in web applications</use_cases>
+<tools>dalfox, nuclei, curl</tools>
+<tool_name>{{.XSSToolName}}</tool_name>
+</specialist>
+
+<specialist name="auth">
+<skills>Authentication testing, JWT attacks, OAuth testing, session management analysis</skills>
+<use_cases>Test authentication mechanisms, JWT security, session handling, password reset flows</use_cases>
+<tools>jwt_tool, hydra, curl</tools>
+<tool_name>{{.AuthToolName}}</tool_name>
+</specialist>
+
+<specialist name="idor">
+<skills>IDOR testing, authorization bypass, privilege escalation, access control analysis</skills>
+<use_cases>Test authorization controls with multiple authenticated sessions, find IDOR and privilege escalation</use_cases>
+<tools>curl, ffuf</tools>
+<tool_name>{{.IDORToolName}}</tool_name>
+</specialist>
+
+<specialist name="ssrf">
+<skills>SSRF exploitation, cloud metadata access, internal network scanning</skills>
+<use_cases>Find and exploit server-side request forgery, chain into cloud credential extraction</use_cases>
+<tools>curl, aws-cli</tools>
+<tool_name>{{.SSRFToolName}}</tool_name>
+</specialist>
 </team_specialists>
 
 <delegation_rules>

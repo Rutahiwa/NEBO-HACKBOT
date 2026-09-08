@@ -230,16 +230,22 @@ type FlowManagerHandlers struct {
 }
 
 type PrimaryExecutorConfig struct {
-	TaskID     int64
-	SubtaskID  int64
-	Barrier    ExecutorHandler
-	Adviser    ExecutorHandler
-	Coder      ExecutorHandler
-	Installer  ExecutorHandler
-	Memorist   ExecutorHandler
-	Pentester  ExecutorHandler
-	Searcher   ExecutorHandler
-	Summarizer SummarizeHandler
+	TaskID      int64
+	SubtaskID   int64
+	Barrier     ExecutorHandler
+	Adviser     ExecutorHandler
+	Coder       ExecutorHandler
+	Installer   ExecutorHandler
+	Memorist    ExecutorHandler
+	Pentester   ExecutorHandler
+	Searcher    ExecutorHandler
+	Recon       ExecutorHandler
+	Injection   ExecutorHandler
+	XSS         ExecutorHandler
+	Auth        ExecutorHandler
+	IDOR        ExecutorHandler
+	SSRF        ExecutorHandler
+	Summarizer  SummarizeHandler
 }
 
 type InstallerExecutorConfig struct {
@@ -273,6 +279,22 @@ type PentesterExecutorConfig struct {
 	Searcher   ExecutorHandler
 	HackResult ExecutorHandler
 	Summarizer SummarizeHandler
+}
+
+// SpecialistExecutorConfig is a generic config for specialist agents (recon, injection, xss, auth, idor, ssrf).
+// They share the same tool set as the pentester but use their own delegation and result tool names.
+type SpecialistExecutorConfig struct {
+	ToolName      string // the delegation tool name (e.g., "recon")
+	ResultToolName string // the barrier tool (e.g., "recon_result")
+	TaskID        *int64
+	SubtaskID     *int64
+	Adviser       ExecutorHandler
+	Coder         ExecutorHandler
+	Installer     ExecutorHandler
+	Memorist      ExecutorHandler
+	Searcher      ExecutorHandler
+	ResultHandler ExecutorHandler
+	Summarizer    SummarizeHandler
 }
 
 type SearcherExecutorConfig struct {
@@ -341,6 +363,7 @@ type FlowToolsExecutor interface {
 	GetInstallerExecutor(cfg InstallerExecutorConfig) (ContextToolsExecutor, error)
 	GetCoderExecutor(cfg CoderExecutorConfig) (ContextToolsExecutor, error)
 	GetPentesterExecutor(cfg PentesterExecutorConfig) (ContextToolsExecutor, error)
+	GetSpecialistExecutor(cfg SpecialistExecutorConfig) (ContextToolsExecutor, error)
 	GetSearcherExecutor(cfg SearcherExecutorConfig) (ContextToolsExecutor, error)
 	GetGeneratorExecutor(cfg GeneratorExecutorConfig) (ContextToolsExecutor, error)
 	GetRefinerExecutor(cfg RefinerExecutorConfig) (ContextToolsExecutor, error)
@@ -1060,6 +1083,25 @@ func (fte *flowToolsExecutor) GetPrimaryExecutor(cfg PrimaryExecutorConfig) (Con
 		summarizer: cfg.Summarizer,
 	}
 
+	// Register specialist agents if handlers are provided
+	specialistTools := []struct {
+		toolName string
+		handler  ExecutorHandler
+	}{
+		{ReconToolName, cfg.Recon},
+		{InjectionToolName, cfg.Injection},
+		{XSSToolName, cfg.XSS},
+		{AuthToolName, cfg.Auth},
+		{IDORToolName, cfg.IDOR},
+		{SSRFToolName, cfg.SSRF},
+	}
+	for _, st := range specialistTools {
+		if st.handler != nil {
+			ce.definitions = append(ce.definitions, registryDefinitions[st.toolName])
+			ce.handlers[st.toolName] = st.handler
+		}
+	}
+
 	if fte.cfg.AskUser {
 		ce.definitions = append(ce.definitions, registryDefinitions[AskUserToolName])
 		ce.handlers[AskUserToolName] = cfg.Barrier
@@ -1367,6 +1409,144 @@ func (fte *flowToolsExecutor) GetPentesterExecutor(cfg PentesterExecutorConfig) 
 		},
 		barriers: map[string]struct{}{
 			HackResultToolName: {},
+		},
+		summarizer: cfg.Summarizer,
+	}
+
+	browser := NewBrowserTool(
+		fte.flowID,
+		cfg.TaskID,
+		cfg.SubtaskID,
+		fte.cfg.DataDir,
+		fte.cfg.ScraperPrivateURL,
+		fte.cfg.ScraperPublicURL,
+		fte.scp,
+	)
+	if browser.IsAvailable() {
+		ce.definitions = append(ce.definitions, registryDefinitions[BrowserToolName])
+		ce.handlers[BrowserToolName] = browser.Handle
+	}
+
+	guide := NewGuideTool(
+		fte.userID,
+		fte.flowID,
+		cfg.TaskID,
+		cfg.SubtaskID,
+		fte.replacer,
+		fte.store,
+		fte.embedder,
+		fte.db,
+		fte.cfg.EmbeddingMaxTextBytes,
+		fte.vslp,
+		fte.knp,
+	)
+	if guide.IsAvailable() {
+		ce.definitions = append(ce.definitions, registryDefinitions[StoreGuideToolName])
+		ce.definitions = append(ce.definitions, registryDefinitions[SearchGuideToolName])
+		ce.handlers[StoreGuideToolName] = guide.Handle
+		ce.handlers[SearchGuideToolName] = guide.Handle
+	}
+
+	graphitiSearch := NewGraphitiSearchTool(
+		fte.flowID,
+		cfg.TaskID,
+		cfg.SubtaskID,
+		fte.cfg.GroupID(fte.flowID),
+		fte.graphitiClient,
+	)
+	if graphitiSearch.IsAvailable() {
+		ce.definitions = append(ce.definitions, registryDefinitions[GraphitiSearchToolName])
+		ce.handlers[GraphitiSearchToolName] = graphitiSearch.Handle
+	}
+
+	webSearch := buildWebSearch(fte, cfg.TaskID, cfg.SubtaskID, cfg.Summarizer)
+	if webSearch.IsAvailable() {
+		ce.definitions = append(ce.definitions, registryDefinitions[WebSearchToolName])
+		ce.handlers[WebSearchToolName] = webSearch.Handle
+	}
+
+	return ce, nil
+}
+
+func (fte *flowToolsExecutor) GetSpecialistExecutor(cfg SpecialistExecutorConfig) (ContextToolsExecutor, error) {
+	if cfg.ResultHandler == nil {
+		return nil, fmt.Errorf("result handler is required for specialist %s", cfg.ToolName)
+	}
+
+	if cfg.Adviser == nil {
+		return nil, fmt.Errorf("adviser handler is required")
+	}
+
+	if cfg.Coder == nil {
+		return nil, fmt.Errorf("coder handler is required")
+	}
+
+	if cfg.Installer == nil {
+		return nil, fmt.Errorf("installer handler is required")
+	}
+
+	if cfg.Memorist == nil {
+		return nil, fmt.Errorf("memorist handler is required")
+	}
+
+	if cfg.Searcher == nil {
+		return nil, fmt.Errorf("searcher handler is required")
+	}
+
+	resultDef, ok := registryDefinitions[cfg.ResultToolName]
+	if !ok {
+		return nil, fmt.Errorf("result tool definition not found: %s", cfg.ResultToolName)
+	}
+
+	container, err := fte.db.GetFlowPrimaryContainer(context.Background(), fte.flowID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get container %d: %w", fte.flowID, err)
+	}
+
+	term := NewTerminalTool(
+		fte.flowID,
+		cfg.TaskID,
+		cfg.SubtaskID,
+		container.ID,
+		container.LocalID.String,
+		fte.cfg.TenantPrefix(),
+		fte.docker,
+		fte.tlp,
+		time.Duration(fte.cfg.TerminalToolTimeout)*time.Second,
+	)
+
+	ce := &customExecutor{
+		userID:    fte.userID,
+		flowID:    fte.flowID,
+		taskID:    cfg.TaskID,
+		subtaskID: cfg.SubtaskID,
+		mlp:       fte.mlp,
+		tclp:      fte.tclp,
+		vslp:      fte.vslp,
+		db:        fte.db,
+		store:     fte.store,
+		definitions: []llms.FunctionDefinition{
+			resultDef,
+			registryDefinitions[AdviceToolName],
+			registryDefinitions[CoderToolName],
+			registryDefinitions[MaintenanceToolName],
+			registryDefinitions[MemoristToolName],
+			registryDefinitions[SearchToolName],
+			registryDefinitions[TerminalToolName],
+			registryDefinitions[FileToolName],
+		},
+		handlers: map[string]ExecutorHandler{
+			cfg.ResultToolName:  cfg.ResultHandler,
+			AdviceToolName:      cfg.Adviser,
+			CoderToolName:       cfg.Coder,
+			MaintenanceToolName: cfg.Installer,
+			MemoristToolName:    cfg.Memorist,
+			SearchToolName:      cfg.Searcher,
+			TerminalToolName:    term.Handle,
+			FileToolName:        term.Handle,
+		},
+		barriers: map[string]struct{}{
+			cfg.ResultToolName: {},
 		},
 		summarizer: cfg.Summarizer,
 	}

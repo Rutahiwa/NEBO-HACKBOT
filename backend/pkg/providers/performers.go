@@ -689,6 +689,104 @@ func (fp *flowProvider) performPentester(
 	return hackResult.Result, nil
 }
 
+func (fp *flowProvider) performSpecialist(
+	ctx context.Context,
+	taskID, subtaskID *int64,
+	optAgentType pconfig.ProviderOptionsType,
+	msgChainType database.MsgchainType,
+	toolName, resultToolName string,
+	systemTmpl, userTmpl, question string,
+) (string, error) {
+	var specialistResult tools.SpecialistResult
+
+	adviser, err := fp.GetAskAdviceHandler(ctx, taskID, subtaskID)
+	if err != nil {
+		return "", fmt.Errorf("failed to get adviser handler: %w", err)
+	}
+
+	coder, err := fp.GetCoderHandler(ctx, taskID, subtaskID)
+	if err != nil {
+		return "", fmt.Errorf("failed to get coder handler: %w", err)
+	}
+
+	installer, err := fp.GetInstallerHandler(ctx, taskID, subtaskID)
+	if err != nil {
+		return "", fmt.Errorf("failed to get installer handler: %w", err)
+	}
+
+	memorist, err := fp.GetMemoristHandler(ctx, taskID, subtaskID)
+	if err != nil {
+		return "", fmt.Errorf("failed to get memorist handler: %w", err)
+	}
+
+	searcher, err := fp.GetSubtaskSearcherHandler(ctx, taskID, subtaskID)
+	if err != nil {
+		return "", fmt.Errorf("failed to get searcher handler: %w", err)
+	}
+
+	ctx = tools.PutAgentContext(ctx, msgChainType)
+	cfg := tools.SpecialistExecutorConfig{
+		ToolName:       toolName,
+		ResultToolName: resultToolName,
+		TaskID:         taskID,
+		SubtaskID:      subtaskID,
+		Adviser:        adviser,
+		Coder:          coder,
+		Installer:      installer,
+		Memorist:       memorist,
+		Searcher:       searcher,
+		ResultHandler: func(ctx context.Context, name string, args json.RawMessage) (string, error) {
+			err := json.Unmarshal(args, &specialistResult)
+			if err != nil {
+				return "", fmt.Errorf("failed to unmarshal result: %w", err)
+			}
+			return toolName + " result successfully processed", nil
+		},
+		Summarizer: fp.GetSummarizeResultHandler(taskID, subtaskID),
+	}
+	executor, err := fp.executor.GetSpecialistExecutor(cfg)
+	if err != nil {
+		return "", fmt.Errorf("failed to get %s executor: %w", toolName, err)
+	}
+
+	if fp.planning {
+		userTmplWithPlan, err := fp.performPlanner(
+			ctx, taskID, subtaskID, optAgentType, executor, userTmpl, question,
+		)
+		if err != nil {
+			logrus.WithContext(ctx).WithError(err).Warn("failed to get task plan from planner, proceeding without plan")
+		} else {
+			userTmpl = userTmplWithPlan
+		}
+	}
+
+	msgChainID, chain, err := fp.restoreChain(
+		ctx, taskID, subtaskID, optAgentType, msgChainType, systemTmpl, userTmpl,
+	)
+	if err != nil {
+		return "", fmt.Errorf("failed to restore chain: %w", err)
+	}
+
+	err = fp.performAgentChain(ctx, optAgentType, msgChainID, taskID, subtaskID, chain, executor, fp.summarizer)
+	if err != nil {
+		return "", fmt.Errorf("failed to get task %s result: %w", toolName, err)
+	}
+
+	if agentCtx, ok := tools.GetAgentContext(ctx); ok {
+		fp.putAgentLog(
+			ctx,
+			agentCtx.ParentAgentType,
+			agentCtx.CurrentAgentType,
+			question,
+			specialistResult.Result,
+			taskID,
+			subtaskID,
+		)
+	}
+
+	return specialistResult.Result, nil
+}
+
 func (fp *flowProvider) performSearcher(
 	ctx context.Context,
 	taskID, subtaskID *int64,

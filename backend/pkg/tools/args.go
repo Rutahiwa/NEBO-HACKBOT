@@ -269,6 +269,20 @@ type HackResult struct {
 	Message string `json:"message" jsonschema:"required,title=Hack result message" jsonschema_description:"Engagement-log entry — a 1-2 short sentence running commentary with the result and the path to reach the goal. Written in the engagement language declared by your system prompt."`
 }
 
+// SpecialistAction is the shared argument struct for all specialist delegation tools
+// (recon, injection, xss_test, auth_test, idor_test, ssrf_test).
+type SpecialistAction struct {
+	Question string `json:"question" jsonschema:"required" jsonschema_description:"Technical-channel payload — task description for the specialist to execute. Always written in English; never translated."`
+	Message  string `json:"message" jsonschema:"required,title=Specialist action message" jsonschema_description:"Engagement-log entry — a 1-2 short sentence running commentary summarizing the question and the task. Written in the engagement language declared by your system prompt."`
+}
+
+// SpecialistResult is the shared result struct for all specialist result barrier tools
+// (recon_result, injection_result, xss_result, auth_result, idor_result, ssrf_result).
+type SpecialistResult struct {
+	Result  string `json:"result" jsonschema:"required,title=Specialist result description" jsonschema_description:"Technical-channel payload — fully detailed specialist report returned to the calling agent. Always written in English; never translated."`
+	Message string `json:"message" jsonschema:"required,title=Specialist result message" jsonschema_description:"Engagement-log entry — a 1-2 short sentence running commentary with the result. Written in the engagement language declared by your system prompt."`
+}
+
 // FlowStatusDetail controls the level of detail returned by get_flow_status.
 // It is a type alias for String - see the FileOp comment above.
 type FlowStatusDetail = String

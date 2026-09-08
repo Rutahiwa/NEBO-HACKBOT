@@ -67,6 +67,18 @@ const (
 	PromptTypeQuestionExecutionMonitor PromptType = "question_execution_monitor" // question for adviser to monitor agent execution progress
 	PromptTypeQuestionTaskPlanner      PromptType = "question_task_planner"      // question for adviser to create execution plan for agent
 	PromptTypeTaskAssignmentWrapper    PromptType = "task_assignment_wrapper"    // wraps original request with execution plan for specialist agents
+	PromptTypeRecon                    PromptType = "recon"                      // reconnaissance specialist agent
+	PromptTypeQuestionRecon            PromptType = "question_recon"             // human input for recon specialist
+	PromptTypeInjection                PromptType = "injection"                  // injection specialist agent
+	PromptTypeQuestionInjection        PromptType = "question_injection"         // human input for injection specialist
+	PromptTypeXSS                      PromptType = "xss"                       // XSS/client-side specialist agent
+	PromptTypeQuestionXSS              PromptType = "question_xss"              // human input for XSS specialist
+	PromptTypeAuthTest                 PromptType = "auth"                       // auth/session specialist agent
+	PromptTypeQuestionAuth             PromptType = "question_auth"              // human input for auth specialist
+	PromptTypeIDOR                     PromptType = "idor"                       // IDOR/access control specialist agent
+	PromptTypeQuestionIDOR             PromptType = "question_idor"              // human input for IDOR specialist
+	PromptTypeSSRF                     PromptType = "ssrf"                       // SSRF/cloud specialist agent
+	PromptTypeQuestionSSRF             PromptType = "question_ssrf"              // human input for SSRF specialist
 )
 
 var PromptVariables = map[PromptType][]string{
@@ -78,6 +90,12 @@ var PromptVariables = map[PromptType][]string{
 		"AdviceToolName",
 		"MemoristToolName",
 		"MaintenanceToolName",
+		"ReconToolName",
+		"InjectionToolName",
+		"XSSToolName",
+		"AuthToolName",
+		"IDORToolName",
+		"SSRFToolName",
 		"SummarizationToolName",
 		"SummarizedContentPrefix",
 		"AskUserToolName",
@@ -439,6 +457,156 @@ var PromptVariables = map[PromptType][]string{
 		"OriginalRequest",
 		"ExecutionPlan",
 	},
+	PromptTypeRecon: {
+		"ResultToolName",
+		"SearchGuideToolName",
+		"StoreGuideToolName",
+		"GraphitiEnabled",
+		"GraphitiSearchToolName",
+		"SearchToolName",
+		"CoderToolName",
+		"AdviceToolName",
+		"MemoristToolName",
+		"MaintenanceToolName",
+		"SummarizationToolName",
+		"SummarizedContentPrefix",
+		"DockerImage",
+		"Cwd",
+		"ContainerPorts",
+		"ExecutionContext",
+		"Lang",
+		"CurrentTime",
+		"ToolPlaceholder",
+		"UserFiles",
+	},
+	PromptTypeQuestionRecon: {
+		"Question",
+	},
+	PromptTypeInjection: {
+		"ResultToolName",
+		"SearchGuideToolName",
+		"StoreGuideToolName",
+		"GraphitiEnabled",
+		"GraphitiSearchToolName",
+		"SearchToolName",
+		"CoderToolName",
+		"AdviceToolName",
+		"MemoristToolName",
+		"MaintenanceToolName",
+		"SummarizationToolName",
+		"SummarizedContentPrefix",
+		"DockerImage",
+		"Cwd",
+		"ContainerPorts",
+		"ExecutionContext",
+		"Lang",
+		"CurrentTime",
+		"ToolPlaceholder",
+		"UserFiles",
+	},
+	PromptTypeQuestionInjection: {
+		"Question",
+	},
+	PromptTypeXSS: {
+		"ResultToolName",
+		"SearchGuideToolName",
+		"StoreGuideToolName",
+		"GraphitiEnabled",
+		"GraphitiSearchToolName",
+		"SearchToolName",
+		"CoderToolName",
+		"AdviceToolName",
+		"MemoristToolName",
+		"MaintenanceToolName",
+		"SummarizationToolName",
+		"SummarizedContentPrefix",
+		"DockerImage",
+		"Cwd",
+		"ContainerPorts",
+		"ExecutionContext",
+		"Lang",
+		"CurrentTime",
+		"ToolPlaceholder",
+		"UserFiles",
+	},
+	PromptTypeQuestionXSS: {
+		"Question",
+	},
+	PromptTypeAuthTest: {
+		"ResultToolName",
+		"SearchGuideToolName",
+		"StoreGuideToolName",
+		"GraphitiEnabled",
+		"GraphitiSearchToolName",
+		"SearchToolName",
+		"CoderToolName",
+		"AdviceToolName",
+		"MemoristToolName",
+		"MaintenanceToolName",
+		"SummarizationToolName",
+		"SummarizedContentPrefix",
+		"DockerImage",
+		"Cwd",
+		"ContainerPorts",
+		"ExecutionContext",
+		"Lang",
+		"CurrentTime",
+		"ToolPlaceholder",
+		"UserFiles",
+	},
+	PromptTypeQuestionAuth: {
+		"Question",
+	},
+	PromptTypeIDOR: {
+		"ResultToolName",
+		"SearchGuideToolName",
+		"StoreGuideToolName",
+		"GraphitiEnabled",
+		"GraphitiSearchToolName",
+		"SearchToolName",
+		"CoderToolName",
+		"AdviceToolName",
+		"MemoristToolName",
+		"MaintenanceToolName",
+		"SummarizationToolName",
+		"SummarizedContentPrefix",
+		"DockerImage",
+		"Cwd",
+		"ContainerPorts",
+		"ExecutionContext",
+		"Lang",
+		"CurrentTime",
+		"ToolPlaceholder",
+		"UserFiles",
+	},
+	PromptTypeQuestionIDOR: {
+		"Question",
+	},
+	PromptTypeSSRF: {
+		"ResultToolName",
+		"SearchGuideToolName",
+		"StoreGuideToolName",
+		"GraphitiEnabled",
+		"GraphitiSearchToolName",
+		"SearchToolName",
+		"CoderToolName",
+		"AdviceToolName",
+		"MemoristToolName",
+		"MaintenanceToolName",
+		"SummarizationToolName",
+		"SummarizedContentPrefix",
+		"DockerImage",
+		"Cwd",
+		"ContainerPorts",
+		"ExecutionContext",
+		"Lang",
+		"CurrentTime",
+		"ToolPlaceholder",
+		"UserFiles",
+	},
+	PromptTypeQuestionSSRF: {
+		"Question",
+	},
 }
 
 type Prompt struct {
@@ -460,6 +628,12 @@ type AgentsPrompts struct {
 	PrimaryAgent  AgentPrompt
 	Assistant     AgentPrompt
 	Pentester     AgentPrompts
+	Recon         AgentPrompts
+	Injection     AgentPrompts
+	XSS           AgentPrompts
+	Auth          AgentPrompts
+	IDOR          AgentPrompts
+	SSRF          AgentPrompts
 	Coder         AgentPrompts
 	Installer     AgentPrompts
 	Searcher      AgentPrompts
@@ -530,6 +704,30 @@ func GetDefaultPrompts() (*DefaultPrompts, error) {
 			Pentester: AgentPrompts{
 				System: getPrompt(PromptTypePentester),
 				Human:  getPrompt(PromptTypeQuestionPentester),
+			},
+			Recon: AgentPrompts{
+				System: getPrompt(PromptTypeRecon),
+				Human:  getPrompt(PromptTypeQuestionRecon),
+			},
+			Injection: AgentPrompts{
+				System: getPrompt(PromptTypeInjection),
+				Human:  getPrompt(PromptTypeQuestionInjection),
+			},
+			XSS: AgentPrompts{
+				System: getPrompt(PromptTypeXSS),
+				Human:  getPrompt(PromptTypeQuestionXSS),
+			},
+			Auth: AgentPrompts{
+				System: getPrompt(PromptTypeAuthTest),
+				Human:  getPrompt(PromptTypeQuestionAuth),
+			},
+			IDOR: AgentPrompts{
+				System: getPrompt(PromptTypeIDOR),
+				Human:  getPrompt(PromptTypeQuestionIDOR),
+			},
+			SSRF: AgentPrompts{
+				System: getPrompt(PromptTypeSSRF),
+				Human:  getPrompt(PromptTypeQuestionSSRF),
 			},
 			Coder: AgentPrompts{
 				System: getPrompt(PromptTypeCoder),

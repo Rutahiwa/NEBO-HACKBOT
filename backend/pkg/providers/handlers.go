@@ -697,6 +697,170 @@ func (fp *flowProvider) GetPentesterHandler(ctx context.Context, taskID, subtask
 	}, nil
 }
 
+// specialistMeta holds the metadata for a specialist agent type, used by GetSpecialistHandler.
+type specialistMeta struct {
+	ToolName       string
+	ResultToolName string
+	OptionType     pconfig.ProviderOptionsType
+	MsgChainType   database.MsgchainType
+	SystemPrompt   templates.PromptType
+	QuestionPrompt templates.PromptType
+}
+
+var specialistRegistry = map[string]specialistMeta{
+	tools.ReconToolName: {
+		ToolName:       tools.ReconToolName,
+		ResultToolName: tools.ReconResultToolName,
+		OptionType:     pconfig.OptionsTypeRecon,
+		MsgChainType:   database.MsgchainTypeRecon,
+		SystemPrompt:   templates.PromptTypeRecon,
+		QuestionPrompt: templates.PromptTypeQuestionRecon,
+	},
+	tools.InjectionToolName: {
+		ToolName:       tools.InjectionToolName,
+		ResultToolName: tools.InjectionResultToolName,
+		OptionType:     pconfig.OptionsTypeInjection,
+		MsgChainType:   database.MsgchainTypeInjection,
+		SystemPrompt:   templates.PromptTypeInjection,
+		QuestionPrompt: templates.PromptTypeQuestionInjection,
+	},
+	tools.XSSToolName: {
+		ToolName:       tools.XSSToolName,
+		ResultToolName: tools.XSSResultToolName,
+		OptionType:     pconfig.OptionsTypeXSS,
+		MsgChainType:   database.MsgchainTypeXSS,
+		SystemPrompt:   templates.PromptTypeXSS,
+		QuestionPrompt: templates.PromptTypeQuestionXSS,
+	},
+	tools.AuthToolName: {
+		ToolName:       tools.AuthToolName,
+		ResultToolName: tools.AuthResultToolName,
+		OptionType:     pconfig.OptionsTypeAuth,
+		MsgChainType:   database.MsgchainTypeAuth,
+		SystemPrompt:   templates.PromptTypeAuthTest,
+		QuestionPrompt: templates.PromptTypeQuestionAuth,
+	},
+	tools.IDORToolName: {
+		ToolName:       tools.IDORToolName,
+		ResultToolName: tools.IDORResultToolName,
+		OptionType:     pconfig.OptionsTypeIDOR,
+		MsgChainType:   database.MsgchainTypeIDOR,
+		SystemPrompt:   templates.PromptTypeIDOR,
+		QuestionPrompt: templates.PromptTypeQuestionIDOR,
+	},
+	tools.SSRFToolName: {
+		ToolName:       tools.SSRFToolName,
+		ResultToolName: tools.SSRFResultToolName,
+		OptionType:     pconfig.OptionsTypeSSRF,
+		MsgChainType:   database.MsgchainTypeSSRF,
+		SystemPrompt:   templates.PromptTypeSSRF,
+		QuestionPrompt: templates.PromptTypeQuestionSSRF,
+	},
+}
+
+// GetSpecialistHandler returns an ExecutorHandler for any specialist agent type.
+// The toolName must be one of the registered specialist tool names (e.g., tools.ReconToolName).
+func (fp *flowProvider) GetSpecialistHandler(ctx context.Context, toolName string, taskID, subtaskID *int64) (tools.ExecutorHandler, error) {
+	meta, ok := specialistRegistry[toolName]
+	if !ok {
+		return nil, fmt.Errorf("unknown specialist tool name: %s", toolName)
+	}
+
+	_, _, err := fp.getTaskAndSubtask(ctx, taskID, subtaskID)
+	if err != nil {
+		return nil, err
+	}
+
+	executionContext, err := fp.getExecutionContext(ctx, taskID, subtaskID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get execution context: %w", err)
+	}
+
+	specialistHandler := func(ctx context.Context, action tools.SpecialistAction) (string, error) {
+		specialistContext := map[string]map[string]any{
+			"user": {
+				"Question": action.Question,
+			},
+			"system": {
+				"ResultToolName":            meta.ResultToolName,
+				"WebSearchToolName":         tools.WebSearchToolName,
+				"SearchGuideToolName":       tools.SearchGuideToolName,
+				"StoreGuideToolName":        tools.StoreGuideToolName,
+				"GraphitiEnabled":           fp.graphitiClient != nil && fp.graphitiClient.IsEnabled(),
+				"GraphitiSearchToolName":    tools.GraphitiSearchToolName,
+				"SearchToolName":            tools.SearchToolName,
+				"CoderToolName":             tools.CoderToolName,
+				"AdviceToolName":            tools.AdviceToolName,
+				"MemoristToolName":          tools.MemoristToolName,
+				"MaintenanceToolName":       tools.MaintenanceToolName,
+				"TerminalToolName":          tools.TerminalToolName,
+				"FileToolName":              tools.FileToolName,
+				"SummarizationToolName":     cast.SummarizationToolName,
+				"SummarizedContentPrefix":   strings.ReplaceAll(csum.SummarizedContentPrefix, "\n", "\\n"),
+				"IsDefaultDockerImage":      strings.HasPrefix(strings.ToLower(fp.image), pentestDockerImage),
+				"DockerImage":               fp.image,
+				"Cwd":                       docker.WorkFolderPathInContainer,
+				"ContainerPorts":            fp.getContainerPortsDescription(),
+				"ExecutionContext":          executionContext,
+				"Lang":                      fp.language,
+				"CurrentTime":               getCurrentTime(),
+				"ToolPlaceholder":           ToolPlaceholder,
+				"UserFiles":                 fp.userFilesListing(),
+			},
+		}
+
+		specialistCtx, observation := obs.Observer.NewObservation(ctx)
+		specialistEvaluator := observation.Evaluator(
+			langfuse.WithEvaluatorName(fmt.Sprintf("render %s agent prompts", meta.ToolName)),
+			langfuse.WithEvaluatorInput(specialistContext),
+		)
+
+		userTmpl, err := fp.prompter.RenderTemplate(meta.QuestionPrompt, specialistContext["user"])
+		if err != nil {
+			return "", wrapErrorEndEvaluatorSpan(specialistCtx, specialistEvaluator, fmt.Sprintf("failed to get user %s template", meta.ToolName), err)
+		}
+
+		systemTmpl, err := fp.prompter.RenderTemplate(meta.SystemPrompt, specialistContext["system"])
+		if err != nil {
+			return "", wrapErrorEndEvaluatorSpan(specialistCtx, specialistEvaluator, fmt.Sprintf("failed to get system %s template", meta.ToolName), err)
+		}
+
+		specialistEvaluator.End(
+			langfuse.WithEvaluatorOutput(map[string]any{
+				"user_template":   userTmpl,
+				"system_template": systemTmpl,
+			}),
+			langfuse.WithEvaluatorStatus("success"),
+			langfuse.WithEvaluatorLevel(langfuse.ObservationLevelDebug),
+		)
+
+		result, err := fp.performSpecialist(
+			ctx, taskID, subtaskID,
+			meta.OptionType, meta.MsgChainType,
+			meta.ToolName, meta.ResultToolName,
+			systemTmpl, userTmpl, action.Question,
+		)
+		if err != nil {
+			return "", wrapError(ctx, fmt.Sprintf("failed to get %s result", meta.ToolName), err)
+		}
+
+		return result, nil
+	}
+
+	return func(ctx context.Context, name string, args json.RawMessage) (string, error) {
+		ctx, span := obs.Observer.NewSpan(ctx, obs.SpanKindInternal, fmt.Sprintf("providers.flowProvider.getSpecialistHandler.%s", meta.ToolName))
+		defer span.End()
+
+		var action tools.SpecialistAction
+		if err := json.Unmarshal(args, &action); err != nil {
+			logrus.WithContext(ctx).WithError(err).Errorf("failed to unmarshal %s payload", meta.ToolName)
+			return "", fmt.Errorf("failed to unmarshal %s payload: %w", meta.ToolName, err)
+		}
+
+		return specialistHandler(ctx, action)
+	}, nil
+}
+
 func (fp *flowProvider) GetSubtaskSearcherHandler(ctx context.Context, taskID, subtaskID *int64) (tools.ExecutorHandler, error) {
 	ptrTask, ptrSubtask, err := fp.getTaskAndSubtask(ctx, taskID, subtaskID)
 	if err != nil {

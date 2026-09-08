@@ -17,6 +17,18 @@ const (
 	CodeResultToolName         = "code_result"
 	PentesterToolName          = "pentester"
 	HackResultToolName         = "hack_result"
+	ReconToolName              = "recon"
+	ReconResultToolName        = "recon_result"
+	InjectionToolName          = "injection"
+	InjectionResultToolName    = "injection_result"
+	XSSToolName                = "xss_test"
+	XSSResultToolName          = "xss_result"
+	AuthToolName               = "auth_test"
+	AuthResultToolName         = "auth_result"
+	IDORToolName               = "idor_test"
+	IDORResultToolName         = "idor_result"
+	SSRFToolName               = "ssrf_test"
+	SSRFResultToolName         = "ssrf_result"
 	AdviceToolName             = "advice"
 	MemoristToolName           = "memorist"
 	MemoristResultToolName     = "memorist_result"
@@ -104,6 +116,18 @@ var toolsTypeMapping = map[string]ToolType{
 	CodeResultToolName:         StoreAgentResultToolType,
 	PentesterToolName:          AgentToolType,
 	HackResultToolName:         StoreAgentResultToolType,
+	ReconToolName:              AgentToolType,
+	ReconResultToolName:        StoreAgentResultToolType,
+	InjectionToolName:          AgentToolType,
+	InjectionResultToolName:    StoreAgentResultToolType,
+	XSSToolName:                AgentToolType,
+	XSSResultToolName:          StoreAgentResultToolType,
+	AuthToolName:               AgentToolType,
+	AuthResultToolName:         StoreAgentResultToolType,
+	IDORToolName:               AgentToolType,
+	IDORResultToolName:         StoreAgentResultToolType,
+	SSRFToolName:               AgentToolType,
+	SSRFResultToolName:         StoreAgentResultToolType,
 	AdviceToolName:             AgentToolType,
 	MemoristToolName:           AgentToolType,
 	MemoristResultToolName:     StoreAgentResultToolType,
@@ -166,6 +190,12 @@ var allowedStoringInMemoryTools = []string{
 	MaintenanceToolName,
 	CoderToolName,
 	PentesterToolName,
+	ReconToolName,
+	InjectionToolName,
+	XSSToolName,
+	AuthToolName,
+	IDORToolName,
+	SSRFToolName,
 	AdviceToolName,
 }
 
@@ -392,6 +422,66 @@ var registryDefinitions = map[string]llms.FunctionDefinition{
 		Name:        HackResultToolName,
 		Description: "Send the penetration test result to the user with detailed report",
 		Parameters:  reflector.Reflect(&HackResult{}),
+	},
+	ReconToolName: {
+		Name:        ReconToolName,
+		Description: "Delegate to the recon specialist for attack surface mapping: subdomains, ports, services, technologies, endpoints",
+		Parameters:  reflector.Reflect(&SpecialistAction{}),
+	},
+	ReconResultToolName: {
+		Name:        ReconResultToolName,
+		Description: "Send the reconnaissance result with detailed findings report",
+		Parameters:  reflector.Reflect(&SpecialistResult{}),
+	},
+	InjectionToolName: {
+		Name:        InjectionToolName,
+		Description: "Delegate to the injection specialist for server-side injection testing: SQLi, command injection, SSTI, LDAP injection",
+		Parameters:  reflector.Reflect(&SpecialistAction{}),
+	},
+	InjectionResultToolName: {
+		Name:        InjectionResultToolName,
+		Description: "Send the injection testing result with detailed findings report",
+		Parameters:  reflector.Reflect(&SpecialistResult{}),
+	},
+	XSSToolName: {
+		Name:        XSSToolName,
+		Description: "Delegate to the XSS specialist for client-side testing: cross-site scripting, prototype pollution, CSP bypass",
+		Parameters:  reflector.Reflect(&SpecialistAction{}),
+	},
+	XSSResultToolName: {
+		Name:        XSSResultToolName,
+		Description: "Send the XSS testing result with detailed findings report",
+		Parameters:  reflector.Reflect(&SpecialistResult{}),
+	},
+	AuthToolName: {
+		Name:        AuthToolName,
+		Description: "Delegate to the auth specialist for authentication and session testing: JWT, OAuth, session management, password reset",
+		Parameters:  reflector.Reflect(&SpecialistAction{}),
+	},
+	AuthResultToolName: {
+		Name:        AuthResultToolName,
+		Description: "Send the auth testing result with detailed findings report",
+		Parameters:  reflector.Reflect(&SpecialistResult{}),
+	},
+	IDORToolName: {
+		Name:        IDORToolName,
+		Description: "Delegate to the IDOR specialist for access control testing: authorization bypass, IDOR, privilege escalation",
+		Parameters:  reflector.Reflect(&SpecialistAction{}),
+	},
+	IDORResultToolName: {
+		Name:        IDORResultToolName,
+		Description: "Send the IDOR testing result with detailed findings report",
+		Parameters:  reflector.Reflect(&SpecialistResult{}),
+	},
+	SSRFToolName: {
+		Name:        SSRFToolName,
+		Description: "Delegate to the SSRF specialist for server-side request forgery testing and cloud metadata access",
+		Parameters:  reflector.Reflect(&SpecialistAction{}),
+	},
+	SSRFResultToolName: {
+		Name:        SSRFResultToolName,
+		Description: "Send the SSRF testing result with detailed findings report",
+		Parameters:  reflector.Reflect(&SpecialistResult{}),
 	},
 	AdviceToolName: {
 		Name:        AdviceToolName,

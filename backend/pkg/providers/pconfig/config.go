@@ -151,6 +151,12 @@ const (
 	OptionsTypeInstaller    ProviderOptionsType = "installer"
 	OptionsTypePentester    ProviderOptionsType = "pentester"
 	OptionsTypeReflector    ProviderOptionsType = "reflector"
+	OptionsTypeRecon        ProviderOptionsType = "recon"
+	OptionsTypeInjection    ProviderOptionsType = "injection"
+	OptionsTypeXSS          ProviderOptionsType = "xss"
+	OptionsTypeAuth         ProviderOptionsType = "auth"
+	OptionsTypeIDOR         ProviderOptionsType = "idor"
+	OptionsTypeSSRF         ProviderOptionsType = "ssrf"
 )
 
 var AllAgentTypes = []ProviderOptionsType{
@@ -167,6 +173,12 @@ var AllAgentTypes = []ProviderOptionsType{
 	OptionsTypeCoder,
 	OptionsTypeInstaller,
 	OptionsTypePentester,
+	OptionsTypeRecon,
+	OptionsTypeInjection,
+	OptionsTypeXSS,
+	OptionsTypeAuth,
+	OptionsTypeIDOR,
+	OptionsTypeSSRF,
 }
 
 type ModelConfig struct {

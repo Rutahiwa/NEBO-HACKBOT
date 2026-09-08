@@ -6,7 +6,7 @@
  * Returns a generic "Prompt" fallback when the input does not look like
  * a camelCase identifier — e.g. when the URL contains an invalid id such
  * as `/settings/prompts/99999`. Without this guard the route title would
- * render the raw id (`"99999 — PentAGI"`).
+ * render the raw id (`"99999 — NEBO-HACKBOT"`).
  */
 export const formatPromptId = (key: string): string => {
     if (!/^[a-z][a-zA-Z]*$/.test(key)) {

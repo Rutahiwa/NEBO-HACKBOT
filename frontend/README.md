@@ -1,4 +1,4 @@
-# PentAGI Frontend
+# NEBO-HACKBOT Frontend
 
 A chat application built with React, TypeScript, and GraphQL that enables intelligent conversations with AI agents.
 

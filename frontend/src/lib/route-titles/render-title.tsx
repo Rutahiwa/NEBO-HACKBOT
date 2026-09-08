@@ -1,4 +1,4 @@
-export const APP_NAME = 'PentAGI';
+export const APP_NAME = 'NEBO-HACKBOT';
 
 export type RouteParams = Record<string, string | undefined>;
 

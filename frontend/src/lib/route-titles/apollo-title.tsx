@@ -30,7 +30,7 @@ interface ApolloTitleOpts<TData, TVars extends Record<string, unknown>> {
 // and Terser leaves Symbol-keyed properties alone even under aggressive
 // `mangle.properties`. `Symbol.for` is used so an accidental double-bundle
 // (worker, SSR boundary) still resolves to the same key.
-const APOLLO_TITLE_MARKER = Symbol.for('pentagi.apolloTitle');
+const APOLLO_TITLE_MARKER = Symbol.for('nebo-hackbot.apolloTitle');
 
 export type ApolloTitleComponent = ComponentType<{ params: RouteParams }> & {
     readonly [APOLLO_TITLE_MARKER]: true;

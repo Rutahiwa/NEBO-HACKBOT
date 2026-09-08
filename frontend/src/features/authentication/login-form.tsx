@@ -174,7 +174,7 @@ function LoginForm({ providers, returnUrl = routes.newFlow }: LoginFormProps) {
                 noValidate
                 onSubmit={form.handleSubmit(handleSubmit)}
             >
-                <h1 className="text-center text-3xl font-bold">PentAGI</h1>
+                <h1 className="text-center text-3xl font-bold">NEBO-HACKBOT</h1>
 
                 {providers?.length > 0 && (
                     <>

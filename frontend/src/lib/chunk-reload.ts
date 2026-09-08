@@ -1,4 +1,4 @@
-const LAST_RELOAD_AT_KEY = 'pentagi:chunk-reload-at';
+const LAST_RELOAD_AT_KEY = 'nebo-hackbot:chunk-reload-at';
 const RELOAD_DEBOUNCE_MS = 10_000;
 
 // The error browsers throw when a dynamically imported chunk can't be loaded —

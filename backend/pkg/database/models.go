@@ -215,6 +215,7 @@ const (
 	MsgchainTypeAuth          MsgchainType = "auth"
 	MsgchainTypeIDOR          MsgchainType = "idor"
 	MsgchainTypeSSRF          MsgchainType = "ssrf"
+	MsgchainTypeValidator     MsgchainType = "validator"
 )
 
 func (e *MsgchainType) Scan(src interface{}) error {

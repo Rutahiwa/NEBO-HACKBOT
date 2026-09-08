@@ -136,6 +136,13 @@ When writing the closing entry of `{{.FinalyToolName}}`, translate the relevant 
 <tools>curl, aws-cli</tools>
 <tool_name>{{.SSRFToolName}}</tool_name>
 </specialist>
+
+<specialist name="validator">
+<skills>Adversarial finding reproduction, false-positive elimination, severity assessment, defense-aware verification</skills>
+<use_cases>Independently reproduce candidate vulnerability findings, verify real impact, check for missed defenses (CSP, WAF, rate limiting), assign accurate severity. Route ALL candidate findings through the validator before reporting</use_cases>
+<tools>curl, nmap, sqlmap, nuclei — same toolset as testers but used to DISPROVE claims</tools>
+<tool_name>{{.ValidatorToolName}}</tool_name>
+</specialist>
 </team_specialists>
 
 <delegation_rules>

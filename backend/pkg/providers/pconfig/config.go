@@ -157,6 +157,7 @@ const (
 	OptionsTypeAuth         ProviderOptionsType = "auth"
 	OptionsTypeIDOR         ProviderOptionsType = "idor"
 	OptionsTypeSSRF         ProviderOptionsType = "ssrf"
+	OptionsTypeValidator    ProviderOptionsType = "validator"
 )
 
 var AllAgentTypes = []ProviderOptionsType{
@@ -179,6 +180,7 @@ var AllAgentTypes = []ProviderOptionsType{
 	OptionsTypeAuth,
 	OptionsTypeIDOR,
 	OptionsTypeSSRF,
+	OptionsTypeValidator,
 }
 
 type ModelConfig struct {

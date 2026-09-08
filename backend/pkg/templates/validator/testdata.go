@@ -38,6 +38,7 @@ func CreateDummyTemplateData() map[string]any {
 		"AuthToolName":               tools.AuthToolName,
 		"IDORToolName":               tools.IDORToolName,
 		"SSRFToolName":               tools.SSRFToolName,
+		"ValidatorToolName":          tools.ValidatorToolName,
 		"GraphitiSearchToolName":     tools.GraphitiSearchToolName,
 		"GraphitiEnabled":            true,
 		"TerminalToolName":           tools.TerminalToolName,

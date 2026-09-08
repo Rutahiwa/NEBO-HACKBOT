@@ -781,6 +781,7 @@ func (fp *flowProvider) PerformAgentChain(ctx context.Context, taskID, subtaskID
 		tools.AuthToolName,
 		tools.IDORToolName,
 		tools.SSRFToolName,
+		tools.ValidatorToolName,
 	}
 	specialistHandlers := make(map[string]tools.ExecutorHandler, len(specialistToolNames))
 	for _, stn := range specialistToolNames {
@@ -831,6 +832,7 @@ func (fp *flowProvider) PerformAgentChain(ctx context.Context, taskID, subtaskID
 		Auth:      specialistHandlers[tools.AuthToolName],
 		IDOR:      specialistHandlers[tools.IDORToolName],
 		SSRF:      specialistHandlers[tools.SSRFToolName],
+		Validator: specialistHandlers[tools.ValidatorToolName],
 		Barrier: func(ctx context.Context, name string, args json.RawMessage) (string, error) {
 			loggerFunc := logger.WithContext(ctx).WithFields(logrus.Fields{
 				"name": name,

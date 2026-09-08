@@ -29,6 +29,8 @@ const (
 	IDORResultToolName         = "idor_result"
 	SSRFToolName               = "ssrf_test"
 	SSRFResultToolName         = "ssrf_result"
+	ValidatorToolName          = "validator"
+	ValidatorResultToolName    = "validator_result"
 	AdviceToolName             = "advice"
 	MemoristToolName           = "memorist"
 	MemoristResultToolName     = "memorist_result"
@@ -128,6 +130,8 @@ var toolsTypeMapping = map[string]ToolType{
 	IDORResultToolName:         StoreAgentResultToolType,
 	SSRFToolName:               AgentToolType,
 	SSRFResultToolName:         StoreAgentResultToolType,
+	ValidatorToolName:          AgentToolType,
+	ValidatorResultToolName:    StoreAgentResultToolType,
 	AdviceToolName:             AgentToolType,
 	MemoristToolName:           AgentToolType,
 	MemoristResultToolName:     StoreAgentResultToolType,
@@ -196,6 +200,7 @@ var allowedStoringInMemoryTools = []string{
 	AuthToolName,
 	IDORToolName,
 	SSRFToolName,
+	ValidatorToolName,
 	AdviceToolName,
 }
 
@@ -481,6 +486,16 @@ var registryDefinitions = map[string]llms.FunctionDefinition{
 	SSRFResultToolName: {
 		Name:        SSRFResultToolName,
 		Description: "Send the SSRF testing result with detailed findings report",
+		Parameters:  reflector.Reflect(&SpecialistResult{}),
+	},
+	ValidatorToolName: {
+		Name:        ValidatorToolName,
+		Description: "Delegate to the findings validator for adversarial reproduction and severity assessment of candidate vulnerability findings",
+		Parameters:  reflector.Reflect(&SpecialistAction{}),
+	},
+	ValidatorResultToolName: {
+		Name:        ValidatorResultToolName,
+		Description: "Send the validation verdict with reproduction evidence and severity assessment",
 		Parameters:  reflector.Reflect(&SpecialistResult{}),
 	},
 	AdviceToolName: {

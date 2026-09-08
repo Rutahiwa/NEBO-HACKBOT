@@ -245,6 +245,7 @@ type PrimaryExecutorConfig struct {
 	Auth        ExecutorHandler
 	IDOR        ExecutorHandler
 	SSRF        ExecutorHandler
+	Validator   ExecutorHandler
 	Summarizer  SummarizeHandler
 }
 
@@ -1094,6 +1095,7 @@ func (fte *flowToolsExecutor) GetPrimaryExecutor(cfg PrimaryExecutorConfig) (Con
 		{AuthToolName, cfg.Auth},
 		{IDORToolName, cfg.IDOR},
 		{SSRFToolName, cfg.SSRF},
+		{ValidatorToolName, cfg.Validator},
 	}
 	for _, st := range specialistTools {
 		if st.handler != nil {

@@ -79,6 +79,8 @@ const (
 	PromptTypeQuestionIDOR             PromptType = "question_idor"              // human input for IDOR specialist
 	PromptTypeSSRF                     PromptType = "ssrf"                       // SSRF/cloud specialist agent
 	PromptTypeQuestionSSRF             PromptType = "question_ssrf"              // human input for SSRF specialist
+	PromptTypeValidator                PromptType = "validator"                  // findings validation specialist agent
+	PromptTypeQuestionValidator        PromptType = "question_validator"         // human input for findings validator specialist
 )
 
 var PromptVariables = map[PromptType][]string{
@@ -96,6 +98,7 @@ var PromptVariables = map[PromptType][]string{
 		"AuthToolName",
 		"IDORToolName",
 		"SSRFToolName",
+		"ValidatorToolName",
 		"SummarizationToolName",
 		"SummarizedContentPrefix",
 		"AskUserToolName",
@@ -607,6 +610,23 @@ var PromptVariables = map[PromptType][]string{
 	PromptTypeQuestionSSRF: {
 		"Question",
 	},
+	PromptTypeValidator: {
+		"ResultToolName",
+		"MemoristToolName",
+		"SummarizationToolName",
+		"SummarizedContentPrefix",
+		"DockerImage",
+		"Cwd",
+		"ContainerPorts",
+		"ExecutionContext",
+		"Lang",
+		"CurrentTime",
+		"ToolPlaceholder",
+		"UserFiles",
+	},
+	PromptTypeQuestionValidator: {
+		"Question",
+	},
 }
 
 type Prompt struct {
@@ -634,6 +654,7 @@ type AgentsPrompts struct {
 	Auth          AgentPrompts
 	IDOR          AgentPrompts
 	SSRF          AgentPrompts
+	Validator     AgentPrompts
 	Coder         AgentPrompts
 	Installer     AgentPrompts
 	Searcher      AgentPrompts
@@ -728,6 +749,10 @@ func GetDefaultPrompts() (*DefaultPrompts, error) {
 			SSRF: AgentPrompts{
 				System: getPrompt(PromptTypeSSRF),
 				Human:  getPrompt(PromptTypeQuestionSSRF),
+			},
+			Validator: AgentPrompts{
+				System: getPrompt(PromptTypeValidator),
+				Human:  getPrompt(PromptTypeQuestionValidator),
 			},
 			Coder: AgentPrompts{
 				System: getPrompt(PromptTypeCoder),

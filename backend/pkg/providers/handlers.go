@@ -756,6 +756,14 @@ var specialistRegistry = map[string]specialistMeta{
 		SystemPrompt:   templates.PromptTypeSSRF,
 		QuestionPrompt: templates.PromptTypeQuestionSSRF,
 	},
+	tools.ValidatorToolName: {
+		ToolName:       tools.ValidatorToolName,
+		ResultToolName: tools.ValidatorResultToolName,
+		OptionType:     pconfig.OptionsTypeValidator,
+		MsgChainType:   database.MsgchainTypeValidator,
+		SystemPrompt:   templates.PromptTypeValidator,
+		QuestionPrompt: templates.PromptTypeQuestionValidator,
+	},
 }
 
 // GetSpecialistHandler returns an ExecutorHandler for any specialist agent type.

@@ -23,6 +23,12 @@ import (
 
 const DefaultResultSizeLimit = 16 * 1024 // 16 KB
 
+// TruncateHeadSize is the number of bytes kept from the start of a truncated tool result.
+const TruncateHeadSize = 8 * 1024 // 8 KB
+
+// TruncateTailSize is the number of bytes kept from the end of a truncated tool result.
+const TruncateTailSize = 2 * 1024 // 2 KB
+
 const maxArgValueLength = 1024 // 1 KB limit for argument values
 
 type dummyMessage struct {
@@ -305,27 +311,14 @@ func (ce *customExecutor) Execute(
 		}
 
 		result = database.SanitizeUTF8(result)
-		allowSummarize := slices.Contains(allowedSummarizingToolsResult, name)
-		if ce.summarizer != nil && allowSummarize && len(result) > DefaultResultSizeLimit {
-			summarizePrompt, err := ce.getSummarizePrompt(name, string(args), result)
-			if err != nil {
-				return "", resultFormat, fmt.Errorf("failed to get summarize prompt: %w", err)
-			}
-			result, err = ce.summarizer(persistCtx, summarizePrompt)
-			if err != nil {
-				durationDelta := time.Since(startTime).Seconds()
-				failureResult := fmt.Sprintf("failed to summarize result: %s", err.Error())
-				_ = ce.tclp.UpdateLogFailed(persistCtx, tcID, failureResult, durationDelta)
-				return "", resultFormat, fmt.Errorf("failed to summarize result: %w", err)
-			}
-			resultFormat = database.MsglogResultFormatMarkdown
-		} else if allowSummarize && len(result) > DefaultResultSizeLimit*2 {
-			result = fmt.Sprintf("%s\n[0:%d bytes]\n... [truncated] ...\n[%d:%d bytes]\n%s",
-				result[:DefaultResultSizeLimit],
-				DefaultResultSizeLimit,
-				len(result)-DefaultResultSizeLimit,
-				len(result),
-				result[len(result)-DefaultResultSizeLimit:],
+		allowTruncate := slices.Contains(allowedSummarizingToolsResult, name)
+		if allowTruncate && len(result) > DefaultResultSizeLimit {
+			totalLen := len(result)
+			result = fmt.Sprintf("%s\n\n[... truncated %d bytes of %d total ...]\n\n%s",
+				result[:TruncateHeadSize],
+				totalLen-TruncateHeadSize-TruncateTailSize,
+				totalLen,
+				result[totalLen-TruncateTailSize:],
 			)
 		}
 

@@ -41,37 +41,12 @@ Do not switch the closing entry to English just because the execution logs you a
 ## SUMMARIZATION AWARENESS PROTOCOL
 
 <summarized_content_handling>
-<identification>
-- Summarized historical interactions appear in TWO distinct forms within the conversation history:
-  1. **Tool Call Summary:** An AI message containing ONLY a call to the `{{.SummarizationToolName}}` tool, immediately followed by a `Tool` message containing the summary in its response content.
-  2. **Prefixed Summary:** An AI message (of type `Completion`) whose text content starts EXACTLY with the prefix: `{{.SummarizedContentPrefix}}`.
-- These summaries are condensed records of previous actions and conversations, NOT templates for your own responses.
-</identification>
+Summarized history appears as either (1) a `{{.SummarizationToolName}}` tool-call message followed by a Tool response with the summary, or (2) an AI message prefixed with `{{.SummarizedContentPrefix}}`. These are condensed records of past actions and results -- treat them as read-only historical context to inform your strategy and avoid redundant work.
 
-<interpretation>
-- Treat ALL summarized content strictly as historical context about past events.
-- Understand that these summaries encapsulate ACTUAL tool calls, function executions, and their results that occurred previously.
-- Extract relevant information (e.g., previously used commands, discovered vulnerabilities, error messages, successful techniques) to inform your current strategy and avoid redundant actions.
-- Pay close attention to the specific details within summaries as they reflect real outcomes.
-</interpretation>
-
-<prohibited_behavior>
-- NEVER mimic or copy the format of summarized content (neither the tool call pattern nor the prefix).
-- NEVER use the prefix `{{.SummarizedContentPrefix}}` in your own messages.
-- NEVER call the `{{.SummarizationToolName}}` tool yourself; it is exclusively a system marker for historical summaries.
-- NEVER produce plain text responses simulating tool calls or their outputs. ALL actions MUST use structured tool calls.
-</prohibited_behavior>
-
-<required_behavior>
-- ALWAYS use proper, structured tool calls for ALL actions you perform.
-- Interpret the information derived from summaries to guide your strategy and decision-making.
-- Analyze summarized failures before re-attempting similar actions.
-</required_behavior>
-
-<system_context>
-- This system operates EXCLUSIVELY through structured tool calls.
-- Bypassing this structure (e.g., by simulating calls in plain text) prevents actual execution by the underlying system.
-</system_context>
+Rules:
+- NEVER mimic summary format, use the `{{.SummarizedContentPrefix}}` prefix, or call `{{.SummarizationToolName}}` yourself
+- NEVER produce plain-text responses simulating tool calls -- always use structured tool calls
+- Analyze summarized failures before re-attempting similar actions
 </summarized_content_handling>
 
 ## XML INPUT PROCESSING

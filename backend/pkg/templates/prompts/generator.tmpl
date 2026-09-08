@@ -78,33 +78,12 @@ All subtasks will be performed in:
 ## SUMMARIZATION AWARENESS PROTOCOL
 
 <summarized_content_handling>
-<identification>
-- Summarized historical interactions appear as either:
-  1. An AI message with ONLY a call to the `{{.SummarizationToolName}}` tool, followed by a Tool message with the summary
-  2. An AI message whose content starts with the prefix: `{{.SummarizedContentPrefix}}`
-</identification>
+Summarized history appears as either (1) a `{{.SummarizationToolName}}` tool-call message followed by a Tool response with the summary, or (2) an AI message prefixed with `{{.SummarizedContentPrefix}}`. These are condensed records of past actions and results -- treat them as read-only historical context to inform your strategy and avoid redundant work.
 
-<interpretation>
-- Treat ALL summarized content as historical context about past events
-- Extract relevant information to inform your strategy and avoid redundancy
-</interpretation>
-
-<prohibited_behavior>
-- NEVER mimic or copy the format of summarized content
-- NEVER use the prefix `{{.SummarizedContentPrefix}}` in your messages
-- NEVER call the `{{.SummarizationToolName}}` tool yourself
-- NEVER produce plain text responses simulating tool calls or outputs
-</prohibited_behavior>
-
-<required_behavior>
-- ALWAYS use proper, structured tool calls for ALL actions
+Rules:
+- NEVER mimic summary format, use the `{{.SummarizedContentPrefix}}` prefix, or call `{{.SummarizationToolName}}` yourself
+- NEVER produce plain-text responses simulating tool calls -- always use structured tool calls
 - Analyze summarized failures before re-attempting similar actions
-</required_behavior>
-
-<system_context>
-- This system operates EXCLUSIVELY through structured tool calls.
-- Bypassing this structure (e.g., by simulating calls in plain text) prevents actual execution by the underlying system.
-</system_context>
 </summarized_content_handling>
 
 ## XML INPUT PROCESSING

@@ -56,16 +56,18 @@ The summary should help the reader quickly understand the current state of the t
 </previous_tasks>
 
 <completed_subtasks>
-{{if .CompletedSubtasks}}
-{{range .CompletedSubtasks}}
+{{if .CompletedSubtasks}}{{$total := len .CompletedSubtasks}}{{$cutoff := sub $total 3}}{{if gt $cutoff 0}}
+{{range $i, $s := .CompletedSubtasks}}{{if lt $i $cutoff}}<subtask_summary>{{$s.Title}} [{{$s.Status}}]</subtask_summary>
+{{end}}{{end}}{{end}}
+{{range $i, $s := .CompletedSubtasks}}{{if ge $i (sub (len $.CompletedSubtasks) 3)}}
 <subtask>
-<id>{{.ID}}</id>
-<title>{{.Title}}</title>
-<description>{{.Description}}</description>
-<status>{{.Status}}</status>
-<result>{{.Result}}</result>
+<id>{{$s.ID}}</id>
+<title>{{$s.Title}}</title>
+<description>{{$s.Description}}</description>
+<status>{{$s.Status}}</status>
+<result>{{$s.Result}}</result>
 </subtask>
-{{end}}
+{{end}}{{end}}
 {{else}}
 <status>none</status>
 <message>No completed subtasks for the customer's task, it's the first subtask in the backlog.</message>

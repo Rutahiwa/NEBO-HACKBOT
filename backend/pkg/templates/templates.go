@@ -726,8 +726,14 @@ func LoadDefaultPromptsMap() (PromptsMap, error) {
 	return copyMap, nil
 }
 
+// templateFuncs contains helper functions available to all prompt templates.
+var templateFuncs = template.FuncMap{
+	// sub returns a - b. Useful for index arithmetic such as "show last N items".
+	"sub": func(a, b int) int { return a - b },
+}
+
 func RenderPrompt(name, prompt string, params any) (string, error) {
-	t, err := template.New(string(name)).Parse(prompt)
+	t, err := template.New(string(name)).Funcs(templateFuncs).Parse(prompt)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse template: %w", err)
 	}

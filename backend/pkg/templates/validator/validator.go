@@ -104,18 +104,21 @@ func ExtractTemplateVariables(templateContent string) ([]string, error) {
 		return nil, fmt.Errorf("template content is empty")
 	}
 
-	// Create function map with all builtin functions as nil values for the parser
+	// Create function map with placeholder values for the parser.
+	// parse.Parse requires non-nil values to recognise identifiers as
+	// callable functions (e.g. {{$v := len .X}}).  Using a non-nil
+	// placeholder ("1") satisfies the parser without needing real impls.
 	funcMap := template.FuncMap{
 		// Builtin comparison and logic functions
-		"and": nil, "or": nil, "not": nil,
-		"eq": nil, "ne": nil, "lt": nil, "le": nil, "gt": nil, "ge": nil,
+		"and": "1", "or": "1", "not": "1",
+		"eq": "1", "ne": "1", "lt": "1", "le": "1", "gt": "1", "ge": "1",
 		// Builtin utility functions
-		"len": nil, "index": nil, "slice": nil, "print": nil, "printf": nil, "println": nil,
-		"html": nil, "js": nil, "urlquery": nil, "call": nil,
+		"len": "1", "index": "1", "slice": "1", "print": "1", "printf": "1", "println": "1",
+		"html": "1", "js": "1", "urlquery": "1", "call": "1",
 		// Additional common functions that might be used
-		"add": nil, "sub": nil, "mul": nil, "div": nil, "mod": nil,
-		"upper": nil, "lower": nil, "title": nil, "trim": nil, "trimSpace": nil,
-		"default": nil, "empty": nil, "contains": nil, "hasPrefix": nil, "hasSuffix": nil,
+		"add": "1", "sub": "1", "mul": "1", "div": "1", "mod": "1",
+		"upper": "1", "lower": "1", "title": "1", "trim": "1", "trimSpace": "1",
+		"default": "1", "empty": "1", "contains": "1", "hasPrefix": "1", "hasSuffix": "1",
 	}
 
 	// Parse template with function map to get AST

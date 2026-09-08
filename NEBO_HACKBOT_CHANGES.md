@@ -53,3 +53,193 @@ Tracks every change from the PentAGI v2.1.0 base, with files affected, rationale
 - GitHub URLs (github.com/vxcontrol/pentagi)
 - pentagi.com and update.pentagi.com domain URLs
 - Go identifier names (PentagiRunning, ProductStackPentagi, etc.)
+
+---
+
+## Phase A: Context Efficiency
+
+**Goal:** Reduce token usage per agent call by truncating large tool outputs, abbreviating stale execution context, and pruning verbose chain history.
+
+### Tool Output Truncation
+
+Tool results (terminal output, browser content, search results) that exceed a size threshold are truncated to an 8 KB head + 2 KB tail with a `[... truncated N bytes ...]` marker. This prevents a single verbose `nmap` or `nikto` scan from consuming the entire context window.
+
+**Files changed:**
+- `backend/pkg/providers/performer.go` — applies truncation to tool call responses before appending to the chain
+- `backend/pkg/providers/helpers.go` — truncation utility functions
+
+### Execution Context Abbreviation
+
+When building the execution context template for later subtasks, older subtask results are abbreviated to short summaries rather than full verbatim output. The most recent subtask retains its full output for the agent's immediate use.
+
+**Files changed:**
+- `backend/pkg/templates/prompts/short_execution_context.tmpl` — abbreviated format for older subtask results
+- `backend/pkg/templates/prompts/full_execution_context.tmpl` — full format for the current subtask
+
+**Runtime test:** Run a multi-subtask Juice Shop flow. Verify token count per agent call is lower than baseline. Verify large tool outputs show the truncation marker in the UI.
+
+---
+
+## Phase B: CLI-Operator Behaviour
+
+**Goal:** Ensure agents behave as CLI operators, using terminal commands and tool calls instead of narrating GUI tool usage or writing essay-length explanations.
+
+### System Prompt Tuning
+
+Agent system prompts were tuned to enforce CLI-operator behaviour:
+- Agents are instructed to use command-line tools (`nmap`, `sqlmap`, `ffuf`, `curl`, `httpx`, `nikto`, etc.) instead of GUI tools (Burp Suite, ZAP, etc.)
+- Agents are instructed to be concise in their message fields (under 200 characters)
+- Agents are instructed to prefer tool calls over plain-text narration
+
+**Files changed:**
+- `backend/pkg/templates/prompts/pentester.tmpl` — CLI-operator instructions added to the pentester system prompt
+- `backend/pkg/templates/prompts/primary_agent.tmpl` — CLI-operator instructions added to the primary agent system prompt
+- `backend/pkg/templates/prompts/coder.tmpl` — conciseness instructions for the coder agent
+- `backend/pkg/templates/prompts/searcher.tmpl` — conciseness instructions for the searcher agent
+
+**Runtime test:** Run a Juice Shop flow. Verify no Burp Suite / ZAP / GUI tool references in agent logs. Verify message fields are under 200 chars. Verify most agent turns include tool calls.
+
+---
+
+## Phase C: Context Architecture
+
+**Goal:** Implement a sliding-window context system that keeps agent calls fast by limiting the number of conversation messages sent to the LLM, while preserving the full chain in the database.
+
+### Sliding-Window Context
+
+A new `applyContextWindow` function slices the message chain to keep only the pinned prefix (system prompt + first human message) and the last N messages from the conversation history. The full chain is still persisted to the database; the window only affects what the LLM sees.
+
+**Files created:**
+- `backend/pkg/providers/context_window.go` — `applyContextWindow(chain, windowSize)` function
+
+**Files changed:**
+- `backend/pkg/config/config.go` — new config fields: `UseContextWindow` (bool, default `true`), `ContextWindowSize` (int, default `10`)
+- `backend/pkg/providers/performer.go` — calls `applyContextWindow` before sending the chain to the LLM when `UseContextWindow` is enabled
+
+### Chain Pruning
+
+Stale tool results (older than the 5 most recent tool-call/response pairs) are replaced with short stubs to prevent unbounded chain growth between summarization passes. This is a pure string operation with no LLM call.
+
+**Files created:**
+- `backend/pkg/providers/chain_pruning.go` — `pruneStaleToolResults(chain, keepRecent)` function; replaces old tool response content with a 120-char stub + `[... pruned N bytes ...]` pointer to memory search
+
+### Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `USE_CONTEXT_WINDOW` | `true` | Enable/disable sliding-window context |
+| `CONTEXT_WINDOW_SIZE` | `10` | Number of trailing messages in the window |
+
+**Runtime test:** Run a long flow (10+ subtasks) with context windowing on and off. Measure agent call times. Verify the fallback path (`USE_CONTEXT_WINDOW=false`) still works. Test `CONTEXT_WINDOW_SIZE=5` for tighter windows.
+
+---
+
+## Phase D: Specialist Agents
+
+**Goal:** Break the monolithic pentester agent into focused specialists that the Primary Agent delegates to based on vulnerability class.
+
+### Specialist Agent Types
+
+Six specialist agents were added, each with its own system prompt, question prompt, tool definition, and handler:
+
+| Specialist | Tool Name | System Prompt | Focus Area |
+|---|---|---|---|
+| Recon | `recon` | `recon.tmpl` | Reconnaissance: nmap, httpx, ffuf, whatweb, directory enumeration |
+| Injection | `injection` | `injection.tmpl` | Injection attacks: SQLi (sqlmap), command injection, template injection |
+| XSS | `xss_test` | `xss.tmpl` | Cross-site scripting: reflected, stored, DOM XSS |
+| Auth | `auth_test` | `auth.tmpl` | Authentication/session: default creds, session fixation, JWT, brute force |
+| IDOR | `idor_test` | `idor.tmpl` | Access control: horizontal/vertical privesc, direct object references |
+| SSRF | `ssrf_test` | `ssrf.tmpl` | SSRF: internal network access, cloud metadata, URL scheme abuse |
+
+### Files created (prompt templates)
+
+- `backend/pkg/templates/prompts/recon.tmpl` — recon specialist system prompt
+- `backend/pkg/templates/prompts/question_recon.tmpl` — recon specialist question prompt
+- `backend/pkg/templates/prompts/injection.tmpl` — injection specialist system prompt
+- `backend/pkg/templates/prompts/question_injection.tmpl` — injection specialist question prompt
+- `backend/pkg/templates/prompts/xss.tmpl` — XSS specialist system prompt
+- `backend/pkg/templates/prompts/question_xss.tmpl` — XSS specialist question prompt
+- `backend/pkg/templates/prompts/auth.tmpl` — auth specialist system prompt
+- `backend/pkg/templates/prompts/question_auth.tmpl` — auth specialist question prompt
+- `backend/pkg/templates/prompts/idor.tmpl` — IDOR specialist system prompt
+- `backend/pkg/templates/prompts/question_idor.tmpl` — IDOR specialist question prompt
+- `backend/pkg/templates/prompts/ssrf.tmpl` — SSRF specialist system prompt
+- `backend/pkg/templates/prompts/question_ssrf.tmpl` — SSRF specialist question prompt
+
+### Files changed (backend wiring)
+
+- `backend/pkg/templates/templates.go` — new `PromptType` constants for all specialist + question prompts; new `AllowedVars` entries; prompt registration in `FlowPrompts`
+- `backend/pkg/tools/registry.go` — tool name constants (`ReconToolName`, `InjectionToolName`, `XSSToolName`, `AuthToolName`, `IDORToolName`, `SSRFToolName`); tool type mappings; tool definitions with `SpecialistAction`/`SpecialistResult` parameter schemas; tools added to primary agent's available tool list
+- `backend/pkg/tools/args.go` — `SpecialistAction` and `SpecialistResult` structs (shared across all specialist delegation tools)
+- `backend/pkg/tools/tools.go` — `SpecialistExecutorConfig` struct for specialist executor setup
+- `backend/pkg/providers/handlers.go` — `specialistMeta` struct and `specialistRegistry` map wiring each tool name to its prompt types, option type, and message chain type; `GetSpecialistHandler` factory method
+- `backend/pkg/providers/performers.go` — `performSpecialist` method that runs the specialist agent loop (similar to `performPentester` but using the specialist's own prompt and tool set)
+- `backend/pkg/providers/pconfig/config.go` — new `OptionsType` constants for each specialist (e.g., `OptionsTypeRecon`, `OptionsTypeInjection`)
+- `backend/pkg/database/models.go` — new `MsgchainType` constants for each specialist's message chain storage
+
+### Subtask Patch Operations
+
+The subtask management system was refactored to support delta operations (add, remove, modify, reorder) instead of full subtask list replacement. This allows the Primary Agent to incrementally adjust the plan as specialists report findings.
+
+**Files created:**
+- `backend/pkg/providers/subtask_patch.go` — `applySubtaskOperations` function with full CRUD operations on the subtask list
+- `backend/pkg/providers/subtask_patch_test.go` — comprehensive tests for all subtask patch operations
+
+**Runtime test:** Run a Juice Shop flow. Verify the Primary Agent delegates to specialists. Verify each specialist uses tools appropriate to its focus area. Verify specialist results appear in the final report.
+
+---
+
+## Phase E: Validation Agent
+
+**Goal:** Add an adversarial validation agent that independently reproduces candidate findings before they are included in the final report.
+
+### Validator Agent
+
+The validator agent receives candidate findings from specialist agents and attempts to independently reproduce them. Findings that cannot be reproduced are marked as REJECTED and excluded from the final report. Confirmed findings receive an independent severity assessment.
+
+| Tool Name | Description |
+|---|---|
+| `validator` | Delegate to the findings validator for adversarial reproduction and severity assessment |
+| `validator_result` | Store the validation result (confirmed/rejected with evidence) |
+
+### Files changed
+
+- `backend/pkg/tools/registry.go` — `ValidatorToolName` and `ValidatorResultToolName` constants; tool definitions with `SpecialistAction`/`SpecialistResult` parameter schemas; validator added to primary agent's available tool list
+- `backend/pkg/providers/handlers.go` — validator entry in `specialistRegistry` map, wiring it to its prompt type, option type, and message chain type
+- `backend/pkg/providers/performers.go` — validator execution via the shared `performSpecialist` path
+- `backend/pkg/templates/templates.go` — prompt type constants and registration for the validator agent
+
+**Runtime test:** Manually trigger a finding the validator should reject (e.g., self-XSS). Verify the validator reproduces confirmed findings independently. Verify rejected findings are excluded from the final report.
+
+---
+
+## Phase F: Deployment Documentation
+
+**Goal:** Create deployment and testing documentation for the GPU VM.
+
+### Files created
+
+- `DEPLOY_NEBO_HACKBOT.md` — step-by-step deployment guide for the GPU VM (2x A100 40GB, Debian 13), covering vLLM setup, NEBO-HACKBOT stack configuration, new environment variables, rollback procedures, and future scope enforcement hooks
+- `RUNTIME_TEST_CHECKLIST.md` — specific test flows for each phase (A-E) plus baseline comparison methodology
+- `NEBO_HACKBOT_CHANGES.md` — this file, updated with Phase A-F entries
+
+### No code changes
+
+Phase F is documentation-only. No backend, frontend, or configuration code was modified.
+
+---
+
+## Provider Registry (reference)
+
+The provider registry (`backend/pkg/providers/registry.go`) supports the following provider types. For vLLM deployment, use the `custom` provider:
+
+| Provider | Env Var Gate | Use Case |
+|---|---|---|
+| `custom` | `LLM_SERVER_URL` + (`LLM_SERVER_MODEL` or `LLM_SERVER_CONFIG`) | vLLM, text-generation-inference, any OpenAI-compatible server |
+| `openai` | `OPENAI_API_KEY` | OpenAI API (or compatible endpoint with base URL override) |
+| `ollama` | `OLLAMA_SERVER_URL` | Ollama local inference (single GPU only) |
+| `anthropic` | `ANTHROPIC_API_KEY` | Anthropic Claude API |
+| `gemini` | `GEMINI_API_KEY` | Google Gemini API |
+| `bedrock` | AWS credentials | AWS Bedrock |
+| `deepseek` | `DEEPSEEK_API_KEY` | DeepSeek API |
+| `qwen` | `QWEN_API_KEY` | Qwen API (Alibaba Cloud) |

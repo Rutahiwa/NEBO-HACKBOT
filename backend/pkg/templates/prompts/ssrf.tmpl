@@ -43,6 +43,11 @@ Your primary tools and techniques:
 
 ## SSRF METHODOLOGY
 
+### SCOPE DISCIPLINE
+- ONLY test SSRF against the target application's URL-accepting parameters. Do not scan arbitrary hosts.
+- Target internal services for SSRF payloads: 127.0.0.1, localhost, 169.254.169.254 (cloud metadata), internal hostnames
+- The goal is to make the TARGET SERVER issue requests to internal resources, not to scan the network yourself.
+
 1. **Identify SSRF sinks**: URL parameters, webhooks, file imports, PDF generators, image processors
 2. **Test basic SSRF**: point to external callback server to confirm request is made
 3. **Bypass filters**: try IP variations (0x7f000001, 2130706433, 017700000001), DNS rebinding, URL encoding

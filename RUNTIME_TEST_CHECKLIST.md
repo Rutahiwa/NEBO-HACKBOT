@@ -94,6 +94,32 @@ Run a controlled comparison between original PentAGI and the NEBO-HACKBOT fork.
 
 ---
 
+## Final Tooling & Workflow Pass
+
+### Graceful failure + guaranteed report (Tasks 1+6)
+- [ ] Force a "no tool call" response (e.g., set CONTEXT_WINDOW_SIZE=2 to starve context) → verify subtask is marked Failed, NOT Waiting
+- [ ] Verify the flow CONTINUES past the failed subtask (next subtask runs)
+- [ ] Verify the reporter ALWAYS produces a final report, even when subtasks failed
+- [ ] Verify NO duplicate "Address Tool Call Issues" subtasks are spawned
+
+### Status queries (Task 2)
+- [ ] Mid-flow, ask "is the report ready?" → verify it answers directly WITHOUT creating new subtasks
+- [ ] Ask "what's the status?" → verify NO re-delegation to pentester/specialists
+- [ ] Then say "continue testing" → verify THAT resumes active work (the distinction works)
+
+### Evidence integrity (Task 3)
+- [ ] Stop the Juice Shop container, then trigger validation → verify findings are marked UNCONFIRMED (not "confirmed")
+- [ ] Check the report for any "Confirmed with Burp Suite" or references to tools that didn't run → must find NONE
+
+### Discovery cross-check (Task 4)
+- [ ] If discovery says "No IDOR vulnerabilities identified", verify the validator REJECTS any IDOR finding unless independently reproduced
+
+### Single-source report (Task 5)
+- [ ] Verify the final report contains NO contradictory duplicate findings
+- [ ] Verify each finding appears exactly once with consistent description and severity
+
+---
+
 ## Environment Notes
 
 - All tests should be run on the GPU VM (2x A100 40GB, Debian 13)

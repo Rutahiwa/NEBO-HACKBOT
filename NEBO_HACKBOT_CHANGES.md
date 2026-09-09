@@ -279,6 +279,59 @@ No change needed.
 
 ---
 
+## Final Tooling & Workflow Pass
+
+Fixes for 6 concrete bugs exposed by a baseline Juice Shop run (142 tool calls, ~2h49m, ~3.1M tokens, no report produced).
+
+### Task 1+6: Graceful subtask failure + guaranteed reporter
+
+**Before:** When the LLM returned empty content (stop reason 'stop'), `callWithRetries` retried 3x, then `performCallerReflector` fired, and if that also failed, the error propagated up through `subtaskWorker.Run` → `taskWorker.Run`, killing the entire task. The reporter at `task.go:336` never executed. Duplicate "Address Tool Call Issues" subtasks were spawned.
+
+**After:**
+- `performer.go`: Added `ErrSubtaskIncomplete` sentinel. `performReflector` failure wraps this sentinel.
+- `subtask.go`: When `PerformAgentChain` returns `ErrSubtaskIncomplete`, marks subtask Failed and returns nil (graceful).
+- `task.go`: Recoverable subtask errors (non-context, non-DB) log a warning and continue the loop. Only unrecoverable errors (context.Canceled, sql.ErrConnDone) propagate. Reporter always runs after the loop.
+
+**Files:** `backend/pkg/providers/performer.go`, `backend/pkg/controller/{subtask,task}.go`
+
+**Runtime test:** Force empty LLM response → subtask marked Failed, flow continues, report produced.
+
+### Task 2: Status queries must not trigger new work
+
+**Before:** Asking "is the report ready?" caused the Primary Agent to re-delegate to pentester, restart the target, install tools, re-scan ports.
+
+**After:** Added STATUS QUERY HANDLING directive to `primary_agent.tmpl` and `assistant.tmpl`. Status questions are answered from current knowledge using the done tool. New work only resumes on explicit "continue testing" instructions.
+
+**Files:** `backend/pkg/templates/prompts/{primary_agent,assistant}.tmpl`
+
+**Runtime test:** Ask "is the report ready?" mid-flow → answers without new subtasks.
+
+### Task 3: No confirmation without live target + real evidence
+
+**After:** Added to `validator.tmpl`: TARGET REACHABILITY CHECK (must verify target is live before confirming), EVIDENCE INTEGRITY (only cite actually-executed tools), UNCONFIRMED status for unreachable targets.
+
+**File:** `backend/pkg/templates/prompts/validator.tmpl`
+
+**Runtime test:** Stop target before validation → findings marked UNCONFIRMED.
+
+### Task 4: Validator rejects findings contradicting discovery
+
+**After:** Added DISCOVERY CROSS-CHECK rule to `validator.tmpl`. If discovery found no vulns of a class, findings must be independently reproduced or REJECTED.
+
+**File:** `backend/pkg/templates/prompts/validator.tmpl`
+
+**Runtime test:** Discovery says "No IDOR found" → IDOR finding REJECTED unless reproduced.
+
+### Task 5: Single source of truth for the report
+
+**After:** Added REPORT INTEGRITY RULES to `reporter.tmpl`: single source of truth (from subtask results only), no contradictions (each finding once), evidence-bound severity (no theoretical upgrades).
+
+**File:** `backend/pkg/templates/prompts/reporter.tmpl`
+
+**Runtime test:** Report has no duplicate/contradictory findings, severities match evidence.
+
+---
+
 ## Provider Registry (reference)
 
 The provider registry (`backend/pkg/providers/registry.go`) supports the following provider types. For vLLM deployment, use the `custom` provider:

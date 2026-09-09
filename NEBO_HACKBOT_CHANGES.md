@@ -229,6 +229,56 @@ Phase F is documentation-only. No backend, frontend, or configuration code was m
 
 ---
 
+## Context Isolation Verification Pass (pre-deploy)
+
+Systematic verification of 5 context-isolation principles before VM deployment.
+
+### 1. Specialist context isolation — ALREADY CORRECT
+
+**How it works:** `performSpecialist()` in `performers.go:693` calls `restoreChain()` which queries `GetFlowTaskTypeLastMsgChain` for a chain matching the specialist's own `MsgchainType`. On first invocation this returns empty, so `fallback()` creates a fresh `[SystemPrompt, HumanMessage]` chain. The specialist never inherits the orchestrator's chain — it only sees its own system prompt and the delegated question.
+
+**Files:** `backend/pkg/providers/performers.go:763`, `backend/pkg/providers/helpers.go:447-608`
+
+No change needed.
+
+### 2. Compact results back to orchestrator — ALREADY CORRECT
+
+**How it works:** `performSpecialist()` returns only `specialistResult.Result` (a single string extracted from the `SpecialistResult` JSON via the barrier tool handler at line 738). The specialist's full internal transcript stays in the DB chain; the orchestrator only sees the compact result string.
+
+**Files:** `backend/pkg/providers/performers.go:787`, `backend/pkg/tools/args.go` (SpecialistResult struct)
+
+No change needed.
+
+### 3. External memory for findings — ALREADY CORRECT
+
+**How it works:** All specialist delegation tool names are in `allowedStoringInMemoryTools` (`registry.go:197-203`), and the `storeToolResult()` function in `executor.go:519` writes tool results to pgvector when the tool is in that list. Graphiti integration (when enabled) also stores agent responses and tool executions. Findings survive window eviction because they're in durable pgvector storage, retrievable via `search_in_memory`.
+
+**Files:** `backend/pkg/tools/registry.go:181-205`, `backend/pkg/tools/executor.go:519-603`
+
+No change needed.
+
+### 4. Pin critical state — FIXED
+
+**What was wrong:** The context window could cut inside a tool-call exchange, leaving a Tool response message in the window without its preceding AI message (which contains the ToolCall the response answers). The LLM would see an orphaned tool response it never requested, causing confusion or malformed tool call attempts.
+
+**Fix:** Adjusted `applyContextWindow()` to back up the cut point past any leading Tool response messages, so the window always starts at an AI or Human message boundary.
+
+**File:** `backend/pkg/providers/context_window.go`
+
+**Runtime test:** Run a long flow with `USE_CONTEXT_WINDOW=true` and `CONTEXT_WINDOW_SIZE=5` (tight window). Verify no "unknown tool call ID" errors in agent logs.
+
+### 5. Prune output but keep conclusions — FIXED
+
+**What was wrong:** `pruneStaleToolResults()` kept the first 120 raw bytes of content, which often cut mid-word and lost the most informative line. The stub was a generic `[... pruned N bytes ...]` with no tool name or meaningful summary.
+
+**Fix:** Now extracts the first non-empty line (which usually contains the key finding — e.g., "Nmap scan report for 10.0.0.1" or "sqlmap identified the following injection point(s)") and prefixes it with the tool name. Stub size increased from 120 to 200 bytes.
+
+**File:** `backend/pkg/providers/chain_pruning.go`
+
+**Runtime test:** Run a multi-tool flow and inspect pruned stubs in the chain (via Langfuse or DB). Verify they show tool name + meaningful first line, not raw byte truncation.
+
+---
+
 ## Provider Registry (reference)
 
 The provider registry (`backend/pkg/providers/registry.go`) supports the following provider types. For vLLM deployment, use the `custom` provider:

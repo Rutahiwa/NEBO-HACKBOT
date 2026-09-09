@@ -313,13 +313,18 @@ func (fp *flowProvider) getTaskPrimaryAgentChainSummary(
 	)
 	ctx, _ = evaluator.Observation(ctx)
 
+	// In direct mode, the main chain is pentester, not primary_agent.
+	chainType := database.MsgchainTypePrimaryAgent
+	if fp.cfg.DirectMode {
+		chainType = database.MsgchainTypePentester
+	}
 	msgChain, err := fp.db.GetFlowTaskTypeLastMsgChain(ctx, database.GetFlowTaskTypeLastMsgChainParams{
 		FlowID: fp.flowID,
 		TaskID: database.Int64ToNullInt64(&taskID),
-		Type:   database.MsgchainTypePrimaryAgent,
+		Type:   chainType,
 	})
 	if err != nil || isEmptyChain(msgChain.Chain) {
-		return "", wrapErrorEndEvaluatorSpan(ctx, evaluator, "failed to get task primary agent chain", err)
+		return "", wrapErrorEndEvaluatorSpan(ctx, evaluator, "failed to get task agent chain", err)
 	}
 
 	chain := []llms.MessageContent{}

@@ -351,17 +351,44 @@ func (fp *flowProvider) GenerateSubtasks(ctx context.Context, taskID int64) ([]t
 	ctx, span := obs.Observer.NewSpan(ctx, obs.SpanKindInternal, "providers.flowProvider.GenerateSubtasks")
 	defer span.End()
 
-	// Direct mode: skip the LLM generator and return a single subtask
-	// that passes the user's original prompt straight to the pentester.
+	// Direct mode: skip the LLM generator and return phase-based subtasks
+	// so that if one phase fails the next still runs and the reporter has
+	// more data to work with.
 	if fp.cfg.DirectMode {
 		task, err := fp.db.GetTask(ctx, taskID)
 		if err != nil {
 			return nil, fmt.Errorf("direct mode: failed to get task: %w", err)
 		}
-		return []tools.SubtaskInfo{{
-			Title:       "Execute penetration test",
-			Description: task.Input,
-		}}, nil
+		return []tools.SubtaskInfo{
+			{
+				Title: "Phase 1: Reconnaissance and endpoint discovery",
+				Description: fmt.Sprintf(
+					"Perform reconnaissance and endpoint discovery for the following target. "+
+						"Enumerate all reachable services, open ports, web paths, technologies, "+
+						"and potential attack surface. Original task:\n\n%s", task.Input),
+			},
+			{
+				Title: "Phase 2: Authentication and injection testing",
+				Description: fmt.Sprintf(
+					"Test for authentication weaknesses and injection vulnerabilities "+
+						"(SQL injection, command injection, SSTI, etc.) on the target. "+
+						"Use the reconnaissance data gathered in the previous phase. Original task:\n\n%s", task.Input),
+			},
+			{
+				Title: "Phase 3: Access control and additional testing",
+				Description: fmt.Sprintf(
+					"Test for access control issues (IDOR, privilege escalation, SSRF, path traversal), "+
+						"XSS, CSRF, and any other vulnerabilities not covered in previous phases. "+
+						"Original task:\n\n%s", task.Input),
+			},
+			{
+				Title: "Phase 4: Compile and report findings",
+				Description: fmt.Sprintf(
+					"Compile all findings from previous phases into a structured penetration test report. "+
+						"Include discovered vulnerabilities, severity ratings, proof-of-concept details, "+
+						"and remediation recommendations. Original task:\n\n%s", task.Input),
+			},
+		}, nil
 	}
 
 	logger := logrus.WithContext(ctx).WithField("task_id", taskID)

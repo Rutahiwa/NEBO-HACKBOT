@@ -64,10 +64,12 @@ func (fp *flowProvider) performAgentChain(
 	defer span.End()
 
 	var (
-		wantToStop        bool
-		monitor           = fp.buildMonitor()
-		detector          = &repeatingDetector{}
-		summarizerHandler = fp.GetSummarizeResultHandler(taskID, subtaskID)
+		wantToStop                 bool
+		consecutiveTextOnlyFails   int
+		maxConsecutiveTextOnlyFails = 3
+		monitor                    = fp.buildMonitor()
+		detector                   = &repeatingDetector{}
+		summarizerHandler          = fp.GetSummarizeResultHandler(taskID, subtaskID)
 	)
 
 	// In direct mode, disable the execution monitor so the pentester
@@ -172,7 +174,10 @@ func (fp *flowProvider) performAgentChain(
 					append(chain, reflectorMsg), executor,
 					fp.getLastHumanMessage(chain), result.content, executionContext, 1)
 				if err != nil {
-					fields := logrus.Fields{}
+					consecutiveTextOnlyFails++
+					fields := logrus.Fields{
+						"consecutive_text_only_fails": consecutiveTextOnlyFails,
+					}
 					if result != nil {
 						fields["content"] = result.content[:min(1000, len(result.content))]
 						if !result.thinking.IsEmpty() {
@@ -180,9 +185,26 @@ func (fp *flowProvider) performAgentChain(
 						}
 						fields["execution"] = executionContext[:min(1000, len(executionContext))]
 					}
-					obs.LogErrorOrCancel(logger.WithFields(fields), err, "failed to perform reflector")
-					return fmt.Errorf("%w: %w", ErrSubtaskIncomplete, err)
+
+					if consecutiveTextOnlyFails >= maxConsecutiveTextOnlyFails {
+						obs.LogErrorOrCancel(logger.WithFields(fields), err, "failed to perform reflector after max consecutive text-only failures")
+						return fmt.Errorf("%w: %w", ErrSubtaskIncomplete, err)
+					}
+
+					// Not yet at the limit: log a warning, append the text
+					// the model produced as an AI message, and continue the
+					// loop so the next iteration can try again.
+					logger.WithFields(fields).Warn("reflector failed but consecutive limit not reached, appending text and continuing")
+					if result != nil && result.content != "" {
+						chain = append(chain, llms.MessageContent{
+							Role:  llms.ChatMessageTypeAI,
+							Parts: []llms.ContentPart{llms.TextContent{Text: result.content}},
+						})
+					}
+					continue
 				}
+				// Reflector succeeded with tool calls — reset the counter.
+				consecutiveTextOnlyFails = 0
 			}
 		}
 
@@ -487,6 +509,17 @@ func (fp *flowProvider) callWithRetries(
 		}
 
 		result.content = strings.Join(parts, "\n")
+
+		// If the model produced text but no structured tool calls, attempt
+		// to parse tool calls that were emitted as plain text (e.g.
+		// <tool_call>JSON</tool_call> or bare JSON objects).
+		if len(result.funcCalls) == 0 && result.content != "" {
+			if textToolCalls := parseTextModeToolCalls(result.content); len(textToolCalls) > 0 {
+				result.funcCalls = textToolCalls
+				result.content = "" // clear text since we extracted tool calls
+			}
+		}
+
 		if strings.Trim(result.content, "' \"\n\r\t") == "" && len(result.funcCalls) == 0 {
 			return fmt.Errorf("no content and tool calls in response: stop reason '%s'", stopReason)
 		}

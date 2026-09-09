@@ -1049,35 +1049,18 @@ func (fp *flowProvider) performDirectMode(ctx context.Context, taskID, subtaskID
 		return PerformResultError, fmt.Errorf("failed to unmarshal msg chain %d: %w", msgChainID, err)
 	}
 
-	// Build delegation handlers so the pentester can delegate when needed.
-	adviser, err := fp.GetAskAdviceHandler(ctx, &taskID, &subtaskID)
-	if err != nil {
-		logger.WithError(err).Error("failed to get ask advice handler")
-		return PerformResultError, fmt.Errorf("failed to get ask advice handler: %w", err)
-	}
-
-	coder, err := fp.GetCoderHandler(ctx, &taskID, &subtaskID)
-	if err != nil {
-		logger.WithError(err).Error("failed to get coder handler")
-		return PerformResultError, fmt.Errorf("failed to get coder handler: %w", err)
-	}
-
+	// In direct mode, keep delegation minimal to reduce tool count.
+	// Only installer (for tool setup) and searcher (for research) are provided.
 	installer, err := fp.GetInstallerHandler(ctx, &taskID, &subtaskID)
 	if err != nil {
-		logger.WithError(err).Error("failed to get installer handler")
-		return PerformResultError, fmt.Errorf("failed to get installer handler: %w", err)
-	}
-
-	memorist, err := fp.GetMemoristHandler(ctx, &taskID, &subtaskID)
-	if err != nil {
-		logger.WithError(err).Error("failed to get memorist handler")
-		return PerformResultError, fmt.Errorf("failed to get memorist handler: %w", err)
+		logger.WithField("handler", "installer").Warn("failed to get installer handler, continuing without")
+		installer = nil
 	}
 
 	searcher, err := fp.GetSubtaskSearcherHandler(ctx, &taskID, &subtaskID)
 	if err != nil {
-		logger.WithError(err).Error("failed to get searcher handler")
-		return PerformResultError, fmt.Errorf("failed to get searcher handler: %w", err)
+		logger.WithField("handler", "searcher").Warn("failed to get searcher handler, continuing without")
+		searcher = nil
 	}
 
 	subtask, err := fp.db.GetSubtask(ctx, subtaskID)
@@ -1110,21 +1093,15 @@ func (fp *flowProvider) performDirectMode(ctx context.Context, taskID, subtaskID
 	// The pentester gets terminal + file + browser + web_search + memory +
 	// delegation tools (adviser, coder, installer, memorist, searcher) +
 	// specialist tools (recon, injection, xss, auth, idor, ssrf, validator).
+	// In direct mode, keep the tool set MINIMAL to fit in 32K context.
+	// The pentester gets: terminal, file, browser, web_search, hack_result,
+	// plus installer (for tool setup) and searcher (for research).
+	// No specialist delegation — the pentester does the work itself.
 	cfg := tools.PentesterExecutorConfig{
 		TaskID:    &taskID,
 		SubtaskID: &subtaskID,
-		Adviser:   adviser,
-		Coder:     coder,
 		Installer: installer,
-		Memorist:  memorist,
 		Searcher:  searcher,
-		Recon:     fp.buildSpecialistHandlerSafe(ctx, tools.ReconToolName, &taskID, &subtaskID, logger),
-		Injection: fp.buildSpecialistHandlerSafe(ctx, tools.InjectionToolName, &taskID, &subtaskID, logger),
-		XSS:       fp.buildSpecialistHandlerSafe(ctx, tools.XSSToolName, &taskID, &subtaskID, logger),
-		Auth:      fp.buildSpecialistHandlerSafe(ctx, tools.AuthToolName, &taskID, &subtaskID, logger),
-		IDOR:      fp.buildSpecialistHandlerSafe(ctx, tools.IDORToolName, &taskID, &subtaskID, logger),
-		SSRF:      fp.buildSpecialistHandlerSafe(ctx, tools.SSRFToolName, &taskID, &subtaskID, logger),
-		Validator: fp.buildSpecialistHandlerSafe(ctx, tools.ValidatorToolName, &taskID, &subtaskID, logger),
 		HackResult: func(ctx context.Context, name string, args json.RawMessage) (string, error) {
 			// In direct mode, HackResult serves the same role as FinalyTool
 			// in the primary agent: it marks the subtask as done.

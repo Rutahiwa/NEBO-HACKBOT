@@ -1350,26 +1350,6 @@ func (fte *flowToolsExecutor) GetPentesterExecutor(cfg PentesterExecutorConfig) 
 		return nil, fmt.Errorf("hack result handler is required")
 	}
 
-	if cfg.Adviser == nil {
-		return nil, fmt.Errorf("adviser handler is required")
-	}
-
-	if cfg.Coder == nil {
-		return nil, fmt.Errorf("coder handler is required")
-	}
-
-	if cfg.Installer == nil {
-		return nil, fmt.Errorf("installer handler is required")
-	}
-
-	if cfg.Memorist == nil {
-		return nil, fmt.Errorf("memorist handler is required")
-	}
-
-	if cfg.Searcher == nil {
-		return nil, fmt.Errorf("searcher handler is required")
-	}
-
 	container, err := fte.db.GetFlowPrimaryContainer(context.Background(), fte.flowID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get container %d: %w", fte.flowID, err)
@@ -1399,28 +1379,38 @@ func (fte *flowToolsExecutor) GetPentesterExecutor(cfg PentesterExecutorConfig) 
 		store:     fte.store,
 		definitions: []llms.FunctionDefinition{
 			registryDefinitions[HackResultToolName],
-			registryDefinitions[AdviceToolName],
-			registryDefinitions[CoderToolName],
-			registryDefinitions[MaintenanceToolName],
-			registryDefinitions[MemoristToolName],
-			registryDefinitions[SearchToolName],
 			registryDefinitions[TerminalToolName],
 			registryDefinitions[FileToolName],
 		},
 		handlers: map[string]ExecutorHandler{
-			HackResultToolName:  cfg.HackResult,
-			AdviceToolName:      cfg.Adviser,
-			CoderToolName:       cfg.Coder,
-			MaintenanceToolName: cfg.Installer,
-			MemoristToolName:    cfg.Memorist,
-			SearchToolName:      cfg.Searcher,
-			TerminalToolName:    term.Handle,
-			FileToolName:        term.Handle,
+			HackResultToolName: cfg.HackResult,
+			TerminalToolName:   term.Handle,
+			FileToolName:       term.Handle,
 		},
 		barriers: map[string]struct{}{
 			HackResultToolName: {},
 		},
 		summarizer: cfg.Summarizer,
+	}
+
+	// Register optional delegation tools only when handlers are provided.
+	// In direct mode, most delegation handlers are nil to keep the tool
+	// count low and fit within the 32K context window.
+	pentesterOptionalTools := []struct {
+		name    string
+		handler ExecutorHandler
+	}{
+		{AdviceToolName, cfg.Adviser},
+		{CoderToolName, cfg.Coder},
+		{MaintenanceToolName, cfg.Installer},
+		{MemoristToolName, cfg.Memorist},
+		{SearchToolName, cfg.Searcher},
+	}
+	for _, ot := range pentesterOptionalTools {
+		if ot.handler != nil {
+			ce.definitions = append(ce.definitions, registryDefinitions[ot.name])
+			ce.handlers[ot.name] = ot.handler
+		}
 	}
 
 	browser := NewBrowserTool(

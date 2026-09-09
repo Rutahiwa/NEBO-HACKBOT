@@ -163,6 +163,13 @@ func (fp *flowProvider) performAgentChain(
 			if optAgentType == pconfig.OptionsTypeAssistant {
 				fp.storeAgentResponseToGraphiti(ctx, groupID, optAgentType, result, taskID, subtaskID, chainID)
 				return fp.processAssistantResult(ctx, logger, chainID, chain, result, summarizer, summarizerHandler, rollLastUpdateTime())
+			} else if fp.cfg.DirectMode && optAgentType == pconfig.OptionsTypePentester && result.content != "" {
+				// In direct mode, text output from the pentester = final report.
+				// Like Claude Code: the agent stops calling tools when it's done
+				// and outputs its report as plain text. No reflector, no barrier tool.
+				logger.WithField("content_len", len(result.content)).Info("direct mode: pentester produced text output, treating as final report")
+				fp.storeAgentResponseToGraphiti(ctx, groupID, optAgentType, result, taskID, subtaskID, chainID)
+				return nil
 			} else {
 				// Build AI message with reasoning for reflector (universal pattern)
 				reflectorMsg := llms.MessageContent{Role: llms.ChatMessageTypeAI}

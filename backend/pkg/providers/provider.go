@@ -1100,76 +1100,18 @@ func (fp *flowProvider) performDirectMode(ctx context.Context, taskID, subtaskID
 	// The pentester gets: terminal, file, browser, web_search, hack_result,
 	// plus installer (for tool setup) and searcher (for research).
 	// No specialist delegation — the pentester does the work itself.
+	// In direct mode, NO hack_result barrier tool. The agent stops by
+	// producing text output (like Claude Code / OpenCode). This prevents
+	// premature reporting — the agent must keep calling tools until it
+	// has genuinely achieved the objective or exhausted all approaches.
+	// NoBarrier=true: no hack_result tool at all. The agent keeps calling
+	// terminal/file tools until it produces text output = final report.
 	cfg := tools.PentesterExecutorConfig{
-		TaskID:    &taskID,
-		SubtaskID: &subtaskID,
-		Installer: installer,
-		Searcher:  searcher,
-		HackResult: func(ctx context.Context, name string, args json.RawMessage) (string, error) {
-			// In direct mode, HackResult serves the same role as FinalyTool
-			// in the primary agent: it marks the subtask as done.
-			var hackResult tools.HackResult
-			if err := json.Unmarshal(args, &hackResult); err != nil {
-				logger.WithContext(ctx).WithError(err).Error("failed to unmarshal hack result")
-				return "", fmt.Errorf("failed to unmarshal hack result: %w", err)
-			}
-
-			opts := []langfuse.AgentOption{
-				langfuse.WithAgentOutput(hackResult.Result),
-			}
-			defer func() {
-				executorAgent.End(opts...)
-			}()
-
-			performResult = PerformResultDone
-			opts = append(opts,
-				langfuse.WithAgentStatus("direct mode: hack result"),
-			)
-
-			subtask, err = fp.db.UpdateSubtaskResult(ctx, database.UpdateSubtaskResultParams{
-				Result: hackResult.Result,
-				ID:     subtaskID,
-			})
-			if err != nil {
-				opts = append(opts,
-					langfuse.WithAgentStatus(err.Error()),
-					langfuse.WithAgentLevel(langfuse.ObservationLevelError),
-				)
-				logger.WithContext(ctx).WithError(err).Error("failed to update subtask result")
-				return "", fmt.Errorf("failed to update subtask %d result: %w", subtaskID, err)
-			}
-
-			reportMsgID, err := fp.putMsgLog(
-				ctx,
-				database.MsglogTypeReport,
-				&taskID, &subtaskID, 0,
-				"", subtask.Description,
-			)
-			if err != nil {
-				opts = append(opts,
-					langfuse.WithAgentStatus(err.Error()),
-					langfuse.WithAgentLevel(langfuse.ObservationLevelError),
-				)
-				logger.WithContext(ctx).WithError(err).Error("failed to put report msg")
-				return "", fmt.Errorf("failed to put report msg: %w", err)
-			}
-
-			err = fp.updateMsgLogResult(
-				ctx,
-				reportMsgID, 0,
-				hackResult.Result, database.MsglogResultFormatMarkdown,
-			)
-			if err != nil {
-				opts = append(opts,
-					langfuse.WithAgentStatus(err.Error()),
-					langfuse.WithAgentLevel(langfuse.ObservationLevelError),
-				)
-				logger.WithContext(ctx).WithError(err).Error("failed to update report msg result")
-				return "", fmt.Errorf("failed to update report msg result: %w", err)
-			}
-
-			return "hack result successfully processed", nil
-		},
+		TaskID:     &taskID,
+		SubtaskID:  &subtaskID,
+		NoBarrier:  true,
+		Installer:  installer,
+		Searcher:   searcher,
 		Summarizer: fp.GetSummarizeResultHandler(&taskID, &subtaskID),
 	}
 
@@ -1184,6 +1126,43 @@ func (fp *flowProvider) performDirectMode(ctx context.Context, taskID, subtaskID
 	)
 	if err != nil {
 		return PerformResultError, wrapErrorEndAgentSpan(ctx, executorAgent, "failed to perform direct pentester chain", err)
+	}
+
+	// In direct mode, if the pentester produced text output (no hack_result barrier),
+	// the text IS the final report. Extract it from the chain and save as subtask result.
+	if performResult != PerformResultDone {
+		// The agent stopped by producing text (Claude Code style).
+		// Get the last AI message from the chain as the report.
+		updatedChain, _ := fp.db.GetMsgChain(ctx, msgChain.ID)
+		if updatedChain.ID != 0 {
+			var msgs []llms.MessageContent
+			if json.Unmarshal(updatedChain.Chain, &msgs) == nil {
+				for i := len(msgs) - 1; i >= 0; i-- {
+					if msgs[i].Role == llms.ChatMessageTypeAI {
+						for _, part := range msgs[i].Parts {
+							if tp, ok := part.(llms.TextContent); ok && tp.Text != "" {
+								// Save the text as the subtask result
+								fp.db.UpdateSubtaskResult(ctx, database.UpdateSubtaskResultParams{
+									Result: tp.Text,
+									ID:     subtaskID,
+								})
+								// Also save as a report message for the UI
+								reportMsgID, _ := fp.putMsgLog(ctx, database.MsglogTypeReport, &taskID, &subtaskID, 0, "", subtask.Description)
+								if reportMsgID != 0 {
+									fp.updateMsgLogResult(ctx, reportMsgID, 0, tp.Text, database.MsglogResultFormatMarkdown)
+								}
+								performResult = PerformResultDone
+								break
+							}
+						}
+						break
+					}
+				}
+			}
+		}
+		if performResult != PerformResultDone {
+			performResult = PerformResultDone // Still mark as done even if we couldn't extract text
+		}
 	}
 
 	executorAgent.End()

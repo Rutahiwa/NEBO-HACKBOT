@@ -280,6 +280,10 @@ type PentesterExecutorConfig struct {
 	Searcher   ExecutorHandler
 	HackResult ExecutorHandler
 	Summarizer SummarizeHandler
+	// NoBarrier disables hack_result as a barrier tool. When true, calling
+	// hack_result does NOT stop the agent loop — the agent continues working.
+	// Used in direct mode where the agent stops by producing text output.
+	NoBarrier bool
 	// Specialist delegation handlers (optional, for direct mode).
 	Recon     ExecutorHandler
 	Injection ExecutorHandler
@@ -1378,19 +1382,24 @@ func (fte *flowToolsExecutor) GetPentesterExecutor(cfg PentesterExecutorConfig) 
 		db:        fte.db,
 		store:     fte.store,
 		definitions: []llms.FunctionDefinition{
-			registryDefinitions[HackResultToolName],
 			registryDefinitions[TerminalToolName],
 			registryDefinitions[FileToolName],
 		},
 		handlers: map[string]ExecutorHandler{
-			HackResultToolName: cfg.HackResult,
-			TerminalToolName:   term.Handle,
-			FileToolName:       term.Handle,
+			TerminalToolName: term.Handle,
+			FileToolName:     term.Handle,
 		},
-		barriers: map[string]struct{}{
-			HackResultToolName: {},
-		},
+		barriers:   map[string]struct{}{},
 		summarizer: cfg.Summarizer,
+	}
+
+	// Only register hack_result as a tool+barrier when NoBarrier is false.
+	// In direct mode (NoBarrier=true), the agent has no escape hatch —
+	// it must keep working until it outputs text (Claude Code style).
+	if !cfg.NoBarrier && cfg.HackResult != nil {
+		ce.definitions = append(ce.definitions, registryDefinitions[HackResultToolName])
+		ce.handlers[HackResultToolName] = cfg.HackResult
+		ce.barriers[HackResultToolName] = struct{}{}
 	}
 
 	// Register optional delegation tools only when handlers are provided.

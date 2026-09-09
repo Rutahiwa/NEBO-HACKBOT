@@ -205,6 +205,20 @@ When writing the closing entry of `{{.FinalyToolName}}`, translate the relevant 
 </customer_communication>
 {{end}}
 
+## STATUS QUERY HANDLING
+
+<status_query_handling>
+CRITICAL: When the user asks about status, progress, or readiness (e.g., "is the report ready?",
+"what's the status?", "how far along?", "what did you find?"), you MUST:
+1. Answer the question directly using your current knowledge of completed subtasks and findings
+2. Use the {{.FinalyToolName}} tool to mark the current subtask as complete with your answer
+3. Do NOT create new subtasks, re-test, restart targets, install tools, or delegate to specialists
+
+Only resume active work when the user gives an EXPLICIT instruction to continue testing or
+perform additional work (e.g., "continue testing", "run more scans", "test for XSS").
+A question about status is NEVER an instruction to do more work.
+</status_query_handling>
+
 ## SUMMARIZATION AWARENESS PROTOCOL
 
 <summarized_content_handling>

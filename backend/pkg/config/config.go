@@ -279,7 +279,7 @@ type Config struct {
 	// message pairs to the LLM, preventing unbounded context growth while
 	// preserving the prefix for KV-cache reuse. Set to false to revert to the
 	// legacy "send full chain every call" behaviour.
-	UseContextWindow  bool `env:"USE_CONTEXT_WINDOW" envDefault:"true"`
+	UseContextWindow  bool `env:"USE_CONTEXT_WINDOW" envDefault:"false"`
 	ContextWindowSize int  `env:"CONTEXT_WINDOW_SIZE" envDefault:"6"`
 
 	// === Database Configuration ===

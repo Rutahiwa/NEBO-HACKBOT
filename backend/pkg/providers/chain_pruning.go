@@ -14,8 +14,8 @@ import (
 //
 // The stub preserves the first non-empty line of the result (which usually
 // contains the most meaningful summary) plus a pointer to memory search.
-const defaultKeepRecentToolResults = 5
-const pruneStubMaxLen = 200
+const defaultKeepRecentToolResults = 15
+const pruneStubMaxLen = 300
 
 func pruneStaleToolResults(chain []llms.MessageContent, keepRecent int) []llms.MessageContent {
 	if keepRecent <= 0 {

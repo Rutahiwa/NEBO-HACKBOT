@@ -351,6 +351,19 @@ func (fp *flowProvider) GenerateSubtasks(ctx context.Context, taskID int64) ([]t
 	ctx, span := obs.Observer.NewSpan(ctx, obs.SpanKindInternal, "providers.flowProvider.GenerateSubtasks")
 	defer span.End()
 
+	// Direct mode: skip the LLM generator and return a single subtask
+	// that passes the user's original prompt straight to the pentester.
+	if fp.cfg.DirectMode {
+		task, err := fp.db.GetTask(ctx, taskID)
+		if err != nil {
+			return nil, fmt.Errorf("direct mode: failed to get task: %w", err)
+		}
+		return []tools.SubtaskInfo{{
+			Title:       "Execute penetration test",
+			Description: task.Input,
+		}}, nil
+	}
+
 	logger := logrus.WithContext(ctx).WithField("task_id", taskID)
 
 	tasksInfo, err := fp.getTasksInfo(ctx, taskID)
@@ -433,6 +446,11 @@ func (fp *flowProvider) GenerateSubtasks(ctx context.Context, taskID int64) ([]t
 func (fp *flowProvider) RefineSubtasks(ctx context.Context, taskID int64) ([]tools.SubtaskInfo, error) {
 	ctx, span := obs.Observer.NewSpan(ctx, obs.SpanKindInternal, "providers.flowProvider.RefineSubtasks")
 	defer span.End()
+
+	// Direct mode: skip refinement entirely — the pentester handles everything.
+	if fp.cfg.DirectMode {
+		return nil, nil
+	}
 
 	logger := logrus.WithContext(ctx).WithField("task_id", taskID)
 
@@ -634,15 +652,21 @@ func (fp *flowProvider) PrepareAgentChain(ctx context.Context, taskID, subtaskID
 	ctx, span := obs.Observer.NewSpan(ctx, obs.SpanKindInternal, "providers.flowProvider.PrepareAgentChain")
 	defer span.End()
 
+	// In direct mode, use the pentester agent type instead of the primary agent.
 	optAgentType := pconfig.OptionsTypePrimaryAgent
 	msgChainType := database.MsgchainTypePrimaryAgent
+	if fp.cfg.DirectMode {
+		optAgentType = pconfig.OptionsTypePentester
+		msgChainType = database.MsgchainTypePentester
+	}
 
 	logger := logrus.WithContext(ctx).WithFields(logrus.Fields{
-		"provider":   fp.Type(),
-		"agent":      optAgentType,
-		"flow_id":    fp.flowID,
-		"task_id":    taskID,
-		"subtask_id": subtaskID,
+		"provider":    fp.Type(),
+		"agent":       optAgentType,
+		"flow_id":     fp.flowID,
+		"task_id":     taskID,
+		"subtask_id":  subtaskID,
+		"direct_mode": fp.cfg.DirectMode,
 	})
 
 	subtask, err := fp.db.GetSubtask(ctx, subtaskID)
@@ -666,35 +690,67 @@ func (fp *flowProvider) PrepareAgentChain(ctx context.Context, taskID, subtaskID
 		return 0, fmt.Errorf("failed to update subtask context: %w", err)
 	}
 
-	systemAgentTmpl, err := fp.prompter.RenderTemplate(templates.PromptTypePrimaryAgent, map[string]any{
-		"FinalyToolName":          tools.FinalyToolName,
-		"SearchToolName":          tools.SearchToolName,
-		"PentesterToolName":       tools.PentesterToolName,
-		"CoderToolName":           tools.CoderToolName,
-		"AdviceToolName":          tools.AdviceToolName,
-		"MemoristToolName":        tools.MemoristToolName,
-		"MaintenanceToolName":     tools.MaintenanceToolName,
-		"ReconToolName":           tools.ReconToolName,
-		"InjectionToolName":       tools.InjectionToolName,
-		"XSSToolName":             tools.XSSToolName,
-		"AuthToolName":            tools.AuthToolName,
-		"IDORToolName":            tools.IDORToolName,
-		"SSRFToolName":            tools.SSRFToolName,
-		"SummarizationToolName":   cast.SummarizationToolName,
-		"SummarizedContentPrefix": strings.ReplaceAll(csum.SummarizedContentPrefix, "\n", "\\n"),
-		"AskUserToolName":         tools.AskUserToolName,
-		"AskUserEnabled":          fp.askUser,
-		"ExecutionContext":        executionContext,
-		"Cwd":                     docker.WorkFolderPathInContainer,
-		"Lang":                    fp.language,
-		"DockerImage":             fp.image,
-		"CurrentTime":             getCurrentTime(),
-		"ToolPlaceholder":         ToolPlaceholder,
-		"UserFiles":               fp.userFilesListing(),
-	})
+	var systemAgentTmpl string
+	if fp.cfg.DirectMode {
+		// In direct mode, use the pentester system prompt so the agent gets
+		// full pentesting context and tool awareness.
+		systemAgentTmpl, err = fp.prompter.RenderTemplate(templates.PromptTypePentester, map[string]any{
+			"HackResultToolName":      tools.HackResultToolName,
+			"WebSearchToolName":       tools.WebSearchToolName,
+			"SearchGuideToolName":     tools.SearchGuideToolName,
+			"StoreGuideToolName":      tools.StoreGuideToolName,
+			"GraphitiEnabled":         fp.graphitiClient != nil && fp.graphitiClient.IsEnabled(),
+			"GraphitiSearchToolName":  tools.GraphitiSearchToolName,
+			"SearchToolName":          tools.SearchToolName,
+			"CoderToolName":           tools.CoderToolName,
+			"AdviceToolName":          tools.AdviceToolName,
+			"MemoristToolName":        tools.MemoristToolName,
+			"MaintenanceToolName":     tools.MaintenanceToolName,
+			"TerminalToolName":        tools.TerminalToolName,
+			"FileToolName":            tools.FileToolName,
+			"SummarizationToolName":   cast.SummarizationToolName,
+			"SummarizedContentPrefix": strings.ReplaceAll(csum.SummarizedContentPrefix, "\n", "\\n"),
+			"IsDefaultDockerImage":    strings.HasPrefix(strings.ToLower(fp.image), pentestDockerImage),
+			"DockerImage":             fp.image,
+			"Cwd":                     docker.WorkFolderPathInContainer,
+			"ContainerPorts":          fp.getContainerPortsDescription(),
+			"ExecutionContext":        executionContext,
+			"Lang":                    fp.language,
+			"CurrentTime":             getCurrentTime(),
+			"ToolPlaceholder":         ToolPlaceholder,
+			"UserFiles":               fp.userFilesListing(),
+		})
+	} else {
+		systemAgentTmpl, err = fp.prompter.RenderTemplate(templates.PromptTypePrimaryAgent, map[string]any{
+			"FinalyToolName":          tools.FinalyToolName,
+			"SearchToolName":          tools.SearchToolName,
+			"PentesterToolName":       tools.PentesterToolName,
+			"CoderToolName":           tools.CoderToolName,
+			"AdviceToolName":          tools.AdviceToolName,
+			"MemoristToolName":        tools.MemoristToolName,
+			"MaintenanceToolName":     tools.MaintenanceToolName,
+			"ReconToolName":           tools.ReconToolName,
+			"InjectionToolName":       tools.InjectionToolName,
+			"XSSToolName":             tools.XSSToolName,
+			"AuthToolName":            tools.AuthToolName,
+			"IDORToolName":            tools.IDORToolName,
+			"SSRFToolName":            tools.SSRFToolName,
+			"SummarizationToolName":   cast.SummarizationToolName,
+			"SummarizedContentPrefix": strings.ReplaceAll(csum.SummarizedContentPrefix, "\n", "\\n"),
+			"AskUserToolName":         tools.AskUserToolName,
+			"AskUserEnabled":          fp.askUser,
+			"ExecutionContext":        executionContext,
+			"Cwd":                     docker.WorkFolderPathInContainer,
+			"Lang":                    fp.language,
+			"DockerImage":             fp.image,
+			"CurrentTime":             getCurrentTime(),
+			"ToolPlaceholder":         ToolPlaceholder,
+			"UserFiles":               fp.userFilesListing(),
+		})
+	}
 	if err != nil {
-		logger.WithError(err).Error("failed to get system prompt for primary agent template")
-		return 0, fmt.Errorf("failed to get system prompt for primary agent template: %w", err)
+		logger.WithError(err).Error("failed to get system prompt for agent template")
+		return 0, fmt.Errorf("failed to get system prompt for agent template: %w", err)
 	}
 
 	msgChainID, _, err := fp.restoreChain(
@@ -712,6 +768,16 @@ func (fp *flowProvider) PerformAgentChain(ctx context.Context, taskID, subtaskID
 	ctx, span := obs.Observer.NewSpan(ctx, obs.SpanKindInternal, "providers.flowProvider.PerformAgentChain")
 	defer span.End()
 
+	if fp.cfg.DirectMode {
+		return fp.performDirectMode(ctx, taskID, subtaskID, msgChainID)
+	}
+
+	return fp.performPrimaryAgentMode(ctx, taskID, subtaskID, msgChainID)
+}
+
+// performPrimaryAgentMode is the original PerformAgentChain logic: the primary
+// agent orchestrates subtask execution by delegating to specialist agents.
+func (fp *flowProvider) performPrimaryAgentMode(ctx context.Context, taskID, subtaskID, msgChainID int64) (PerformResult, error) {
 	optAgentType := pconfig.OptionsTypePrimaryAgent
 	msgChainType := database.MsgchainTypePrimaryAgent
 
@@ -952,6 +1018,212 @@ func (fp *flowProvider) PerformAgentChain(ctx context.Context, taskID, subtaskID
 	executorAgent.End()
 
 	return performResult, nil
+}
+
+// performDirectMode routes the subtask directly to the pentester agent with full
+// tool access (terminal, file, browser, memory, delegation, and specialist tools).
+// It bypasses the primary agent entirely.
+func (fp *flowProvider) performDirectMode(ctx context.Context, taskID, subtaskID, msgChainID int64) (PerformResult, error) {
+	optAgentType := pconfig.OptionsTypePentester
+	msgChainType := database.MsgchainTypePentester
+
+	logger := logrus.WithContext(ctx).WithFields(logrus.Fields{
+		"provider":     fp.Type(),
+		"agent":        optAgentType,
+		"flow_id":      fp.flowID,
+		"task_id":      taskID,
+		"subtask_id":   subtaskID,
+		"msg_chain_id": msgChainID,
+		"direct_mode":  true,
+	})
+
+	msgChain, err := fp.db.GetMsgChain(ctx, msgChainID)
+	if err != nil {
+		logger.WithError(err).Error("failed to get msg chain")
+		return PerformResultError, fmt.Errorf("failed to get msg chain %d: %w", msgChainID, err)
+	}
+
+	var chain []llms.MessageContent
+	if err := json.Unmarshal(msgChain.Chain, &chain); err != nil {
+		logger.WithError(err).Error("failed to unmarshal msg chain")
+		return PerformResultError, fmt.Errorf("failed to unmarshal msg chain %d: %w", msgChainID, err)
+	}
+
+	// Build delegation handlers so the pentester can delegate when needed.
+	adviser, err := fp.GetAskAdviceHandler(ctx, &taskID, &subtaskID)
+	if err != nil {
+		logger.WithError(err).Error("failed to get ask advice handler")
+		return PerformResultError, fmt.Errorf("failed to get ask advice handler: %w", err)
+	}
+
+	coder, err := fp.GetCoderHandler(ctx, &taskID, &subtaskID)
+	if err != nil {
+		logger.WithError(err).Error("failed to get coder handler")
+		return PerformResultError, fmt.Errorf("failed to get coder handler: %w", err)
+	}
+
+	installer, err := fp.GetInstallerHandler(ctx, &taskID, &subtaskID)
+	if err != nil {
+		logger.WithError(err).Error("failed to get installer handler")
+		return PerformResultError, fmt.Errorf("failed to get installer handler: %w", err)
+	}
+
+	memorist, err := fp.GetMemoristHandler(ctx, &taskID, &subtaskID)
+	if err != nil {
+		logger.WithError(err).Error("failed to get memorist handler")
+		return PerformResultError, fmt.Errorf("failed to get memorist handler: %w", err)
+	}
+
+	searcher, err := fp.GetSubtaskSearcherHandler(ctx, &taskID, &subtaskID)
+	if err != nil {
+		logger.WithError(err).Error("failed to get searcher handler")
+		return PerformResultError, fmt.Errorf("failed to get searcher handler: %w", err)
+	}
+
+	subtask, err := fp.db.GetSubtask(ctx, subtaskID)
+	if err != nil {
+		logger.WithError(err).Error("failed to get subtask")
+		return PerformResultError, fmt.Errorf("failed to get subtask: %w", err)
+	}
+
+	ctx, observation := obs.Observer.NewObservation(ctx)
+	executorAgent := observation.Agent(
+		langfuse.WithAgentName(fmt.Sprintf("direct pentester for subtask %d: %s", subtaskID, subtask.Title)),
+		langfuse.WithAgentInput(chain),
+		langfuse.WithAgentMetadata(langfuse.Metadata{
+			"flow_id":      fp.flowID,
+			"task_id":      taskID,
+			"subtask_id":   subtaskID,
+			"msg_chain_id": msgChainID,
+			"provider":     fp.Type(),
+			"image":        fp.image,
+			"lang":         fp.language,
+			"description":  subtask.Description,
+			"direct_mode":  true,
+		}),
+	)
+	ctx, _ = executorAgent.Observation(ctx)
+
+	performResult := PerformResultError
+
+	// Use the pentester executor with HackResult as the barrier tool.
+	// The pentester gets terminal + file + browser + web_search + memory +
+	// delegation tools (adviser, coder, installer, memorist, searcher) +
+	// specialist tools (recon, injection, xss, auth, idor, ssrf, validator).
+	cfg := tools.PentesterExecutorConfig{
+		TaskID:    &taskID,
+		SubtaskID: &subtaskID,
+		Adviser:   adviser,
+		Coder:     coder,
+		Installer: installer,
+		Memorist:  memorist,
+		Searcher:  searcher,
+		Recon:     fp.buildSpecialistHandlerSafe(ctx, tools.ReconToolName, &taskID, &subtaskID, logger),
+		Injection: fp.buildSpecialistHandlerSafe(ctx, tools.InjectionToolName, &taskID, &subtaskID, logger),
+		XSS:       fp.buildSpecialistHandlerSafe(ctx, tools.XSSToolName, &taskID, &subtaskID, logger),
+		Auth:      fp.buildSpecialistHandlerSafe(ctx, tools.AuthToolName, &taskID, &subtaskID, logger),
+		IDOR:      fp.buildSpecialistHandlerSafe(ctx, tools.IDORToolName, &taskID, &subtaskID, logger),
+		SSRF:      fp.buildSpecialistHandlerSafe(ctx, tools.SSRFToolName, &taskID, &subtaskID, logger),
+		Validator: fp.buildSpecialistHandlerSafe(ctx, tools.ValidatorToolName, &taskID, &subtaskID, logger),
+		HackResult: func(ctx context.Context, name string, args json.RawMessage) (string, error) {
+			// In direct mode, HackResult serves the same role as FinalyTool
+			// in the primary agent: it marks the subtask as done.
+			var hackResult tools.HackResult
+			if err := json.Unmarshal(args, &hackResult); err != nil {
+				logger.WithContext(ctx).WithError(err).Error("failed to unmarshal hack result")
+				return "", fmt.Errorf("failed to unmarshal hack result: %w", err)
+			}
+
+			opts := []langfuse.AgentOption{
+				langfuse.WithAgentOutput(hackResult.Result),
+			}
+			defer func() {
+				executorAgent.End(opts...)
+			}()
+
+			performResult = PerformResultDone
+			opts = append(opts,
+				langfuse.WithAgentStatus("direct mode: hack result"),
+			)
+
+			subtask, err = fp.db.UpdateSubtaskResult(ctx, database.UpdateSubtaskResultParams{
+				Result: hackResult.Result,
+				ID:     subtaskID,
+			})
+			if err != nil {
+				opts = append(opts,
+					langfuse.WithAgentStatus(err.Error()),
+					langfuse.WithAgentLevel(langfuse.ObservationLevelError),
+				)
+				logger.WithContext(ctx).WithError(err).Error("failed to update subtask result")
+				return "", fmt.Errorf("failed to update subtask %d result: %w", subtaskID, err)
+			}
+
+			reportMsgID, err := fp.putMsgLog(
+				ctx,
+				database.MsglogTypeReport,
+				&taskID, &subtaskID, 0,
+				"", subtask.Description,
+			)
+			if err != nil {
+				opts = append(opts,
+					langfuse.WithAgentStatus(err.Error()),
+					langfuse.WithAgentLevel(langfuse.ObservationLevelError),
+				)
+				logger.WithContext(ctx).WithError(err).Error("failed to put report msg")
+				return "", fmt.Errorf("failed to put report msg: %w", err)
+			}
+
+			err = fp.updateMsgLogResult(
+				ctx,
+				reportMsgID, 0,
+				hackResult.Result, database.MsglogResultFormatMarkdown,
+			)
+			if err != nil {
+				opts = append(opts,
+					langfuse.WithAgentStatus(err.Error()),
+					langfuse.WithAgentLevel(langfuse.ObservationLevelError),
+				)
+				logger.WithContext(ctx).WithError(err).Error("failed to update report msg result")
+				return "", fmt.Errorf("failed to update report msg result: %w", err)
+			}
+
+			return "hack result successfully processed", nil
+		},
+		Summarizer: fp.GetSummarizeResultHandler(&taskID, &subtaskID),
+	}
+
+	executor, err := fp.executor.GetPentesterExecutor(cfg)
+	if err != nil {
+		return PerformResultError, wrapErrorEndAgentSpan(ctx, executorAgent, "failed to get pentester executor", err)
+	}
+
+	ctx = tools.PutAgentContext(ctx, msgChainType)
+	err = fp.performAgentChain(
+		ctx, optAgentType, msgChain.ID, &taskID, &subtaskID, chain, executor, fp.summarizer,
+	)
+	if err != nil {
+		return PerformResultError, wrapErrorEndAgentSpan(ctx, executorAgent, "failed to perform direct pentester chain", err)
+	}
+
+	executorAgent.End()
+
+	return performResult, nil
+}
+
+// buildSpecialistHandlerSafe returns a specialist handler or nil on error (non-fatal).
+func (fp *flowProvider) buildSpecialistHandlerSafe(
+	ctx context.Context,
+	toolName string,
+	taskID, subtaskID *int64,
+	logger *logrus.Entry,
+) tools.ExecutorHandler {
+	h, err := fp.GetSpecialistHandler(ctx, toolName, taskID, subtaskID)
+	if err != nil {
+		logger.WithField("specialist", toolName).WithError(err).Warn("failed to get specialist handler, skipping")
+		return nil
+	}
+	return h
 }
 
 func (fp *flowProvider) PutInputToAgentChain(ctx context.Context, msgChainID int64, input string) error {

@@ -280,6 +280,14 @@ type PentesterExecutorConfig struct {
 	Searcher   ExecutorHandler
 	HackResult ExecutorHandler
 	Summarizer SummarizeHandler
+	// Specialist delegation handlers (optional, for direct mode).
+	Recon     ExecutorHandler
+	Injection ExecutorHandler
+	XSS       ExecutorHandler
+	Auth      ExecutorHandler
+	IDOR      ExecutorHandler
+	SSRF      ExecutorHandler
+	Validator ExecutorHandler
 }
 
 // SpecialistExecutorConfig is a generic config for specialist agents (recon, injection, xss, auth, idor, ssrf).
@@ -1465,6 +1473,26 @@ func (fte *flowToolsExecutor) GetPentesterExecutor(cfg PentesterExecutorConfig) 
 	if webSearch.IsAvailable() {
 		ce.definitions = append(ce.definitions, registryDefinitions[WebSearchToolName])
 		ce.handlers[WebSearchToolName] = webSearch.Handle
+	}
+
+	// Register specialist delegation tools if handlers are provided (used in direct mode).
+	specialistTools := []struct {
+		toolName string
+		handler  ExecutorHandler
+	}{
+		{ReconToolName, cfg.Recon},
+		{InjectionToolName, cfg.Injection},
+		{XSSToolName, cfg.XSS},
+		{AuthToolName, cfg.Auth},
+		{IDORToolName, cfg.IDOR},
+		{SSRFToolName, cfg.SSRF},
+		{ValidatorToolName, cfg.Validator},
+	}
+	for _, st := range specialistTools {
+		if st.handler != nil {
+			ce.definitions = append(ce.definitions, registryDefinitions[st.toolName])
+			ce.handlers[st.toolName] = st.handler
+		}
 	}
 
 	return ce, nil

@@ -70,6 +70,12 @@ func (fp *flowProvider) performAgentChain(
 		summarizerHandler = fp.GetSummarizeResultHandler(taskID, subtaskID)
 	)
 
+	// In direct mode, disable the execution monitor so the pentester
+	// is not interrupted by mentor checks every N tool calls.
+	if fp.cfg.DirectMode {
+		monitor.enabled = false
+	}
+
 	logger := logrus.WithContext(ctx).WithFields(enrichLogrusFields(fp.flowID, taskID, subtaskID, logrus.Fields{
 		"provider":     fp.Type(),
 		"agent":        optAgentType,

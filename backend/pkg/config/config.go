@@ -268,6 +268,11 @@ type Config struct {
 	// === Agent Planning Phase Configuration ===
 	AgentPlanningStepEnabled bool `env:"AGENT_PLANNING_STEP_ENABLED" envDefault:"false"`
 
+	// === Direct Mode Configuration ===
+	// DirectMode bypasses the Generator/Refiner planning loop and routes
+	// the user prompt directly to the Pentester agent with full tool access.
+	DirectMode bool `env:"DIRECT_MODE" envDefault:"true"`
+
 	// === Context Window Configuration ===
 	// UseContextWindow enables a sliding window that keeps the system prompt +
 	// first human message pinned and only sends the last ContextWindowSize

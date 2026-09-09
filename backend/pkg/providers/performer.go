@@ -25,6 +25,12 @@ import (
 	"github.com/vxcontrol/langchaingo/llms/streaming"
 )
 
+// ErrSubtaskIncomplete is returned when a subtask's agent chain produces no
+// actionable output (no tool calls and no content) even after reflector
+// retries. Callers can use errors.Is to distinguish this recoverable
+// condition from hard failures such as context cancellation or DB errors.
+var ErrSubtaskIncomplete = errors.New("subtask incomplete: agent produced no actionable output")
+
 const (
 	maxRetriesToCallSimpleChain    = 3
 	maxRetriesToCallAgentChain     = 3
@@ -166,7 +172,7 @@ func (fp *flowProvider) performAgentChain(
 						fields["execution"] = executionContext[:min(1000, len(executionContext))]
 					}
 					obs.LogErrorOrCancel(logger.WithFields(fields), err, "failed to perform reflector")
-					return err
+					return fmt.Errorf("%w: %w", ErrSubtaskIncomplete, err)
 				}
 			}
 		}

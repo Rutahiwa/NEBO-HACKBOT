@@ -318,6 +318,21 @@ func (stw *subtaskWorker) Run(ctx context.Context) error {
 
 	performResult, err := stw.subtaskCtx.Provider.PerformAgentChain(ctx, taskID, subtaskID, msgChainID)
 	if err != nil {
+		// When the agent chain produced no actionable output (ErrSubtaskIncomplete),
+		// mark the subtask as failed but return nil so the task can continue to the
+		// next subtask and eventually run the reporter.
+		if errors.Is(err, providers.ErrSubtaskIncomplete) {
+			logrus.WithContext(ctx).WithError(err).WithField("subtask_id", subtaskID).
+				Warn("subtask incomplete: agent produced no actionable output, marking as failed")
+			errChainConsistency := stw.subtaskCtx.Provider.EnsureChainConsistency(ctx, msgChainID)
+			if errChainConsistency != nil {
+				logrus.WithContext(ctx).WithError(errChainConsistency).
+					Warn("failed to ensure chain consistency after incomplete subtask")
+			}
+			_ = stw.SetStatus(ctx, database.SubtaskStatusFailed)
+			return nil
+		}
+
 		if errors.Is(err, context.Canceled) {
 			ctx = context.Background()
 		}

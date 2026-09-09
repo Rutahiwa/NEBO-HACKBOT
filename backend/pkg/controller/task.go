@@ -315,8 +315,19 @@ func (tw *taskWorker) Run(ctx context.Context) error {
 		}
 
 		if err := st.Run(ctx); err != nil {
-			tw.handleInterrupting(err)
-			return err
+			// Unrecoverable errors propagate immediately: context cancellation,
+			// deadline exceeded, and database errors kill the task.
+			if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) || errors.Is(err, sql.ErrConnDone) || errors.Is(err, sql.ErrTxDone) {
+				tw.handleInterrupting(err)
+				return err
+			}
+
+			// Recoverable subtask-level failure: log, mark failed, and
+			// continue to the next subtask so the reporter can still run.
+			logrus.WithContext(ctx).WithError(err).WithField("subtask_id", st.GetSubtaskID()).
+				Warn("subtask failed with recoverable error, continuing to next subtask")
+			_ = st.SetStatus(ctx, database.SubtaskStatusFailed)
+			// fall through to continue the loop
 		}
 
 		// pass through if task is waiting from back status propagation

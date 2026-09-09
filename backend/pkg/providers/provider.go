@@ -699,6 +699,7 @@ func (fp *flowProvider) PrepareAgentChain(ctx context.Context, taskID, subtaskID
 		// full pentesting context and tool awareness.
 		systemAgentTmpl, err = fp.prompter.RenderTemplate(templates.PromptTypePentester, map[string]any{
 			"HackResultToolName":      tools.HackResultToolName,
+			"NoBarrier":               true,
 			"WebSearchToolName":       tools.WebSearchToolName,
 			"SearchGuideToolName":     tools.SearchGuideToolName,
 			"StoreGuideToolName":      tools.StoreGuideToolName,
@@ -1092,20 +1093,8 @@ func (fp *flowProvider) performDirectMode(ctx context.Context, taskID, subtaskID
 
 	performResult := PerformResultError
 
-	// Use the pentester executor with HackResult as the barrier tool.
-	// The pentester gets terminal + file + browser + web_search + memory +
-	// delegation tools (adviser, coder, installer, memorist, searcher) +
-	// specialist tools (recon, injection, xss, auth, idor, ssrf, validator).
-	// In direct mode, keep the tool set MINIMAL to fit in 32K context.
-	// The pentester gets: terminal, file, browser, web_search, hack_result,
-	// plus installer (for tool setup) and searcher (for research).
-	// No specialist delegation — the pentester does the work itself.
-	// In direct mode, NO hack_result barrier tool. The agent stops by
-	// producing text output (like Claude Code / OpenCode). This prevents
-	// premature reporting — the agent must keep calling tools until it
-	// has genuinely achieved the objective or exhausted all approaches.
-	// NoBarrier=true: no hack_result tool at all. The agent keeps calling
-	// terminal/file tools until it produces text output = final report.
+	// Direct mode uses a simple loop (performDirectLoop): call LLM → execute
+	// tools → repeat. Text output = done. No hack_result barrier needed.
 	cfg := tools.PentesterExecutorConfig{
 		TaskID:     &taskID,
 		SubtaskID:  &subtaskID,
@@ -1121,8 +1110,8 @@ func (fp *flowProvider) performDirectMode(ctx context.Context, taskID, subtaskID
 	}
 
 	ctx = tools.PutAgentContext(ctx, msgChainType)
-	err = fp.performAgentChain(
-		ctx, optAgentType, msgChain.ID, &taskID, &subtaskID, chain, executor, fp.summarizer,
+	err = fp.performDirectLoop(
+		ctx, msgChain.ID, &taskID, &subtaskID, chain, executor, fp.summarizer,
 	)
 	if err != nil {
 		return PerformResultError, wrapErrorEndAgentSpan(ctx, executorAgent, "failed to perform direct pentester chain", err)

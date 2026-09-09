@@ -612,6 +612,7 @@ func (fp *flowProvider) GetPentesterHandler(ctx context.Context, taskID, subtask
 			},
 			"system": {
 				"HackResultToolName":      tools.HackResultToolName,
+				"NoBarrier":               false,
 				"WebSearchToolName":       tools.WebSearchToolName,
 				"SearchGuideToolName":     tools.SearchGuideToolName,
 				"StoreGuideToolName":      tools.StoreGuideToolName,

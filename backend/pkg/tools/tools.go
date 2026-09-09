@@ -1350,7 +1350,7 @@ func (fte *flowToolsExecutor) GetCoderExecutor(cfg CoderExecutorConfig) (Context
 }
 
 func (fte *flowToolsExecutor) GetPentesterExecutor(cfg PentesterExecutorConfig) (ContextToolsExecutor, error) {
-	if cfg.HackResult == nil {
+	if cfg.HackResult == nil && !cfg.NoBarrier {
 		return nil, fmt.Errorf("hack result handler is required")
 	}
 

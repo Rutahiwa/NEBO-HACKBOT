@@ -72,8 +72,9 @@ func (fp *flowProvider) performAgentChain(
 		summarizerHandler          = fp.GetSummarizeResultHandler(taskID, subtaskID)
 	)
 
-	// In direct mode, disable the execution monitor so the pentester
-	// is not interrupted by mentor checks every N tool calls.
+	// In direct mode, performDirectLoop is used instead of this function.
+	// This monitor disable is kept as a safety net in case performAgentChain
+	// is ever called for pentester-type agents in direct mode.
 	if fp.cfg.DirectMode {
 		monitor.enabled = false
 	}
@@ -163,13 +164,6 @@ func (fp *flowProvider) performAgentChain(
 			if optAgentType == pconfig.OptionsTypeAssistant {
 				fp.storeAgentResponseToGraphiti(ctx, groupID, optAgentType, result, taskID, subtaskID, chainID)
 				return fp.processAssistantResult(ctx, logger, chainID, chain, result, summarizer, summarizerHandler, rollLastUpdateTime())
-			} else if fp.cfg.DirectMode && optAgentType == pconfig.OptionsTypePentester && result.content != "" {
-				// In direct mode, text output from the pentester = final report.
-				// Like Claude Code: the agent stops calling tools when it's done
-				// and outputs its report as plain text. No reflector, no barrier tool.
-				logger.WithField("content_len", len(result.content)).Info("direct mode: pentester produced text output, treating as final report")
-				fp.storeAgentResponseToGraphiti(ctx, groupID, optAgentType, result, taskID, subtaskID, chainID)
-				return nil
 			} else {
 				// Build AI message with reasoning for reflector (universal pattern)
 				reflectorMsg := llms.MessageContent{Role: llms.ChatMessageTypeAI}
@@ -304,6 +298,164 @@ func (fp *flowProvider) performAgentChain(
 			}
 		}
 	}
+}
+
+// performDirectLoop is a simple agent loop for direct mode, modeled after
+// OpenCode's processGeneration(): call LLM → execute tool calls → repeat.
+// When the model produces text with no tool calls, it's the final report.
+// No reflector, no barrier tools, no special text handling.
+func (fp *flowProvider) performDirectLoop(
+	ctx context.Context,
+	chainID int64,
+	taskID, subtaskID *int64,
+	chain []llms.MessageContent,
+	executor tools.ContextToolsExecutor,
+	summarizer csum.Summarizer,
+) error {
+	ctx, span := obs.Observer.NewSpan(ctx, obs.SpanKindInternal, "providers.flowProvider.performDirectLoop")
+	defer span.End()
+
+	var (
+		optAgentType      = pconfig.OptionsTypePentester
+		detector          = &repeatingDetector{}
+		groupID           = fp.cfg.GroupID(fp.flowID)
+		toolTypeMapping   = tools.GetToolTypeMapping()
+		summarizerHandler = fp.GetSummarizeResultHandler(taskID, subtaskID)
+		monitor           = &executionMonitor{enabled: false}
+	)
+
+	logger := logrus.WithContext(ctx).WithFields(enrichLogrusFields(fp.flowID, taskID, subtaskID, logrus.Fields{
+		"provider":     fp.Type(),
+		"agent":        optAgentType,
+		"msg_chain_id": chainID,
+		"direct_loop":  true,
+	}))
+
+	lastUpdateTime := time.Now()
+	rollLastUpdateTime := func() float64 {
+		durationDelta := time.Since(lastUpdateTime).Seconds()
+		lastUpdateTime = time.Now()
+		return durationDelta
+	}
+
+	executionContext, err := fp.getExecutionContext(ctx, taskID, subtaskID)
+	if err != nil {
+		return fmt.Errorf("failed to get execution context: %w", err)
+	}
+
+	maxIterations := 3000
+	if fp.maxGACallsLimit > 0 {
+		maxIterations = fp.maxGACallsLimit
+	}
+
+	for iteration := 0; iteration < maxIterations; iteration++ {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+
+		chain = pruneStaleToolResults(chain, defaultKeepRecentToolResults)
+
+		callChain := chain
+		if fp.cfg.UseContextWindow {
+			callChain = applyContextWindow(chain, fp.cfg.ContextWindowSize)
+		}
+
+		result, err := fp.callWithRetries(ctx, optAgentType, chainID, taskID, subtaskID, callChain, executor, executionContext)
+		if err != nil {
+			obs.LogErrorOrCancel(logger, err, "failed to call LLM in direct loop")
+			return err
+		}
+
+		if err := fp.updateMsgChainUsage(ctx, chainID, optAgentType, result.info, rollLastUpdateTime()); err != nil {
+			obs.LogErrorOrCancel(logger, err, "failed to update msg chain usage")
+			return err
+		}
+
+		// No tool calls = done. Text output is the final report.
+		if len(result.funcCalls) == 0 {
+			logger.WithField("iteration", iteration).Info("direct loop: model produced text, treating as final report")
+			fp.storeAgentResponseToGraphiti(ctx, groupID, optAgentType, result, taskID, subtaskID, chainID)
+
+			msg := llms.MessageContent{Role: llms.ChatMessageTypeAI}
+			if result.content != "" || !result.thinking.IsEmpty() {
+				msg.Parts = append(msg.Parts, llms.TextPartWithReasoning(result.content, result.thinking))
+			}
+			chain = append(chain, msg)
+			fp.updateMsgChain(ctx, optAgentType, chainID, chain, rollLastUpdateTime())
+			return nil
+		}
+
+		// Has tool calls — execute them all, then loop back.
+		fp.storeAgentResponseToGraphiti(ctx, groupID, optAgentType, result, taskID, subtaskID, chainID)
+
+		msg := llms.MessageContent{Role: llms.ChatMessageTypeAI}
+		if result.content != "" || !result.thinking.IsEmpty() {
+			msg.Parts = append(msg.Parts, llms.TextPartWithReasoning(result.content, result.thinking))
+		}
+		for _, toolCall := range result.funcCalls {
+			msg.Parts = append(msg.Parts, toolCall)
+		}
+		chain = append(chain, msg)
+
+		if err := fp.updateMsgChain(ctx, optAgentType, chainID, chain, rollLastUpdateTime()); err != nil {
+			obs.LogErrorOrCancel(logger, err, "failed to update msg chain")
+			return err
+		}
+
+		for idx, toolCall := range result.funcCalls {
+			if toolCall.FunctionCall == nil {
+				continue
+			}
+
+			funcName := toolCall.FunctionCall.Name
+			response, err := fp.execToolCall(
+				ctx, optAgentType, chainID, idx, result, monitor, detector, executor, taskID, subtaskID, chain,
+			)
+
+			if toolTypeMapping[funcName] != tools.AgentToolType {
+				fp.storeToolExecutionToGraphiti(
+					ctx, groupID, optAgentType, toolCall, response, err, executor, taskID, subtaskID, chainID,
+				)
+			}
+
+			if err != nil {
+				obs.LogErrorOrCancel(logger.WithFields(logrus.Fields{
+					"func_name": funcName,
+					"func_args": toolCall.FunctionCall.Arguments,
+				}), err, "failed to exec tool call")
+				return err
+			}
+
+			chain = append(chain, llms.MessageContent{
+				Role: llms.ChatMessageTypeTool,
+				Parts: []llms.ContentPart{
+					llms.ToolCallResponse{
+						ToolCallID: toolCall.ID,
+						Name:       funcName,
+						Content:    response,
+					},
+				},
+			})
+			if err := fp.updateMsgChain(ctx, optAgentType, chainID, chain, rollLastUpdateTime()); err != nil {
+				obs.LogErrorOrCancel(logger, err, "failed to update msg chain")
+				return err
+			}
+		}
+
+		if summarizer != nil {
+			chain, err = summarizer.SummarizeChain(ctx, summarizerHandler, chain, fp.tcIDTemplate)
+			if err != nil {
+				logger.WithError(err).Warn("failed to summarize chain, continuing")
+			} else if err := fp.updateMsgChain(ctx, optAgentType, chainID, chain, rollLastUpdateTime()); err != nil {
+				obs.LogErrorOrCancel(logger, err, "failed to update msg chain after summarization")
+				return err
+			}
+		}
+	}
+
+	return fmt.Errorf("direct loop exceeded safety limit (%d iterations)", maxIterations)
 }
 
 func (fp *flowProvider) execToolCall(

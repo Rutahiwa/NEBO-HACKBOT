@@ -262,7 +262,7 @@ type Config struct {
 	ExecutionMonitorTotalToolLimit int  `env:"EXECUTION_MONITOR_TOTAL_TOOL_LIMIT" envDefault:"10"`
 
 	// === Agent Tool Execution Limits ===
-	MaxGeneralAgentToolCalls int `env:"MAX_GENERAL_AGENT_TOOL_CALLS" envDefault:"200"`
+	MaxGeneralAgentToolCalls int `env:"MAX_GENERAL_AGENT_TOOL_CALLS" envDefault:"3000"`
 	MaxLimitedAgentToolCalls int `env:"MAX_LIMITED_AGENT_TOOL_CALLS" envDefault:"20"`
 
 	// === Agent Planning Phase Configuration ===

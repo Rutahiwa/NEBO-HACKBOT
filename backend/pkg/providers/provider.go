@@ -361,35 +361,8 @@ func (fp *flowProvider) GenerateSubtasks(ctx context.Context, taskID int64) ([]t
 		}
 		return []tools.SubtaskInfo{
 			{
-				Title: "Phase 1: Reconnaissance and endpoint discovery",
-				Description: fmt.Sprintf(
-					"Perform reconnaissance and endpoint discovery for the following target. "+
-						"Enumerate all reachable services, open ports, web paths, technologies, "+
-						"and potential attack surface. Write all discovered endpoints to /work/ENDPOINTS.md. "+
-						"Read /work/STATE.md for context from previous phases.\n\nTarget: %s", task.Input),
-			},
-			{
-				Title: "Phase 2: Authentication and injection testing",
-				Description: fmt.Sprintf(
-					"Test for authentication weaknesses and injection vulnerabilities "+
-						"(SQL injection, command injection, SSTI, etc.) on the target. "+
-						"Read /work/STATE.md for context from previous phases. "+
-						"Read /work/ENDPOINTS.md for discovered endpoints.\n\nTarget: %s", task.Input),
-			},
-			{
-				Title: "Phase 3: Access control and additional testing",
-				Description: fmt.Sprintf(
-					"Test for access control issues (IDOR, privilege escalation, SSRF, path traversal), "+
-						"XSS, CSRF, and any other vulnerabilities not covered in previous phases. "+
-						"Read /work/STATE.md for context from previous phases. "+
-						"Read /work/ENDPOINTS.md for discovered endpoints.\n\nTarget: %s", task.Input),
-			},
-			{
-				Title: "Phase 4: Compile and report findings",
-				Description: fmt.Sprintf(
-					"Compile all findings from previous phases into a structured penetration test report. "+
-						"Include discovered vulnerabilities, severity ratings, proof-of-concept details, "+
-						"and remediation recommendations. Read /work/FINDINGS.md and /work/STATE.md for all collected data.\n\nTarget: %s", task.Input),
+				Title:       "Execute penetration test",
+				Description: task.Input,
 			},
 		}, nil
 	}

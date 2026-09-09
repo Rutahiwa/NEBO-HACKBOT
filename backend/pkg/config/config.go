@@ -280,7 +280,7 @@ type Config struct {
 	// preserving the prefix for KV-cache reuse. Set to false to revert to the
 	// legacy "send full chain every call" behaviour.
 	UseContextWindow  bool `env:"USE_CONTEXT_WINDOW" envDefault:"true"`
-	ContextWindowSize int  `env:"CONTEXT_WINDOW_SIZE" envDefault:"10"`
+	ContextWindowSize int  `env:"CONTEXT_WINDOW_SIZE" envDefault:"6"`
 
 	// === Database Configuration ===
 	DatabaseURL string `env:"DATABASE_URL" envDefault:"postgres://nebohackbotuser:nebohackbotpass@pgvector:5432/nebohackbotdb?sslmode=disable"`

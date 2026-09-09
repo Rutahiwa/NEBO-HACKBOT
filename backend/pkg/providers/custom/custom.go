@@ -20,7 +20,7 @@ func BuildProviderConfig(cfg *config.Config, configData []byte) (*pconfig.Provid
 		llms.WithTemperature(1.0),
 		llms.WithTopP(1.0),
 		llms.WithN(1),
-		llms.WithMaxTokens(4096),
+		llms.WithMaxTokens(2048),
 	}
 
 	if cfg.LLMServerModel != "" {

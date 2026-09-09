@@ -95,7 +95,10 @@ func (fp *flowProvider) performAgentChain(
 	var maxCallsLimit int
 	switch optAgentType {
 	case pconfig.OptionsTypeAssistant, pconfig.OptionsTypePrimaryAgent,
-		pconfig.OptionsTypePentester, pconfig.OptionsTypeCoder, pconfig.OptionsTypeInstaller:
+		pconfig.OptionsTypePentester, pconfig.OptionsTypeCoder, pconfig.OptionsTypeInstaller,
+		pconfig.OptionsTypeRecon, pconfig.OptionsTypeInjection, pconfig.OptionsTypeXSS,
+		pconfig.OptionsTypeAuth, pconfig.OptionsTypeIDOR, pconfig.OptionsTypeSSRF,
+		pconfig.OptionsTypeValidator:
 		if fp.maxGACallsLimit <= 0 {
 			maxCallsLimit = maxGeneralAgentChainIterations
 		} else {

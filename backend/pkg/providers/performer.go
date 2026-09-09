@@ -316,12 +316,15 @@ func (fp *flowProvider) performDirectLoop(
 	defer span.End()
 
 	var (
-		optAgentType      = pconfig.OptionsTypePentester
-		detector          = &repeatingDetector{}
-		groupID           = fp.cfg.GroupID(fp.flowID)
-		toolTypeMapping   = tools.GetToolTypeMapping()
-		summarizerHandler = fp.GetSummarizeResultHandler(taskID, subtaskID)
-		monitor           = &executionMonitor{enabled: false}
+		optAgentType           = pconfig.OptionsTypePentester
+		detector               = &repeatingDetector{}
+		groupID                = fp.cfg.GroupID(fp.flowID)
+		toolTypeMapping        = tools.GetToolTypeMapping()
+		summarizerHandler      = fp.GetSummarizeResultHandler(taskID, subtaskID)
+		monitor                = &executionMonitor{enabled: false}
+		consecutiveTextOnly    int
+		maxConsecutiveTextOnly = 3
+		totalToolCalls         int
 	)
 
 	logger := logrus.WithContext(ctx).WithFields(enrichLogrusFields(fp.flowID, taskID, subtaskID, logrus.Fields{
@@ -373,21 +376,50 @@ func (fp *flowProvider) performDirectLoop(
 			return err
 		}
 
-		// No tool calls = done. Text output is the final report.
+		// No tool calls — the model produced text only.
+		// Qwen2.5 sometimes narrates between tool calls instead of making them.
+		// Only treat as final report after multiple consecutive text-only responses.
 		if len(result.funcCalls) == 0 {
-			logger.WithField("iteration", iteration).Info("direct loop: model produced text, treating as final report")
+			consecutiveTextOnly++
 			fp.storeAgentResponseToGraphiti(ctx, groupID, optAgentType, result, taskID, subtaskID, chainID)
 
+			// Append the model's text as an AI message
 			msg := llms.MessageContent{Role: llms.ChatMessageTypeAI}
 			if result.content != "" || !result.thinking.IsEmpty() {
 				msg.Parts = append(msg.Parts, llms.TextPartWithReasoning(result.content, result.thinking))
 			}
 			chain = append(chain, msg)
-			fp.updateMsgChain(ctx, optAgentType, chainID, chain, rollLastUpdateTime())
-			return nil
+
+			if consecutiveTextOnly >= maxConsecutiveTextOnly {
+				// Model has produced text N times in a row — it's really done.
+				logger.WithFields(logrus.Fields{
+					"iteration":        iteration,
+					"total_tool_calls": totalToolCalls,
+				}).Info("direct loop: model produced text repeatedly, treating as final report")
+				fp.updateMsgChain(ctx, optAgentType, chainID, chain, rollLastUpdateTime())
+				return nil
+			}
+
+			// Nudge the model to continue working
+			logger.WithFields(logrus.Fields{
+				"iteration":             iteration,
+				"consecutive_text_only": consecutiveTextOnly,
+				"content_preview":       result.content[:min(200, len(result.content))],
+			}).Info("direct loop: text-only response, nudging model to continue")
+
+			nudge := "You have not completed the objective yet. Do NOT report — keep working. Make your next tool call now."
+			chain = append(chain, llms.TextParts(llms.ChatMessageTypeHuman, nudge))
+
+			if err := fp.updateMsgChain(ctx, optAgentType, chainID, chain, rollLastUpdateTime()); err != nil {
+				return err
+			}
+			continue
 		}
 
-		// Has tool calls — execute them all, then loop back.
+		// Model made tool calls — reset the text-only counter.
+		consecutiveTextOnly = 0
+		totalToolCalls += len(result.funcCalls)
+
 		fp.storeAgentResponseToGraphiti(ctx, groupID, optAgentType, result, taskID, subtaskID, chainID)
 
 		msg := llms.MessageContent{Role: llms.ChatMessageTypeAI}

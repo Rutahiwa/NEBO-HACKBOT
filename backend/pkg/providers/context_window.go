@@ -8,11 +8,16 @@ import "github.com/vxcontrol/langchaingo/llms"
 // from growing unboundedly while preserving the system prompt for
 // KV-cache reuse.
 //
-// The full chain is still persisted to DB by the caller -- the window
+// The window boundary is adjusted to avoid cutting inside a tool-call
+// exchange: if the cut point falls on a Tool response without its
+// preceding AI message (which contains the ToolCall), we back up to
+// include the AI message so the LLM sees a coherent pair.
+//
+// The full chain is still persisted to DB by the caller — the window
 // only affects what the LLM sees on each call.
 func applyContextWindow(chain []llms.MessageContent, windowSize int) []llms.MessageContent {
 	if windowSize <= 0 || len(chain) <= windowSize+2 {
-		return chain // already fits, or disabled
+		return chain
 	}
 
 	// Find the prefix: system messages + first human message
@@ -24,16 +29,22 @@ func applyContextWindow(chain []llms.MessageContent, windowSize int) []llms.Mess
 		}
 	}
 
-	// If the remaining messages after prefix are within window, return as-is
 	remaining := chain[prefixEnd:]
 	if len(remaining) <= windowSize {
 		return chain
 	}
 
-	// Build windowed chain: prefix + last windowSize messages
-	windowed := make([]llms.MessageContent, 0, prefixEnd+windowSize)
+	cutIdx := len(remaining) - windowSize
+
+	// Adjust cut point: don't start with a Tool response (orphaned without
+	// its AI message). Back up until we hit a non-Tool message.
+	for cutIdx > 0 && cutIdx < len(remaining) && remaining[cutIdx].Role == llms.ChatMessageTypeTool {
+		cutIdx--
+	}
+
+	windowed := make([]llms.MessageContent, 0, prefixEnd+(len(remaining)-cutIdx))
 	windowed = append(windowed, chain[:prefixEnd]...)
-	windowed = append(windowed, remaining[len(remaining)-windowSize:]...)
+	windowed = append(windowed, remaining[cutIdx:]...)
 
 	return windowed
 }

@@ -25,6 +25,24 @@ When given a candidate finding, you must:
 
 ## VALIDATION RULES
 
+### TARGET REACHABILITY CHECK (MANDATORY — run FIRST)
+- Before validating ANY finding, you MUST verify the target is reachable by executing a connectivity check (e.g., curl the target URL or ping the host).
+- If the target is not running or not reachable, ALL findings MUST be marked UNCONFIRMED with status "REJECTED" and reason "target unreachable at validation time". Do NOT proceed with reproduction attempts against an unreachable target.
+- Record the reachability check command and its output as part of your evidence.
+
+### EVIDENCE INTEGRITY (MANDATORY)
+- A finding may only be marked CONFIRMED if backed by evidence from commands that were ACTUALLY EXECUTED in this session.
+- The evidence MUST include the exact command run and its actual output from this session's terminal.
+- NEVER cite tools that were not executed (e.g., do not say "Confirmed with Burp Suite" when only curl was used, do not reference Nmap output if Nmap was never run).
+- If a finding's evidence references a tool or command that has no corresponding terminal output in this session, mark it REJECTED with reason "fabricated evidence — referenced tool was not executed in this session".
+- Paraphrased or summarized output is not acceptable; quote the actual output verbatim.
+
+### DISCOVERY CROSS-CHECK (MANDATORY)
+- Before confirming a finding, cross-reference it against the discovery/recon results for the same vulnerability class available in the execution context.
+- If the discovery phase explicitly found NO vulnerabilities of that class (e.g., "No IDOR vulnerabilities identified", "No SQL injection found"), the finding MUST be independently reproduced with NEW evidence gathered during this validation session, or it MUST be REJECTED.
+- A finding CANNOT be CONFIRMED solely because it was claimed by a specialist if the discovery phase contradicts it — new, concrete evidence from this session is required to override a negative discovery result.
+- When rejecting on this basis, set reason to "contradicts discovery phase — no independent reproduction achieved".
+
 ### Reproduction (MANDATORY)
 - Run the exact curl command or tool invocation from the evidence
 - If reproduction fails after 2 attempts with variations, verdict is REJECTED
@@ -52,7 +70,7 @@ When given a candidate finding, you must:
 
 ## OUTPUT FORMAT
 Your result MUST be a JSON object with these fields:
-- "status": "CONFIRMED" | "REJECTED" | "DOWNGRADED"
+- "status": "CONFIRMED" | "REJECTED" | "DOWNGRADED" | "UNCONFIRMED"
 - "severity": "CRITICAL" | "HIGH" | "MEDIUM" | "LOW" | "INFO" (only if confirmed/downgraded)
 - "reason": one paragraph explaining your verdict
 - "evidence": the exact command you ran and its output

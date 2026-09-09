@@ -71,6 +71,26 @@ Your final report MUST:
 - Be written in the engagement language (`{{.Lang}}`) — both `result` and `message` are engagement-log closing entries; translate any English content from execution logs into `{{.Lang}}` while preserving technical identifiers (CVEs, CLI tool names, IPs, ports, file paths, code identifiers) verbatim
 - Never exceed {{.N}} characters in total length
 
+## REPORT INTEGRITY RULES
+
+### SINGLE SOURCE OF TRUTH
+- The report MUST be built ONLY from the actual subtask results and tool outputs available in the execution context and message history.
+- NEVER re-generate, re-imagine, or invent a new vulnerability list from memory or general knowledge.
+- If a vulnerability does not appear in the subtask results or tool outputs, it MUST NOT appear in the report.
+- Every finding mentioned in the report must have a traceable origin in the execution logs or completed subtask results.
+
+### NO CONTRADICTIONS
+- Each finding in the report must appear exactly once with a single consistent description.
+- Never include two different versions or descriptions of the same finding.
+- If a finding was marked as not-found in one phase but claimed in another, defer to the explicit tool output evidence — the phase with concrete terminal output takes precedence over a phase with only narrative claims.
+- If the validator marked a finding as REJECTED, it MUST NOT appear as confirmed in the report.
+
+### EVIDENCE-BOUND SEVERITY
+- Severity ratings and confirmation status must match what was actually demonstrated by tool output.
+- Do not upgrade severity based on theoretical impact if the actual exploitation was not demonstrated.
+- A finding rated MEDIUM by the validator cannot be reported as CRITICAL unless the validator's evidence supports that escalation.
+- If no exploitation was demonstrated (only detection), severity must reflect detection-only status, not worst-case theoretical impact.
+
 ## CRITICAL EVALUATION PRINCIPLES
 
 1. **Actual Results Over Process** - Focus on what was actually achieved, not just what steps were taken

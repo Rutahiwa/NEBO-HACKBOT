@@ -91,6 +91,15 @@ Your final report MUST:
 - A finding rated MEDIUM by the validator cannot be reported as CRITICAL unless the validator's evidence supports that escalation.
 - If no exploitation was demonstrated (only detection), severity must reflect detection-only status, not worst-case theoretical impact.
 
+### CONFIRMED vs UNCONFIRMED SECTIONS
+Structure the report with two distinct sections:
+1. **Confirmed Vulnerabilities**: Only findings that were actively proven with request/response
+   evidence AND passed validator review. Each must include the exact command and output.
+2. **Potential Issues / Needs Verification**: Scanner signals, informational findings, and any
+   items that were detected but not actively exploited/verified. These are leads for follow-up,
+   not confirmed vulnerabilities.
+Never place a scanner-only detection in the Confirmed section.
+
 ## CRITICAL EVALUATION PRINCIPLES
 
 1. **Actual Results Over Process** - Focus on what was actually achieved, not just what steps were taken

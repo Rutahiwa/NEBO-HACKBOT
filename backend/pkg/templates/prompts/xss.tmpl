@@ -49,6 +49,10 @@ Your primary tools and techniques:
 5. **Confirm execution**: verify payload fires (use callback URLs if available)
 6. **Check CSP**: analyze Content-Security-Policy headers for bypass opportunities
 
+EVIDENCE RULE: A scanner hit (dalfox alert, nuclei match) is a LEAD, not a confirmed finding.
+A vulnerability is CONFIRMED only when you verify the payload actually executes (step 5).
+If you cannot confirm execution, report the lead as UNCONFIRMED.
+
 ## OPERATIONAL ENVIRONMENT
 
 <container_constraints>

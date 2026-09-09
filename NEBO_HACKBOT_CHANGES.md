@@ -332,6 +332,39 @@ Fixes for 6 concrete bugs exposed by a baseline Juice Shop run (142 tool calls, 
 
 ---
 
+## Recon-Signal vs Proven-Vulnerability Audit
+
+A baseline run treated nikto scanner output as a CONFIRMED CRITICAL finding. This audit identified which prompts correctly distinguish scanner signals from proven vulnerabilities and which blur the distinction.
+
+### Audit Findings
+
+| Prompt | Status | Issue |
+|--------|--------|-------|
+| `validator.tmpl` | EXCELLENT | Already has independent reproduction, evidence integrity, anti-blur rules ("a reflection is NOT XSS unless JavaScript executes") |
+| `reporter.tmpl` | STRONG | Already has evidence-bound severity and validator veto power |
+| `auth.tmpl` | SOUND | Inherently active testing, no scanners involved |
+| `idor.tmpl` | SOUND | Purely active with explicit request/response evidence requirements |
+| `ssrf.tmpl` | SOUND | Callback-based verification built in |
+| `pentester.tmpl` | **FIXED** | Graphiti taxonomy (DETECTED → CONFIRMED → EXPLOITED) was inside `{{if .GraphitiEnabled}}` — disappeared when Graphiti off. Added non-conditional `<evidence_standard>` block. |
+| `recon.tmpl` | **FIXED** | Used "findings" ambiguously. Added explicit framing: output is an attack surface map of leads, not confirmed vulnerabilities. |
+| `injection.tmpl` | **FIXED** | Methodology implied the right process but didn't state scanner-only detection is insufficient. Added evidence rule requiring demonstrated data extraction. |
+| `xss.tmpl` | **FIXED** | Had good "Confirm execution" step but no explicit statement that scanner hits are just leads. Added evidence rule. |
+| `primary_agent.tmpl` | **FIXED** | Validator routing was a suggestion in use_cases, not enforced. Added top-level `<validation_mandate>` requiring all findings to pass validator. |
+| `reporter.tmpl` | **ENHANCED** | Added Confirmed vs Potential Issues section structure. Scanner-only detections go in Potential Issues, never Confirmed. |
+
+### Files Changed
+- `backend/pkg/templates/prompts/pentester.tmpl` — `<evidence_standard>` block (non-conditional)
+- `backend/pkg/templates/prompts/recon.tmpl` — explicit "leads not findings" framing
+- `backend/pkg/templates/prompts/injection.tmpl` — evidence rule for data extraction
+- `backend/pkg/templates/prompts/xss.tmpl` — evidence rule for execution verification
+- `backend/pkg/templates/prompts/primary_agent.tmpl` — `<validation_mandate>` top-level rule
+- `backend/pkg/templates/prompts/reporter.tmpl` — Confirmed vs Potential Issues sections
+
+### Runtime Test
+Run a Juice Shop flow where nikto flags an issue (e.g., "server header disclosure") but active curl verification does NOT demonstrate exploitable impact → verify it appears in "Potential Issues / Needs Verification" section of the report, NOT in the "Confirmed Vulnerabilities" section.
+
+---
+
 ## Provider Registry (reference)
 
 The provider registry (`backend/pkg/providers/registry.go`) supports the following provider types. For vLLM deployment, use the `custom` provider:

@@ -462,6 +462,19 @@ func (cs *CoverageState) getCoverageSummary() (string, error) {
 	return sb.String(), nil
 }
 
+func (cs *CoverageState) GetCoverageSummary() string {
+	cs.mu.RLock()
+	defer cs.mu.RUnlock()
+	s, _ := cs.getCoverageSummary()
+	return s
+}
+
+func (cs *CoverageState) FindingCount() int {
+	cs.mu.RLock()
+	defer cs.mu.RUnlock()
+	return len(cs.Findings)
+}
+
 func (cs *CoverageState) CoveragePercent() float64 {
 	cs.mu.RLock()
 	defer cs.mu.RUnlock()

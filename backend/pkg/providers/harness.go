@@ -27,9 +27,9 @@ func DefaultHarnessConfig() HarnessConfig {
 	return HarnessConfig{
 		MaxIterations:          500,
 		MinToolCalls:           5,
-		StallThreshold:         15,
+		StallThreshold:         5,
 		RepetitionThreshold:    5,
-		MaxConsecutiveTextOnly: 3,
+		MaxConsecutiveTextOnly: 1,
 		CoverageCompleteAt:     85.0,
 	}
 }
@@ -124,7 +124,7 @@ func (fp *flowProvider) performHarnessLoop(
 				return nil
 			}
 
-			nudge := history.GenerateNudge("text_only")
+			nudge := history.GenerateNudgeWithCoverage("text_only", coverageState.GetCoverageSummary())
 			chain = append(chain, llms.TextParts(llms.ChatMessageTypeHuman, nudge))
 			if err := fp.updateMsgChain(ctx, optAgentType, chainID, chain, rollLastUpdateTime()); err != nil {
 				return err
@@ -202,30 +202,31 @@ func (fp *flowProvider) performHarnessLoop(
 			}
 		}
 
-		// Harness-driven checks (every 10 iterations)
-		if iteration > 0 && iteration%10 == 0 {
+		// Harness-driven checks (every 3 iterations)
+		if iteration > 0 && iteration%3 == 0 {
 			coveragePct := coverageState.CoveragePercent()
+			coverageSummary := coverageState.GetCoverageSummary()
 
 			if history.DetectStall(harnessConfig.StallThreshold) && history.ToolCallCount() >= harnessConfig.MinToolCalls {
-				nudge := history.GenerateNudge("stall")
+				nudge := history.GenerateNudgeWithCoverage("stall", coverageSummary)
 				chain = append(chain, llms.TextParts(llms.ChatMessageTypeHuman, nudge))
 				logger.WithField("coverage", coveragePct).Info("harness loop: stall detected, nudging")
 			}
 
 			if history.DetectToolRepetition(harnessConfig.RepetitionThreshold) {
-				nudge := history.GenerateNudge("repetition")
+				nudge := history.GenerateNudgeWithCoverage("repetition", coverageSummary)
 				chain = append(chain, llms.TextParts(llms.ChatMessageTypeHuman, nudge))
 				logger.Info("harness loop: tool repetition detected, nudging")
 			}
 
 			if coveragePct >= harnessConfig.CoverageCompleteAt {
-				nudge := buildCoverageNudge(coveragePct, len(coverageState.Findings))
+				nudge := buildCoverageNudge(coveragePct, coverageState.FindingCount())
 				chain = append(chain, llms.TextParts(llms.ChatMessageTypeHuman, nudge))
 				logger.WithField("coverage", coveragePct).Info("harness loop: high coverage, suggesting wrap-up")
 			}
 
-			if iteration%25 == 0 {
-				progressNudge := history.GenerateNudge("progress")
+			if iteration%15 == 0 {
+				progressNudge := history.GenerateNudgeWithCoverage("progress", coverageSummary)
 				chain = append(chain, llms.TextParts(llms.ChatMessageTypeHuman, progressNudge))
 			}
 		}

@@ -84,30 +84,41 @@ func (h *HarnessHistory) DetectToolRepetition(threshold int) bool {
 }
 
 func (h *HarnessHistory) GenerateNudge(stallType string) string {
+	return h.GenerateNudgeWithCoverage(stallType, "")
+}
+
+func (h *HarnessHistory) GenerateNudgeWithCoverage(stallType, coverageSummary string) string {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
+	var sb strings.Builder
+
 	switch stallType {
 	case "stall":
-		return "You have not made new discoveries in several iterations. " +
-			"Try a completely different approach — different tool, different endpoint, different technique. " +
-			"Check get_state with section 'coverage' to see what areas remain untested."
+		sb.WriteString("You have not made new discoveries in several iterations. ")
+		sb.WriteString("Try a completely different approach — different tool, different endpoint, different technique.")
 	case "repetition":
 		if len(h.toolCallNames) > 0 {
 			lastTool := h.toolCallNames[len(h.toolCallNames)-1]
-			return fmt.Sprintf("You have called '%s' repeatedly. Try a different tool or approach. "+
-				"Check get_state to see untested areas.", lastTool)
+			sb.WriteString(fmt.Sprintf("You have called '%s' repeatedly. Stop and try a different approach.", lastTool))
+		} else {
+			sb.WriteString("You are repeating the same approach. Try something different.")
 		}
-		return "You are repeating the same approach. Try something different."
 	case "text_only":
-		return "Make your next tool call now. Do not explain what you plan to do — execute it."
+		sb.WriteString("Make your next tool call now. Do not explain what you plan to do — execute it.")
 	case "progress":
-		return fmt.Sprintf("Progress check: %d iterations, %d tool calls. "+
-			"Keep working — check get_state with section 'coverage' to find untested areas.",
-			h.iterationCount, len(h.toolCallNames))
+		sb.WriteString(fmt.Sprintf("Progress check: %d iterations, %d tool calls. Keep working.",
+			h.iterationCount, len(h.toolCallNames)))
 	default:
-		return "Continue testing. Use get_state to check coverage."
+		sb.WriteString("Continue testing.")
 	}
+
+	if coverageSummary != "" {
+		sb.WriteString("\n\nCURRENT COVERAGE STATE:\n")
+		sb.WriteString(coverageSummary)
+	}
+
+	return sb.String()
 }
 
 type PhaseResult struct {

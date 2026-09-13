@@ -273,6 +273,7 @@ type AgentConfig struct {
 	Reasoning         ReasoningConfig `json:"reasoning,omitempty" yaml:"reasoning,omitempty"`
 	Price             *PriceInfo      `json:"price,omitempty" yaml:"price,omitempty"`
 	ExtraBody         map[string]any  `json:"extra_body,omitempty" yaml:"extra_body,omitempty"`
+	ToolChoice        string          `json:"tool_choice,omitempty" yaml:"tool_choice,omitempty"`
 	raw               map[string]any  `json:"-" yaml:"-"`
 }
 
@@ -766,6 +767,9 @@ func (ac *AgentConfig) BuildOptions() []llms.CallOption {
 	if _, ok := ac.raw["extra_body"]; ok && ac.ExtraBody != nil {
 		options = append(options, openai.WithExtraBody(ac.ExtraBody))
 	}
+	if _, ok := ac.raw["tool_choice"]; ok && ac.ToolChoice != "" {
+		options = append(options, llms.WithToolChoice(ac.ToolChoice))
+	}
 
 	return options
 }
@@ -831,6 +835,9 @@ func (ac *AgentConfig) marshalMap() map[string]any {
 	}
 	if ac.ExtraBody != nil {
 		output["extra_body"] = ac.ExtraBody
+	}
+	if ac.ToolChoice != "" {
+		output["tool_choice"] = ac.ToolChoice
 	}
 
 	return output

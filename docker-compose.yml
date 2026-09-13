@@ -195,6 +195,8 @@ services:
       - DOCKER_WORK_DIR=${DOCKER_WORK_DIR:-}
       - DOCKER_DEFAULT_IMAGE=${DOCKER_DEFAULT_IMAGE:-}
       - DOCKER_DEFAULT_IMAGE_FOR_PENTEST=${DOCKER_DEFAULT_IMAGE_FOR_PENTEST:-}
+      - DIRECT_MODE=${DIRECT_MODE:-true}
+      - USE_PHASE_PIPELINE=${USE_PHASE_PIPELINE:-false}
     logging:
       options:
         max-size: 50m

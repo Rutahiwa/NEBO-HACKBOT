@@ -18,7 +18,8 @@ import (
 var ErrNothingToLoad = errors.New("nothing to load")
 
 type FlowContext struct {
-	DB database.Querier
+	DB  database.Querier
+	Cfg *config.Config
 
 	UserID  int64
 	FlowID  int64

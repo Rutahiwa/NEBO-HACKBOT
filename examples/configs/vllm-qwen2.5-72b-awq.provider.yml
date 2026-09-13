@@ -1,0 +1,75 @@
+# Qwen2.5-72B-Instruct-AWQ Provider Configuration for NEBO-HACKBOT
+# Optimized for vLLM with tool calling on 2x A100 40GB (tensor-parallel-size 2)
+#
+# CRITICAL: tool_choice is set to "required" for executor agents to force
+# guided decoding. Qwen2.5-72B-AWQ with tool_choice "auto" silently ignores
+# tools on vLLM (confirmed bug, vLLM issue #17481). Using "required" forces
+# vLLM to use constrained decoding, guaranteeing valid tool call output.
+#
+# vLLM server flags required:
+#   --enable-auto-tool-choice --tool-call-parser hermes --enable-prefix-caching
+#
+# Agents that must produce text (reporter, assistant) use tool_choice: auto
+# because "required" suppresses all non-tool output.
+
+simple:
+  max_tokens: 8192
+  temperature: 0.7
+
+simple_json:
+  max_tokens: 8192
+  temperature: 0.7
+  json: true
+
+primary_agent:
+  max_tokens: 8192
+  temperature: 0.7
+  tool_choice: required
+
+assistant:
+  max_tokens: 8192
+  temperature: 0.7
+  tool_choice: auto
+
+generator:
+  max_tokens: 8192
+  temperature: 0.7
+
+refiner:
+  max_tokens: 8192
+  temperature: 0.7
+
+adviser:
+  max_tokens: 8192
+  temperature: 0.7
+  tool_choice: required
+
+reflector:
+  max_tokens: 8192
+  temperature: 0.7
+  tool_choice: required
+
+searcher:
+  max_tokens: 8192
+  temperature: 0.7
+  tool_choice: required
+
+enricher:
+  max_tokens: 8192
+  temperature: 0.7
+  tool_choice: required
+
+coder:
+  max_tokens: 8192
+  temperature: 0.7
+  tool_choice: required
+
+installer:
+  max_tokens: 8192
+  temperature: 0.7
+  tool_choice: required
+
+pentester:
+  max_tokens: 8192
+  temperature: 0.7
+  tool_choice: required

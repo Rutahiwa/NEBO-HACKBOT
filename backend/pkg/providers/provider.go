@@ -694,7 +694,32 @@ func (fp *flowProvider) PrepareAgentChain(ctx context.Context, taskID, subtaskID
 	}
 
 	var systemAgentTmpl string
-	if fp.cfg.DirectMode {
+	if fp.cfg.UsePhasePipeline {
+		promptType := templates.PromptTypePhaseExecutor
+		vars := map[string]any{
+			"TargetURL":       subtask.Description,
+			"DockerImage":     fp.image,
+			"Cwd":             docker.WorkFolderPathInContainer,
+			"CoverageSummary": "",
+			"AuthSummary":     "",
+		}
+		switch subtask.Title {
+		case "Validation":
+			promptType = templates.PromptTypePhaseValidator
+			vars = map[string]any{
+				"TargetURL":      subtask.Description,
+				"DockerImage":    fp.image,
+				"Cwd":            docker.WorkFolderPathInContainer,
+				"FindingDetails": "",
+			}
+		case "Reporting":
+			promptType = templates.PromptTypePhaseReporter
+			vars = map[string]any{
+				"TargetURL": subtask.Description,
+			}
+		}
+		systemAgentTmpl, err = fp.prompter.RenderTemplate(promptType, vars)
+	} else if fp.cfg.DirectMode {
 		// In direct mode, use the pentester system prompt so the agent gets
 		// full pentesting context and tool awareness.
 		systemAgentTmpl, err = fp.prompter.RenderTemplate(templates.PromptTypePentester, map[string]any{
@@ -771,6 +796,10 @@ func (fp *flowProvider) PrepareAgentChain(ctx context.Context, taskID, subtaskID
 func (fp *flowProvider) PerformAgentChain(ctx context.Context, taskID, subtaskID, msgChainID int64) (PerformResult, error) {
 	ctx, span := obs.Observer.NewSpan(ctx, obs.SpanKindInternal, "providers.flowProvider.PerformAgentChain")
 	defer span.End()
+
+	if fp.cfg.UsePhasePipeline {
+		return fp.performPhasePipeline(ctx, taskID, subtaskID, msgChainID)
+	}
 
 	if fp.cfg.DirectMode {
 		return fp.performDirectMode(ctx, taskID, subtaskID, msgChainID)
@@ -1157,6 +1186,169 @@ func (fp *flowProvider) performDirectMode(ctx context.Context, taskID, subtaskID
 	executorAgent.End()
 
 	return performResult, nil
+}
+
+func (fp *flowProvider) performPhasePipeline(ctx context.Context, taskID, subtaskID, msgChainID int64) (PerformResult, error) {
+	optAgentType := pconfig.OptionsTypePentester
+	msgChainType := database.MsgchainTypePentester
+
+	logger := logrus.WithContext(ctx).WithFields(logrus.Fields{
+		"provider":       fp.Type(),
+		"agent":          optAgentType,
+		"flow_id":        fp.flowID,
+		"task_id":        taskID,
+		"subtask_id":     subtaskID,
+		"msg_chain_id":   msgChainID,
+		"phase_pipeline": true,
+	})
+
+	msgChain, err := fp.db.GetMsgChain(ctx, msgChainID)
+	if err != nil {
+		logger.WithError(err).Error("failed to get msg chain")
+		return PerformResultError, fmt.Errorf("failed to get msg chain %d: %w", msgChainID, err)
+	}
+
+	var chain []llms.MessageContent
+	if err := json.Unmarshal(msgChain.Chain, &chain); err != nil {
+		logger.WithError(err).Error("failed to unmarshal msg chain")
+		return PerformResultError, fmt.Errorf("failed to unmarshal msg chain %d: %w", msgChainID, err)
+	}
+
+	subtask, err := fp.db.GetSubtask(ctx, subtaskID)
+	if err != nil {
+		logger.WithError(err).Error("failed to get subtask")
+		return PerformResultError, fmt.Errorf("failed to get subtask: %w", err)
+	}
+
+	ctx, observation := obs.Observer.NewObservation(ctx)
+	executorAgent := observation.Agent(
+		langfuse.WithAgentName(fmt.Sprintf("phase pipeline for subtask %d: %s", subtaskID, subtask.Title)),
+		langfuse.WithAgentInput(chain),
+		langfuse.WithAgentMetadata(langfuse.Metadata{
+			"flow_id":        fp.flowID,
+			"task_id":        taskID,
+			"subtask_id":     subtaskID,
+			"msg_chain_id":   msgChainID,
+			"provider":       fp.Type(),
+			"phase_pipeline": true,
+			"phase":          subtask.Title,
+		}),
+	)
+	ctx, _ = executorAgent.Observation(ctx)
+
+	// Validator and Reporter phases use a single LLM call, not the full harness loop.
+	if subtask.Title == "Validation" || subtask.Title == "Reporting" {
+		return fp.performPhaseSimple(ctx, executorAgent, optAgentType, msgChainType, msgChain.ID, &taskID, &subtaskID, chain, subtask)
+	}
+
+	coverageState := tools.NewCoverageState()
+
+	cfg := tools.PentesterExecutorConfig{
+		TaskID:        &taskID,
+		SubtaskID:     &subtaskID,
+		NoBarrier:     true,
+		Summarizer:    fp.GetSummarizeResultHandler(&taskID, &subtaskID),
+		CoverageState: coverageState,
+	}
+
+	executor, err := fp.executor.GetPentesterExecutor(cfg)
+	if err != nil {
+		return PerformResultError, wrapErrorEndAgentSpan(ctx, executorAgent, "failed to get pentester executor", err)
+	}
+
+	ctx = tools.PutAgentContext(ctx, msgChainType)
+	harnessConfig := DefaultHarnessConfig()
+	err = fp.performHarnessLoop(
+		ctx, msgChain.ID, &taskID, &subtaskID, chain, executor, fp.summarizer, coverageState, harnessConfig,
+	)
+	if err != nil {
+		return PerformResultError, wrapErrorEndAgentSpan(ctx, executorAgent, "failed to perform phase pipeline", err)
+	}
+
+	updatedChain, _ := fp.db.GetMsgChain(ctx, msgChain.ID)
+	if updatedChain.ID != 0 {
+		var msgs []llms.MessageContent
+		if json.Unmarshal(updatedChain.Chain, &msgs) == nil {
+			for i := len(msgs) - 1; i >= 0; i-- {
+				if msgs[i].Role == llms.ChatMessageTypeAI {
+					for _, part := range msgs[i].Parts {
+						if tp, ok := part.(llms.TextContent); ok && tp.Text != "" {
+							fp.db.UpdateSubtaskResult(ctx, database.UpdateSubtaskResultParams{
+								Result: tp.Text,
+								ID:     subtaskID,
+							})
+							reportMsgID, _ := fp.putMsgLog(ctx, database.MsglogTypeReport, &taskID, &subtaskID, 0, "", subtask.Description)
+							if reportMsgID != 0 {
+								fp.updateMsgLogResult(ctx, reportMsgID, 0, tp.Text, database.MsglogResultFormatMarkdown)
+							}
+							break
+						}
+					}
+					break
+				}
+			}
+		}
+	}
+
+	executorAgent.End()
+	return PerformResultDone, nil
+}
+
+// performPhaseSimple handles Validation and Reporting phases with a single LLM call.
+// These phases don't use the harness loop — they run the chain once and extract the result.
+// TODO: wire up cross-phase CoverageState so validator/reporter can see executor findings.
+func (fp *flowProvider) performPhaseSimple(
+	ctx context.Context,
+	agentSpan langfuse.Agent,
+	optAgentType pconfig.ProviderOptionsType,
+	msgChainType database.MsgchainType,
+	chainID int64,
+	taskID, subtaskID *int64,
+	chain []llms.MessageContent,
+	subtask database.Subtask,
+) (PerformResult, error) {
+	logger := logrus.WithContext(ctx).WithFields(enrichLogrusFields(fp.flowID, taskID, subtaskID, logrus.Fields{
+		"phase": subtask.Title,
+	}))
+	logger.Info("phase pipeline: running simple phase (no harness loop)")
+
+	cfg := tools.PentesterExecutorConfig{
+		TaskID:     taskID,
+		SubtaskID:  subtaskID,
+		NoBarrier:  true,
+		Summarizer: fp.GetSummarizeResultHandler(taskID, subtaskID),
+	}
+
+	executor, err := fp.executor.GetPentesterExecutor(cfg)
+	if err != nil {
+		return PerformResultError, wrapErrorEndAgentSpan(ctx, agentSpan, "failed to get executor for simple phase", err)
+	}
+
+	ctx = tools.PutAgentContext(ctx, msgChainType)
+
+	executionContext, err := fp.getExecutionContext(ctx, taskID, subtaskID)
+	if err != nil {
+		executionContext = ""
+	}
+
+	result, err := fp.callWithRetries(ctx, optAgentType, chainID, taskID, subtaskID, chain, executor, executionContext)
+	if err != nil {
+		return PerformResultError, wrapErrorEndAgentSpan(ctx, agentSpan, "failed to call LLM for simple phase", err)
+	}
+
+	if result.content != "" {
+		fp.db.UpdateSubtaskResult(ctx, database.UpdateSubtaskResultParams{
+			Result: result.content,
+			ID:     *subtaskID,
+		})
+		reportMsgID, _ := fp.putMsgLog(ctx, database.MsglogTypeReport, taskID, subtaskID, 0, "", subtask.Description)
+		if reportMsgID != 0 {
+			fp.updateMsgLogResult(ctx, reportMsgID, 0, result.content, database.MsglogResultFormatMarkdown)
+		}
+	}
+
+	agentSpan.End()
+	return PerformResultDone, nil
 }
 
 // buildSpecialistHandlerSafe returns a specialist handler or nil on error (non-fatal).

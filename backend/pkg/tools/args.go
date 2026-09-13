@@ -562,3 +562,16 @@ func (s *Strings) MarshalJSON() ([]byte, error) {
 	}
 	return json.Marshal([]string(*s))
 }
+
+type StateUpdateAction struct {
+	Section String          `json:"section" jsonschema:"required,type=string,enum=endpoints,enum=findings,enum=auth,enum=tried" jsonschema_description:"Which state section to update: 'endpoints' for discovered URLs/paths, 'findings' for vulnerabilities found, 'auth' for authentication sessions/tokens, 'tried' for recording attempted approaches and their results"`
+	Action  String          `json:"action" jsonschema:"required,type=string,enum=add,enum=update,enum=remove" jsonschema_description:"Operation to perform: 'add' creates or merges a new entry, 'update' modifies an existing entry, 'remove' deletes an entry"`
+	Data    json.RawMessage `json:"data" jsonschema:"required" jsonschema_description:"JSON object with the entry data. For endpoints: {path, method, params[], auth_required, tested_for[], status, notes}. For findings: {type, endpoint, severity, status, evidence:{command, response}}. For auth: {name, token, type}. For tried: {approach, result, endpoint}"`
+	Message string          `json:"message" jsonschema:"required,title=State update message" jsonschema_description:"Engagement-log entry — 1-2 short sentences describing what you discovered or recorded."`
+}
+
+type GetStateAction struct {
+	Section String `json:"section" jsonschema:"required,type=string,enum=endpoints,enum=findings,enum=auth,enum=tried,enum=coverage,enum=all" jsonschema_description:"Which state section to query: 'endpoints', 'findings', 'auth', 'tried', or 'coverage'/'all' for a full coverage summary"`
+	Filter  String `json:"filter,omitempty" jsonschema:"type=string" jsonschema_description:"Optional text filter to narrow results (e.g., 'sqli' to see only SQL injection findings, 'untested' to see untested endpoints)"`
+	Message string `json:"message" jsonschema:"required,title=State query message" jsonschema_description:"Engagement-log entry — 1-2 short sentences describing what state information you need."`
+}

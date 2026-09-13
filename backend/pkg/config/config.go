@@ -273,6 +273,13 @@ type Config struct {
 	// the user prompt directly to the Pentester agent with full tool access.
 	DirectMode bool `env:"DIRECT_MODE" envDefault:"true"`
 
+	// === Phase Pipeline Configuration ===
+	// UsePhasePipeline enables the harness-driven coverage engine that replaces
+	// the Generator/Refiner subtask decomposition with a coverage-tracking
+	// executor → validator → reporter pipeline. The harness manages phase
+	// transitions based on coverage metrics, not LLM decisions.
+	UsePhasePipeline bool `env:"USE_PHASE_PIPELINE" envDefault:"false"`
+
 	// === Context Window Configuration ===
 	// UseContextWindow enables a sliding window that keeps the system prompt +
 	// first human message pinned and only sends the last ContextWindowSize

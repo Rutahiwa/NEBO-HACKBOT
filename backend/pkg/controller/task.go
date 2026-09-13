@@ -93,9 +93,22 @@ func NewTaskWorker(
 		return nil, fmt.Errorf("failed to put input for task %d: %w", taskCtx.TaskID, err)
 	}
 
-	err = stc.GenerateSubtasks(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to generate subtasks: %w", err)
+	if flowCtx.Cfg.UsePhasePipeline {
+		phaseSubtasks := []database.CreateSubtaskParams{
+			{Status: database.SubtaskStatusCreated, TaskID: task.ID, Title: "Reconnaissance & Testing", Description: input},
+			{Status: database.SubtaskStatusCreated, TaskID: task.ID, Title: "Validation", Description: "Validate confirmed findings"},
+			{Status: database.SubtaskStatusCreated, TaskID: task.ID, Title: "Reporting", Description: "Generate final report"},
+		}
+		for _, p := range phaseSubtasks {
+			if _, err := flowCtx.DB.CreateSubtask(ctx, p); err != nil {
+				return nil, fmt.Errorf("failed to create phase subtask: %w", err)
+			}
+		}
+	} else {
+		err = stc.GenerateSubtasks(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("failed to generate subtasks: %w", err)
+		}
 	}
 
 	subtasks, err := flowCtx.DB.GetTaskSubtasks(ctx, task.ID)
@@ -302,45 +315,14 @@ func (tw *taskWorker) PutInput(ctx context.Context, input string) error {
 func (tw *taskWorker) Run(ctx context.Context) error {
 	ctx = tools.PutAgentContext(ctx, database.MsgchainTypePrimaryAgent)
 
-	for len(tw.stc.ListSubtasks(ctx)) < providers.TasksNumberLimit+3 {
-		st, err := tw.stc.PopSubtask(ctx, tw)
-		if err != nil {
+	if tw.taskCtx.Cfg != nil && tw.taskCtx.Cfg.UsePhasePipeline {
+		if err := tw.runPhasePipeline(ctx); err != nil {
 			tw.handleInterrupting(err)
 			return err
 		}
-
-		// empty queue for subtasks means that task is done
-		if st == nil {
-			break
-		}
-
-		if err := st.Run(ctx); err != nil {
-			// Unrecoverable errors propagate immediately: context cancellation,
-			// deadline exceeded, and database errors kill the task.
-			if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) || errors.Is(err, sql.ErrConnDone) || errors.Is(err, sql.ErrTxDone) {
-				tw.handleInterrupting(err)
-				return err
-			}
-
-			// Recoverable subtask-level failure: log, mark failed, and
-			// continue to the next subtask so the reporter can still run.
-			logrus.WithContext(ctx).WithError(err).WithField("subtask_id", st.GetSubtaskID()).
-				Warn("subtask failed with recoverable error, continuing to next subtask")
-			_ = st.SetStatus(ctx, database.SubtaskStatusFailed)
-			// fall through to continue the loop
-		}
-
-		// pass through if task is waiting from back status propagation
-		if tw.IsWaiting() {
-			return nil
-		} // otherwise subtask is done
-
-		if err := tw.stc.RefineSubtasks(ctx); err != nil {
-			if errors.Is(err, context.Canceled) {
-				ctx = context.Background()
-			}
-			_ = tw.SetStatus(ctx, database.TaskStatusWaiting)
-			return fmt.Errorf("failed to refine subtasks list for the task %d: %w", tw.taskCtx.TaskID, err)
+	} else {
+		if err := tw.runSubtaskLoop(ctx); err != nil {
+			return err
 		}
 	}
 
@@ -382,6 +364,87 @@ func (tw *taskWorker) Run(ctx context.Context) error {
 		return fmt.Errorf("failed to put report for task %d: %w", tw.taskCtx.TaskID, err)
 	}
 
+	return nil
+}
+
+func (tw *taskWorker) runSubtaskLoop(ctx context.Context) error {
+	for len(tw.stc.ListSubtasks(ctx)) < providers.TasksNumberLimit+3 {
+		st, err := tw.stc.PopSubtask(ctx, tw)
+		if err != nil {
+			tw.handleInterrupting(err)
+			return err
+		}
+
+		if st == nil {
+			break
+		}
+
+		if err := st.Run(ctx); err != nil {
+			if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) || errors.Is(err, sql.ErrConnDone) || errors.Is(err, sql.ErrTxDone) {
+				tw.handleInterrupting(err)
+				return err
+			}
+
+			logrus.WithContext(ctx).WithError(err).WithField("subtask_id", st.GetSubtaskID()).
+				Warn("subtask failed with recoverable error, continuing to next subtask")
+			_ = st.SetStatus(ctx, database.SubtaskStatusFailed)
+		}
+
+		if tw.IsWaiting() {
+			return nil
+		}
+
+		if err := tw.stc.RefineSubtasks(ctx); err != nil {
+			if errors.Is(err, context.Canceled) {
+				ctx = context.Background()
+			}
+			_ = tw.SetStatus(ctx, database.TaskStatusWaiting)
+			return fmt.Errorf("failed to refine subtasks list for the task %d: %w", tw.taskCtx.TaskID, err)
+		}
+	}
+	return nil
+}
+
+func (tw *taskWorker) runPhasePipeline(ctx context.Context) error {
+	subtasks, err := tw.taskCtx.DB.GetTaskSubtasks(ctx, tw.taskCtx.TaskID)
+	if err != nil {
+		return fmt.Errorf("failed to get phase subtasks: %w", err)
+	}
+
+	for _, subtask := range subtasks {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+
+		st, err := tw.stc.PopSubtask(ctx, tw)
+		if err != nil {
+			return err
+		}
+		if st == nil {
+			break
+		}
+
+		logrus.WithContext(ctx).WithFields(logrus.Fields{
+			"task_id":    tw.taskCtx.TaskID,
+			"subtask_id": subtask.ID,
+			"phase":      subtask.Title,
+		}).Info("phase pipeline: starting phase")
+
+		if err := st.Run(ctx); err != nil {
+			if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
+				return err
+			}
+			logrus.WithContext(ctx).WithError(err).WithField("phase", subtask.Title).
+				Warn("phase failed, continuing to next phase")
+			_ = st.SetStatus(ctx, database.SubtaskStatusFailed)
+		}
+
+		if tw.IsWaiting() {
+			return nil
+		}
+	}
 	return nil
 }
 

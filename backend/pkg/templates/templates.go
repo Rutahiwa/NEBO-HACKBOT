@@ -81,6 +81,9 @@ const (
 	PromptTypeQuestionSSRF             PromptType = "question_ssrf"              // human input for SSRF specialist
 	PromptTypeValidator                PromptType = "validator"                  // findings validation specialist agent
 	PromptTypeQuestionValidator        PromptType = "question_validator"         // human input for findings validator specialist
+	PromptTypePhaseExecutor            PromptType = "phase_executor"            // harness-driven pentesting executor
+	PromptTypePhaseValidator           PromptType = "phase_validator"           // harness-driven adversarial finding validator
+	PromptTypePhaseReporter            PromptType = "phase_reporter"            // harness-driven report generator
 )
 
 var PromptVariables = map[PromptType][]string{
@@ -628,6 +631,22 @@ var PromptVariables = map[PromptType][]string{
 	PromptTypeQuestionValidator: {
 		"Question",
 	},
+	PromptTypePhaseExecutor: {
+		"TargetURL",
+		"DockerImage",
+		"Cwd",
+		"CoverageSummary",
+		"AuthSummary",
+	},
+	PromptTypePhaseValidator: {
+		"TargetURL",
+		"DockerImage",
+		"Cwd",
+		"FindingDetails",
+	},
+	PromptTypePhaseReporter: {
+		"TargetURL",
+	},
 }
 
 type Prompt struct {
@@ -667,7 +686,10 @@ type AgentsPrompts struct {
 	Reflector     AgentPrompts
 	Enricher      AgentPrompts
 	ToolCallFixer AgentPrompts
-	Summarizer    AgentPrompt
+	Summarizer     AgentPrompt
+	PhaseExecutor  AgentPrompt
+	PhaseValidator AgentPrompt
+	PhaseReporter  AgentPrompt
 }
 
 type ToolsPrompts struct {
@@ -801,6 +823,15 @@ func GetDefaultPrompts() (*DefaultPrompts, error) {
 			},
 			Summarizer: AgentPrompt{
 				System: getPrompt(PromptTypeSummarizer),
+			},
+			PhaseExecutor: AgentPrompt{
+				System: getPrompt(PromptTypePhaseExecutor),
+			},
+			PhaseValidator: AgentPrompt{
+				System: getPrompt(PromptTypePhaseValidator),
+			},
+			PhaseReporter: AgentPrompt{
+				System: getPrompt(PromptTypePhaseReporter),
 			},
 		},
 		ToolsPrompts: ToolsPrompts{

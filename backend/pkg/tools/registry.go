@@ -65,6 +65,8 @@ const (
 	SubmitFlowInputToolName    = "submit_flow_input"
 	PatchFlowSubtasksToolName  = "patch_flow_subtasks"
 	WaitFlowCompletionToolName = "wait_flow_completion"
+	StateUpdateToolName        = "state_update"
+	GetStateToolName           = "get_state"
 )
 
 type ToolType int
@@ -166,6 +168,8 @@ var toolsTypeMapping = map[string]ToolType{
 	SubmitFlowInputToolName:    EnvironmentToolType,
 	PatchFlowSubtasksToolName:  EnvironmentToolType,
 	WaitFlowCompletionToolName: EnvironmentToolType,
+	StateUpdateToolName:        EnvironmentToolType,
+	GetStateToolName:           EnvironmentToolType,
 }
 
 var reflector = &jsonschema.Reflector{
@@ -235,6 +239,41 @@ var registryDefinitions = map[string]llms.FunctionDefinition{
 			"Supports add (create new subtask at position), remove (delete by ID), modify (update title/description), " +
 			"and reorder (move to different position) operations. Use empty operations array if no changes needed.",
 		Parameters: reflector.Reflect(&SubtaskPatch{}),
+	},
+	StateUpdateToolName: {
+		Name: StateUpdateToolName,
+		Description: "Records discoveries, findings, and progress to the shared coverage state. " +
+			"Use this tool to track endpoints you discover, vulnerabilities you find, auth sessions you establish, and approaches you try.\n\n" +
+			"WHEN TO USE:\n" +
+			"- After discovering a new endpoint or API path (section: endpoints)\n" +
+			"- After confirming or identifying a vulnerability (section: findings)\n" +
+			"- After obtaining auth tokens or session cookies (section: auth)\n" +
+			"- After trying an approach that succeeded or failed (section: tried)\n\n" +
+			"HOW TO USE:\n" +
+			"- Set section to the state area you want to update\n" +
+			"- Set action to 'add' for new entries, 'update' for existing ones\n" +
+			"- Provide data as a JSON object matching the section schema\n\n" +
+			"IMPORTANT: Record findings IMMEDIATELY when you discover them. " +
+			"Do not wait until the end — state persists across context resets.",
+		Parameters: reflector.Reflect(&StateUpdateAction{}),
+	},
+	GetStateToolName: {
+		Name: GetStateToolName,
+		Description: "Queries the current coverage state to see what has been discovered, tested, and found. " +
+			"Use this to check your progress, see what areas remain untested, and review previous findings.\n\n" +
+			"WHEN TO USE:\n" +
+			"- At the start of work to see what has already been done\n" +
+			"- To check coverage percentage and find untested areas\n" +
+			"- To review specific findings or endpoints\n" +
+			"- To get auth tokens for authenticated testing\n\n" +
+			"SECTIONS:\n" +
+			"- 'coverage' or 'all': Full summary with coverage percentage and untested areas\n" +
+			"- 'endpoints': List of discovered endpoints with test status\n" +
+			"- 'findings': List of vulnerabilities found\n" +
+			"- 'auth': Available authentication sessions\n" +
+			"- 'tried': Previously attempted approaches and their results\n\n" +
+			"Use the filter parameter to narrow results (e.g., filter='untested' or filter='sqli').",
+		Parameters: reflector.Reflect(&GetStateAction{}),
 	},
 	SearchToolName: {
 		Name: SearchToolName,

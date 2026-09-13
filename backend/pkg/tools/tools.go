@@ -292,6 +292,9 @@ type PentesterExecutorConfig struct {
 	IDOR      ExecutorHandler
 	SSRF      ExecutorHandler
 	Validator ExecutorHandler
+	// CoverageState provides harness-managed state for the phase pipeline.
+	// When set, state_update and get_state tools are wired to this state.
+	CoverageState *CoverageState
 }
 
 // SpecialistExecutorConfig is a generic config for specialist agents (recon, injection, xss, auth, idor, ssrf).
@@ -1492,6 +1495,13 @@ func (fte *flowToolsExecutor) GetPentesterExecutor(cfg PentesterExecutorConfig) 
 			ce.definitions = append(ce.definitions, registryDefinitions[st.toolName])
 			ce.handlers[st.toolName] = st.handler
 		}
+	}
+
+	if cfg.CoverageState != nil {
+		ce.definitions = append(ce.definitions, registryDefinitions[StateUpdateToolName])
+		ce.definitions = append(ce.definitions, registryDefinitions[GetStateToolName])
+		ce.handlers[StateUpdateToolName] = cfg.CoverageState.HandleStateUpdate
+		ce.handlers[GetStateToolName] = cfg.CoverageState.HandleGetState
 	}
 
 	return ce, nil

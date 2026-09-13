@@ -73,6 +73,12 @@ func CreateDummyTemplateData() map[string]any {
 		"PatchFlowSubtasksToolName":  tools.PatchFlowSubtasksToolName,
 		"WaitFlowCompletionToolName": tools.WaitFlowCompletionToolName,
 
+		// Phase pipeline variables
+		"TargetURL":        "http://target.example.com",
+		"CoverageSummary":  "Tested 5/10 endpoints (50%)",
+		"AuthSummary":      "Session: admin/admin123 (cookie: JSESSIONID=abc)",
+		"FindingDetails":   "SQL injection in /api/search?q=test' OR 1=1--",
+
 		// Summarization related - using constants from proper packages
 		"SummarizationToolName":   cast.SummarizationToolName,
 		"SummarizedContentPrefix": csum.SummarizedContentPrefix,

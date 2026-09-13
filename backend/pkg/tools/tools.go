@@ -386,6 +386,8 @@ type FlowToolsExecutor interface {
 	GetMemoristExecutor(cfg MemoristExecutorConfig) (ContextToolsExecutor, error)
 	GetEnricherExecutor(cfg EnricherExecutorConfig) (ContextToolsExecutor, error)
 	GetReporterExecutor(cfg ReporterExecutorConfig) (ContextToolsExecutor, error)
+
+	GetHarnessHandlers(taskID, subtaskID *int64, coverageState *CoverageState) (map[string]ExecutorHandler, map[string]llms.FunctionDefinition, error)
 }
 
 // sharedReplacer is a process-level singleton for the anonymizer replacer.
@@ -2054,4 +2056,51 @@ func enrichLogrusFields(flowID int64, taskID, subtaskID *int64, fields logrus.Fi
 	}
 
 	return fields
+}
+
+func (fte *flowToolsExecutor) GetHarnessHandlers(taskID, subtaskID *int64, coverageState *CoverageState) (map[string]ExecutorHandler, map[string]llms.FunctionDefinition, error) {
+	container, err := fte.db.GetFlowPrimaryContainer(context.Background(), fte.flowID)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to get container: %w", err)
+	}
+
+	term := NewTerminalTool(
+		fte.flowID,
+		taskID,
+		subtaskID,
+		container.ID,
+		container.LocalID.String,
+		fte.cfg.TenantPrefix(),
+		fte.docker,
+		fte.tlp,
+		time.Duration(fte.cfg.TerminalToolTimeout)*time.Second,
+	)
+
+	handlers := map[string]ExecutorHandler{
+		TerminalToolName: term.Handle,
+		FileToolName:     term.Handle,
+	}
+	defs := map[string]llms.FunctionDefinition{
+		TerminalToolName: registryDefinitions[TerminalToolName],
+		FileToolName:     registryDefinitions[FileToolName],
+	}
+
+	if h, ok := fte.handlers[BrowserToolName]; ok && h != nil {
+		handlers[BrowserToolName] = h
+		defs[BrowserToolName] = registryDefinitions[BrowserToolName]
+	}
+
+	if h, ok := fte.handlers[WebSearchToolName]; ok && h != nil {
+		handlers[WebSearchToolName] = h
+		defs[WebSearchToolName] = registryDefinitions[WebSearchToolName]
+	}
+
+	if coverageState != nil {
+		handlers[StateUpdateToolName] = coverageState.HandleStateUpdate
+		handlers[GetStateToolName] = coverageState.HandleGetState
+		defs[StateUpdateToolName] = registryDefinitions[StateUpdateToolName]
+		defs[GetStateToolName] = registryDefinitions[GetStateToolName]
+	}
+
+	return handlers, defs, nil
 }

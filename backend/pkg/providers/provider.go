@@ -16,6 +16,7 @@ import (
 	"pentagi/pkg/docker"
 	"pentagi/pkg/flowfiles"
 	"pentagi/pkg/graphiti"
+	"pentagi/pkg/harness"
 	obs "pentagi/pkg/observability"
 	"pentagi/pkg/observability/langfuse"
 	"pentagi/pkg/providers/embeddings"
@@ -1243,27 +1244,45 @@ func (fp *flowProvider) performPhasePipeline(ctx context.Context, taskID, subtas
 
 	coverageState := tools.NewCoverageState()
 
-	cfg := tools.PentesterExecutorConfig{
-		TaskID:        &taskID,
-		SubtaskID:     &subtaskID,
-		NoBarrier:     true,
-		Summarizer:    fp.GetSummarizeResultHandler(&taskID, &subtaskID),
-		CoverageState: coverageState,
+	// Get raw tool handlers — bypasses the executor/delegation pipeline entirely
+	handlers, defs, err := fp.executor.GetHarnessHandlers(&taskID, &subtaskID, coverageState)
+	if err != nil {
+		return PerformResultError, wrapErrorEndAgentSpan(ctx, executorAgent, "failed to get harness handlers", err)
 	}
 
-	executor, err := fp.executor.GetPentesterExecutor(cfg)
-	if err != nil {
-		return PerformResultError, wrapErrorEndAgentSpan(ctx, executorAgent, "failed to get pentester executor", err)
+	// Wrap each handler as a harness.BaseTool (OpenCode pattern: direct tool.Run())
+	harnessTools := make([]harness.BaseTool, 0, len(handlers))
+	for name, handler := range handlers {
+		def := defs[name]
+		params, _ := json.Marshal(def.Parameters)
+		harnessTools = append(harnessTools, harness.NewHandlerTool(name, def.Description, params, handler))
 	}
 
 	ctx = tools.PutAgentContext(ctx, msgChainType)
-	harnessConfig := DefaultHarnessConfig()
-	err = fp.performHarnessLoop(
-		ctx, msgChain.ID, &taskID, &subtaskID, chain, executor, fp.summarizer, coverageState, harnessConfig,
-	)
+
+	loopResult, err := harness.RunLoop(ctx, harness.LoopConfig{
+		Caller:        fp,
+		Tools:         harnessTools,
+		CoverageState: coverageState,
+		Harness:       harness.DefaultHarnessConfig(),
+		ChainID:       msgChain.ID,
+		TaskID:        taskID,
+		SubtaskID:     subtaskID,
+		FlowID:        fp.flowID,
+		DB:            fp.db,
+		MsgLog:        fp.msgLog,
+		Model:         fp.Model(optAgentType),
+		Provider:      string(fp.Type()),
+	}, chain)
 	if err != nil {
-		return PerformResultError, wrapErrorEndAgentSpan(ctx, executorAgent, "failed to perform phase pipeline", err)
+		return PerformResultError, wrapErrorEndAgentSpan(ctx, executorAgent, "failed to run harness loop", err)
 	}
+
+	logger.WithFields(logrus.Fields{
+		"iterations": loopResult.Iterations,
+		"tool_calls": loopResult.ToolCalls,
+		"coverage":   coverageState.CoveragePercent(),
+	}).Info("harness: loop completed")
 
 	updatedChain, _ := fp.db.GetMsgChain(ctx, msgChain.ID)
 	if updatedChain.ID != 0 {

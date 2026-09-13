@@ -91,31 +91,27 @@ func (h *HarnessHistory) GenerateNudge(stallType, coverageSummary string) string
 
 	switch stallType {
 	case "stall":
-		sb.WriteString("You have not made new discoveries in several iterations. ")
-		sb.WriteString("Try a completely different approach — different tool, different endpoint, different technique.")
+		sb.WriteString("You are stuck in a loop. STOP what you are doing and switch to TESTING.\n")
+		sb.WriteString("Pick one UNTESTED endpoint from the coverage state below and test it for a specific vulnerability.\n")
+		sb.WriteString("Run a targeted command like: curl with SQLi payload, or sqlmap --batch against a specific endpoint.\n")
+		sb.WriteString("After testing, call state_update to mark the endpoint as tested.")
 	case "repetition":
 		if len(h.toolCallNames) > 0 {
 			lastTool := h.toolCallNames[len(h.toolCallNames)-1]
-			sb.WriteString(fmt.Sprintf("You have called '%s' repeatedly. Stop and try a different approach.", lastTool))
-		} else {
-			sb.WriteString("You are repeating the same approach. Try something different.")
+			sb.WriteString(fmt.Sprintf("You have called '%s' multiple times in a row. This is wasting time.\n", lastTool))
 		}
+		sb.WriteString("Switch to a DIFFERENT action: if you were discovering, start testing. If testing one vuln class, try another.")
 	case "text_only":
-		sb.WriteString("Make your next tool call now. Do not explain what you plan to do — execute it.")
+		sb.WriteString("Execute a tool call now. Do not narrate — act.")
 	case "progress":
-		sb.WriteString(fmt.Sprintf("Progress check: %d iterations, %d tool calls. Keep working.",
+		sb.WriteString(fmt.Sprintf("Progress: %d iterations, %d tool calls.",
 			h.iterationCount, len(h.toolCallNames)))
 	default:
-		sb.WriteString("Continue testing.")
+		sb.WriteString("Continue.")
 	}
 
-	if coverageSummary == "" || strings.Contains(coverageSummary, "0/0 endpoint") {
-		sb.WriteString("\n\nIMPORTANT: Your coverage state is EMPTY. You MUST call state_update to register endpoints you have discovered. " +
-			"Example: call state_update with action 'add', section 'endpoints', and data containing the path, method, and params of each endpoint you found. " +
-			"After registering endpoints, call state_update again with section 'endpoints' action 'update' to mark what you have tested. " +
-			"Without registering endpoints, your testing progress is not tracked.")
-	} else {
-		sb.WriteString("\n\nCURRENT COVERAGE STATE:\n")
+	if coverageSummary != "" {
+		sb.WriteString("\n\n")
 		sb.WriteString(coverageSummary)
 	}
 

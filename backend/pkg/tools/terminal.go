@@ -300,7 +300,7 @@ func (t *terminal) getExecResult(ctx context.Context, id string, timeout time.Du
 				"HINT: If this is an interactive command (shell/REPL/listener), use detach=true. "+
 				"For long batch commands, wrap with shell timeout utility: 'timeout %d <command>' to ensure clean completion",
 			ctx.Err(),
-			truncateString(dst.String(), 500),
+			truncateOutput(dst.String(), 8192),
 			suggestedTimeout,
 		)
 	}
@@ -554,4 +554,15 @@ func truncateString(s string, maxLen int) string {
 		return s
 	}
 	return s[:maxLen] + "... [truncated full size is " + strconv.Itoa(len(s)) + " bytes]"
+}
+
+func truncateOutput(s string, maxLen int) string {
+	if len(s) <= maxLen {
+		return s
+	}
+	halfLen := maxLen / 2
+	start := s[:halfLen]
+	end := s[len(s)-halfLen:]
+	truncatedLines := strings.Count(s[halfLen:len(s)-halfLen], "\n")
+	return fmt.Sprintf("%s\n\n... [%d lines truncated] ...\n\n%s", start, truncatedLines, end)
 }

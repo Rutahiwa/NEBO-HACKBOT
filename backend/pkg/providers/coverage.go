@@ -113,7 +113,12 @@ func (h *HarnessHistory) GenerateNudgeWithCoverage(stallType, coverageSummary st
 		sb.WriteString("Continue testing.")
 	}
 
-	if coverageSummary != "" {
+	if coverageSummary == "" || strings.Contains(coverageSummary, "0/0 endpoint") {
+		sb.WriteString("\n\nIMPORTANT: Your coverage state is EMPTY. You MUST call state_update to register endpoints you have discovered. " +
+			"Example: call state_update with action 'add', section 'endpoints', and data containing the path, method, and params of each endpoint you found. " +
+			"After registering endpoints, call state_update again with section 'endpoints' action 'update' to mark what you have tested. " +
+			"Without registering endpoints, your testing progress is not tracked.")
+	} else {
 		sb.WriteString("\n\nCURRENT COVERAGE STATE:\n")
 		sb.WriteString(coverageSummary)
 	}

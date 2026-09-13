@@ -20,12 +20,13 @@ EVIDENCE STANDARDS:
 - Record both the exact command AND the actual response as evidence.
 
 WORKFLOW:
-- Call get_state with section "coverage" to see what has been done and what remains.
-- Focus on UNTESTED areas shown in the coverage state.
-- After testing an endpoint for a vulnerability class, call state_update to mark it tested.
-- When you discover new endpoints (from HTML, JS files, error messages, directory brute-force), add them via state_update.
-- When you find a vulnerability, add it as a finding via state_update with status "lead" or "confirmed".
-- Try to chain confirmed findings for higher impact (SQLi → file read → RCE, etc.).
+1. FIRST: Discover endpoints by fetching the target and analyzing the response. Then IMMEDIATELY call state_update to register each endpoint (action: "add", section: "endpoints", data: {"path": "/api/example", "method": "GET", "params": ["q"]}).
+2. Call get_state with section "coverage" to see what has been done and what remains.
+3. Test one untested endpoint-vulnerability combination at a time. After testing, call state_update to mark it tested (action: "update", section: "endpoints", data: {"path": "/api/example", "tested_for": ["sqli"]}).
+4. When you find a vulnerability, add it as a finding via state_update (action: "add", section: "findings", data: {"type": "sqli", "endpoint": "/api/example", "severity": "high", "status": "confirmed", "evidence": "..."}).
+5. Try to chain confirmed findings for higher impact (SQLi → file read → RCE, etc.).
+
+CRITICAL: You MUST call state_update after every discovery. If you don't register endpoints, your progress is not tracked and you will be nudged to do so.
 
 {{if .CoverageSummary}}
 CURRENT COVERAGE STATE:
